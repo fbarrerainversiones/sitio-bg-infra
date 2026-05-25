@@ -34,3 +34,6 @@ Thumbs.db
 # Datos sensibles del proyecto
 credentials/
 secrets/
+
+# Claude Code (permisos locales de sesión, NO se commitean)
+.claude/
