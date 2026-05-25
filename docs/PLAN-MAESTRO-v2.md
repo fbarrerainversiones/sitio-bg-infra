@@ -1000,6 +1000,60 @@ Documentos que viven en el proyecto Claude.ai (knowledge base, ordenados por pri
 
 > **Esta sección se actualiza al cierre de cada sesión de trabajo.** Formato cronológico inverso (lo más reciente arriba).
 
+### Sesión 3 — 25 mayo 2026 (HITO 01 ejecutado, infraestructura base en VPS)
+
+**Quién:** Francisco (operación VPS manual via SSH) + Claude (chat de auditoría externa)
+
+**Qué se hizo:**
+
+- Reboot coordinado del VPS para aplicar kernel update pendiente (deuda técnica de 6 días resuelta).
+  - Kernel anterior: 6.8.0-111-generic.
+  - Kernel nuevo activo: 6.8.0-117-generic.
+  - Downtime real del VPS: ~11 minutos (estimación inicial era 3 min, ajustado como lección operativa).
+- Gate 0 PRE-REBOOT: VERDE.
+  - 5 dominios productivos HTTP 200.
+  - 12 containers Up (Aurora + FBE Sport, todos healthy donde aplica).
+  - Caddy SOLO en stack_net=172.20.10.10.
+- Gate 0 POST-REBOOT: VERDE.
+  - Aurora resurgió intacta tras el downtime.
+  - Cero errores en journalctl del boot.
+  - "Reboot pendiente" eliminado del estado del sistema.
+- Ejecutado runbook `docs/prompts/HITO-01-runbook-vps.md` completo, paso a paso, con auditoría chat externa entre cada paso.
+- PASO 2: Creada estructura `/opt/sitio-bg/` con 7 subcarpetas (`backups/{daily,scripts}`, `compose`, `logs`, `nginx`, `web`). Ownership `francisco:francisco` en todo.
+- PASO 3: Creada red Docker `sitio_bg_net`.
+  - Subnet: `172.22.10.0/24`.
+  - Gateway: `172.22.10.1`.
+  - Labels: `proyecto=sitio-bg`, `propietario=barreraglobal`.
+  - ID: `0236b80bde2d...`.
+  - Sin containers conectados todavía (correcto, eso es Fase 1).
+  - Aislamiento verificado: Caddy de Aurora sigue SOLO en `stack_net`.
+- PASO 4: Creado `/opt/sitio-bg/CLAUDE.md` operativo (3.215 bytes, UTF-8 sin BOM, 81 líneas). Contiene las reglas operativas para futuras sesiones de Claude Code en el VPS.
+- PASO 5: Creado `/opt/sitio-bg/.env` vacío con `chmod 600` (580 bytes, 22 líneas). Solo `francisco` puede leer/escribir.
+- PASO 6: Gate 0 POST-FINAL: VERDE.
+  - Aurora sin afectación.
+  - FBE Sport sin afectación.
+  - 3 redes Docker coexistiendo (`stack_net`, `fbe_net`, `sitio_bg_net`).
+  - `/opt/` con los 3 proyectos sin colisiones.
+- Aprendizajes operativos de la sesión:
+  - El reboot del VPS Hostinger tarda 5-10 minutos en volver a aceptar SSH (no 2-3 como se estimaba). Estimación actualizada para futuras sesiones.
+  - Al pegar bloques de comandos en SSH, copiar SOLO el bloque (sin texto del chat anterior). Hubo un accidente operativo a las 17:08 donde se pegaron múltiples bloques juntos; bash tiró decenas de "command not found" pero sin daño (los errores fueron benignos). Aprendizaje fijado como regla operativa.
+  - `sudo -i` no es necesario para los pasos del HITO. Mejor `sudo` por comando individual para que el ownership de los archivos creados sea correcto.
+- Aclaración registrada: el usuario VPS es `francisco`, no `panch` como decía el runbook original. El runbook funciona igual porque solo era cosmético, pero conviene actualizar en una próxima edición del archivo `docs/prompts/HITO-01-runbook-vps.md`.
+
+**Qué quedó pendiente:**
+
+- Actualizar `docs/prompts/HITO-01-runbook-vps.md` para reflejar usuario `francisco` (cambio cosmético, no urgente).
+- Crear bucket Backblaze B2 `sitio-bg-backups` (al inicio de Fase 1, cuando haya contenido para respaldar).
+- Arrancar Fase 1 (MVP diseño + stack Astro 5.x).
+
+**Próximo paso concreto:**
+
+- Sesión nueva (mañana o cuando Francisco decida) → arrancar Fase 1.
+- Scaffolding del proyecto Astro 5.x en `/web/` del repo local.
+- Implementar sistema de diseño V17 / Brand Book (tokens CSS, tipografía self-hosted, layout base).
+- 4 páginas base de Fase 1: `/`, `/sobre-mi`, `/contacto`, `/privacidad`.
+- Build local + container Docker + modificar Caddyfile compartido (con flujo 7 pasos).
+
 ### Sesión 2 — 25 mayo 2026 (integración Brand Book + Informe Consolidado)
 
 **Quién:** Francisco + Claude (chat de planificación)
