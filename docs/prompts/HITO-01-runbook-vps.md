@@ -20,10 +20,13 @@ Antes de arrancar este runbook, confirmar:
 [ ] Sesión SSH al VPS Hostinger disponible
 [ ] Francisco tiene 30-45 min sin interrupciones
 [ ] Aurora está en estado VERDE (5 dominios HTTP 200)
+[ ] Si hay reboot pendiente del VPS (cat /var/run/reboot-required), ejecutarlo ANTES del HITO con ventana coordinada. Estimar 5-10 min de downtime.
 [ ] Ventana de baja actividad (idealmente noche o madrugada Ecuador)
 ```
 
 Si CUALQUIER pre-requisito falla, posponer HITO 01.
+
+> **NOTA OPERATIVA (lección 25/05/2026):** evitar `sudo -i` para mantener ownership correcto de archivos creados. Usar `sudo` por comando individual.
 
 ---
 
@@ -119,7 +122,7 @@ pwd
 
 ```
 hostname: <el nombre del VPS Hostinger>
-whoami:   <tu usuario, ej. panch o root>
+whoami:   <tu usuario, ej. francisco o root>
 pwd:      /home/<usuario>
 ```
 
@@ -196,7 +199,7 @@ Si la carpeta YA existe, ABORTAR y reportar al chat.
 sudo mkdir -p /opt/sitio-bg
 
 # 2.2 — Asignar ownership a tu usuario (NO root)
-# Reemplazar 'panch' por tu usuario real si es distinto
+# Reemplazar 'francisco' por tu usuario real si es distinto
 sudo chown -R $USER:$USER /opt/sitio-bg
 chmod 755 /opt/sitio-bg
 
@@ -547,7 +550,7 @@ En VS Code, ir a la sección **10. Bitácora viva** y AGREGAR ARRIBA (encima de 
 - Ejecutado runbook `docs/prompts/HITO-01-runbook-vps.md` completo.
 - Gate 0 PRE: VERDE (5 dominios HTTP 200, 9 containers Aurora Up).
 - Creada estructura `/opt/sitio-bg/` con subcarpetas: compose/, web/, nginx/, logs/, backups/scripts/, backups/daily/.
-- Ownership asignado a usuario `panch`.
+- Ownership asignado a usuario `francisco`.
 - Creada red Docker `sitio_bg_net` con subnet 172.22.10.0/24, gateway 172.22.10.1, labels (proyecto=sitio-bg, propietario=barreraglobal).
 - Creado `/opt/sitio-bg/CLAUDE.md` con reglas operativas para Claude Code en VPS (~95 líneas, UTF-8 sin BOM).
 - Creado `/opt/sitio-bg/.env` vacío con chmod 600.
