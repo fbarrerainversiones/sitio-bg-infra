@@ -1,17 +1,120 @@
 ---
-
+import Layout from "../layouts/Layout.astro";
 ---
 
-<html lang="en">
-	<head>
-		<meta charset="utf-8" />
-		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-		<link rel="icon" href="/favicon.ico" />
-		<meta name="viewport" content="width=device-width" />
-		<meta name="generator" content={Astro.generator} />
-		<title>Astro</title>
-	</head>
-	<body>
-		<h1>Astro</h1>
-	</body>
-</html>
+<Layout title="Barrera Global — Test del Sistema de Diseño">
+  <main class="max-w-5xl mx-auto px-6 py-16">
+
+    <!-- HEADER -->
+    <header class="mb-16 border-b border-gd-muted pb-8">
+      <p class="font-mono text-sm text-gd uppercase tracking-widest mb-4">
+        Sistema de Diseño · Sesión 4 · 26 May 2026
+      </p>
+      <h1 class="text-7xl mb-4">
+        Barrera Global
+      </h1>
+      <p class="text-xl text-tx-muted italic">
+        Arquitectura Financiera
+      </p>
+    </header>
+
+    <!-- TAGLINE -->
+    <section class="mb-16">
+      <h2 class="text-4xl mb-2">Patrimonio que crece.</h2>
+      <h2 class="text-4xl text-gd">Capital protegido.</h2>
+    </section>
+
+    <!-- PALETA -->
+    <section class="mb-16">
+      <h3 class="text-2xl mb-6 font-display">Paleta de colores</h3>
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div class="bg-bg-elev-1 p-6 rounded-md border border-gd-muted">
+          <div class="w-full h-16 bg-bg rounded mb-3 border border-gd-muted"></div>
+          <p class="font-mono text-sm">--bg</p>
+          <p class="font-mono text-xs text-tx-muted">#08080d</p>
+        </div>
+        <div class="bg-bg-elev-1 p-6 rounded-md border border-gd-muted">
+          <div class="w-full h-16 bg-gd rounded mb-3"></div>
+          <p class="font-mono text-sm">--gd</p>
+          <p class="font-mono text-xs text-tx-muted">#c9a84c</p>
+        </div>
+        <div class="bg-bg-elev-1 p-6 rounded-md border border-gd-muted">
+          <div class="w-full h-16 bg-tx rounded mb-3"></div>
+          <p class="font-mono text-sm">--tx</p>
+          <p class="font-mono text-xs text-tx-muted">#edeae3</p>
+        </div>
+        <div class="bg-bg-elev-1 p-6 rounded-md border border-gd-muted">
+          <div class="w-full h-16 bg-gd-light rounded mb-3"></div>
+          <p class="font-mono text-sm">--gd-light</p>
+          <p class="font-mono text-xs text-tx-muted">#d9bd6e</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- TIPOGRAFIA -->
+    <section class="mb-16">
+      <h3 class="text-2xl mb-6 font-display">Tipografía</h3>
+
+      <div class="space-y-6 bg-bg-elev-1 p-8 rounded-md border border-gd-muted">
+        <div>
+          <p class="font-mono text-xs text-tx-muted uppercase tracking-widest mb-2">
+            Display · Cormorant Garamond
+          </p>
+          <p class="font-display text-5xl">El detalle marca la diferencia</p>
+        </div>
+
+        <div>
+          <p class="font-mono text-xs text-tx-muted uppercase tracking-widest mb-2">
+            Body · Outfit
+          </p>
+          <p class="font-body text-base">
+            La planificación financiera comienza con escuchar tu situación real,
+            entender tus metas y diseñar una estrategia a la medida.
+            Sin promesas vacías, sin presión, sin compromiso.
+          </p>
+        </div>
+
+        <div>
+          <p class="font-mono text-xs text-tx-muted uppercase tracking-widest mb-2">
+            Mono · JetBrains Mono Variable (números tabulares)
+          </p>
+          <table class="font-mono text-sm">
+            <tbody>
+              <tr><td class="pr-8">Capital inicial</td><td class="text-right tabular-nums">$ 10.000,00</td></tr>
+              <tr><td class="pr-8">Aporte mensual</td><td class="text-right tabular-nums">$    500,00</td></tr>
+              <tr><td class="pr-8">Plazo</td><td class="text-right tabular-nums">  20 años</td></tr>
+              <tr><td class="pr-8">Capital final estimado</td><td class="text-right tabular-nums">$ 327.815,42</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- BOTONES (preview de CTAs) -->
+    <section class="mb-16">
+      <h3 class="text-2xl mb-6 font-display">Componentes de prueba</h3>
+
+      <div class="flex flex-wrap gap-4">
+        <button class="bg-gd text-bg px-6 py-3 rounded-md font-medium hover:bg-gd-light transition-colors">
+          Conversar por WhatsApp
+        </button>
+        <button class="bg-transparent text-gd border border-gd px-6 py-3 rounded-md font-medium hover:bg-gd hover:text-bg transition-colors">
+          Conocer más
+        </button>
+        <a href="#" class="px-6 py-3">
+          Enlace de texto
+        </a>
+      </div>
+    </section>
+
+    <!-- FOOTER MINIMO -->
+    <footer class="border-t border-gd-muted pt-8 mt-16">
+      <p class="text-sm text-tx-muted">
+        Francisco Barrera · Asesor Productor de Seguros
+        <br />
+        Operando bajo <span class="text-tx">Insurance Trust</span> (Cred. SCVS Nº <span class="font-mono">572619</span>)
+      </p>
+    </footer>
+
+  </main>
+</Layout>

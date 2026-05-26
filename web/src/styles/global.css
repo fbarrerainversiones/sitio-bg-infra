@@ -1,1 +1,155 @@
+/* ============================================================
+   GLOBAL.CSS — Punto de entrada del sistema de diseño
+   Importa: Fuentes Fontsource + Tokens del Brand Book + Tailwind
+   ============================================================ */
+
+/* ---------- FUENTES SELF-HOSTED (Fontsource) ---------- */
+
+/* Cormorant Garamond: display (titulos hero, jerarquia alta) */
+/* Cargamos solo los pesos que usaremos: 400, 500, 600, 700 */
+@import "@fontsource/cormorant-garamond/400.css";
+@import "@fontsource/cormorant-garamond/500.css";
+@import "@fontsource/cormorant-garamond/600.css";
+@import "@fontsource/cormorant-garamond/700.css";
+
+/* Outfit: UI / body (interfaz, lectura) */
+@import "@fontsource/outfit/300.css";
+@import "@fontsource/outfit/400.css";
+@import "@fontsource/outfit/500.css";
+@import "@fontsource/outfit/600.css";
+@import "@fontsource/outfit/700.css";
+
+/* JetBrains Mono Variable: numeros tabulares, codigo */
+@import "@fontsource-variable/jetbrains-mono";
+
+/* ---------- TOKENS DEL BRAND BOOK ---------- */
+
+@import "./tokens.css";
+
+/* ---------- TAILWIND V4 ---------- */
+
 @import "tailwindcss";
+
+/* ---------- THEME INLINE: conecta tokens con Tailwind ----------
+   Tailwind v4 lee este bloque y genera utility classes
+   automaticamente (bg-bg, text-tx, font-display, etc.)
+*/
+
+@theme inline {
+  /* Colores → bg-bg, bg-gd, bg-bg-elev-1, text-tx, text-gd, etc. */
+  --color-bg: var(--bg);
+  --color-bg-elev-1: var(--bg-elev-1);
+  --color-bg-elev-2: var(--bg-elev-2);
+  --color-bg-light: var(--bg-light);
+  --color-gd: var(--gd);
+  --color-gd-light: var(--gd-light);
+  --color-gd-dark: var(--gd-dark);
+  --color-gd-muted: var(--gd-muted);
+  --color-tx: var(--tx);
+  --color-tx-muted: var(--tx-muted);
+  --color-tx-disabled: var(--tx-disabled);
+
+  /* Fuentes → font-display, font-body, font-mono */
+  --font-display: var(--font-display);
+  --font-body: var(--font-body);
+  --font-mono: var(--font-mono);
+
+  /* Sombras → shadow-gold */
+  --shadow-gold: var(--shadow-gold);
+}
+
+/* ---------- BASE STYLES ---------- */
+/* Aplicar tokens al body desde el primer render */
+
+html {
+  /* Scroll suave en navegacion interna */
+  scroll-behavior: smooth;
+  /* Texto antialiased en MacOS / iOS */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  /* Prevenir zoom horizontal por desbordamiento */
+  overflow-x: hidden;
+}
+
+body {
+  background-color: var(--bg);
+  color: var(--tx);
+  font-family: var(--font-body);
+  font-weight: var(--font-regular);
+  font-size: var(--text-base);
+  line-height: var(--leading-normal);
+  min-height: 100vh;
+  /* Renderizado de fuente optimizado */
+  text-rendering: optimizeLegibility;
+}
+
+/* ---------- TIPOGRAFIA POR DEFECTO ---------- */
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-display);
+  font-weight: var(--font-semibold);
+  line-height: var(--leading-tight);
+  letter-spacing: var(--tracking-tight);
+  color: var(--tx);
+}
+
+h1 { font-size: var(--text-5xl); }
+h2 { font-size: var(--text-4xl); }
+h3 { font-size: var(--text-3xl); }
+h4 { font-size: var(--text-2xl); }
+h5 { font-size: var(--text-xl); }
+h6 { font-size: var(--text-lg); }
+
+/* Numeros tabulares en cifras (Brand Book pp 19) */
+.tabular-nums,
+.numero,
+.cifra {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum";
+}
+
+/* ---------- LINKS POR DEFECTO ---------- */
+
+a {
+  color: var(--gd);
+  text-decoration: none;
+  transition: color var(--transition-fast);
+}
+
+a:hover {
+  color: var(--gd-light);
+}
+
+a:focus-visible {
+  outline: 2px solid var(--gd);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}
+
+/* ---------- SELECCION DE TEXTO ---------- */
+
+::selection {
+  background-color: var(--gd);
+  color: var(--bg);
+}
+
+/* ---------- SCROLLBAR (estetica de marca) ---------- */
+
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-elev-1);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--gd-dark);
+  border-radius: var(--radius-md);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--gd);
+}
