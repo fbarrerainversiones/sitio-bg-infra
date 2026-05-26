@@ -1,0 +1,36 @@
+---
+interface Props {
+  href?: string;
+  showDescriptor?: boolean;
+  size?: "sm" | "md" | "lg";
+}
+
+const {
+  href = "/",
+  showDescriptor = true,
+  size = "md",
+} = Astro.props;
+
+const sizeClasses = {
+  sm: "text-xl",
+  md: "text-2xl md:text-3xl",
+  lg: "text-3xl md:text-4xl",
+};
+---
+
+<a
+  href={href}
+  aria-label="Barrera Global - Arquitectura Financiera - Inicio"
+  class="inline-flex flex-col items-start group no-underline"
+>
+  <span
+    class={`font-display font-semibold leading-tight tracking-tight text-tx transition-colors group-hover:text-gd ${sizeClasses[size]}`}
+  >
+    Barrera <span class="text-gd">Global</span>
+  </span>
+  {showDescriptor && (
+    <span class="font-mono text-[10px] md:text-xs uppercase tracking-widest text-tx-muted mt-1">
+      Arquitectura Financiera
+    </span>
+  )}
+</a>

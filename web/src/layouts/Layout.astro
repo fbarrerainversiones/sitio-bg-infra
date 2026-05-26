@@ -1,23 +1,166 @@
 ---
 import "../styles/global.css";
 
+/**
+ * Layout base del sitio.
+ * Incluye <head> con SEO completo + JSON-LD InsuranceAgency + Person.
+ * Cada pagina puede override title, description, ogImage, canonical.
+ *
+ * Fuente unica de identidad: Brand Book 2026 + Plan Maestro v2.
+ */
+
 interface Props {
   title: string;
   description?: string;
+  canonical?: string;
+  ogImage?: string;
+  noindex?: boolean;
 }
 
-const { title, description = "Asesoría en seguros, vida e inversión en Ecuador" } = Astro.props;
+const {
+  title,
+  description = "Asesoria especializada en seguros de vida, salud e inversion en Ecuador. Patrimonio que crece. Capital protegido.",
+  canonical,
+  ogImage = "/og-default.png",
+  noindex = false,
+} = Astro.props;
+
+const SITE_URL = "https://barreraglobal.com";
+const canonicalURL = canonical ?? new URL(Astro.url.pathname, SITE_URL).toString();
+const ogImageURL = new URL(ogImage, SITE_URL).toString();
+
+// Schema.org JSON-LD (insertado en todas las paginas)
+const insuranceAgencySchema = {
+  "@context": "https://schema.org",
+  "@type": "InsuranceAgency",
+  "@id": `${SITE_URL}/#organization`,
+  name: "Barrera Global",
+  alternateName: "Barrera Global Arquitectura Financiera",
+  description: "Asesoria especializada en seguros y planificacion financiera en Ecuador.",
+  url: SITE_URL,
+  logo: `${SITE_URL}/logo.svg`,
+  image: ogImageURL,
+  telephone: "+593998027819",
+  email: "fbarrera.inversiones@gmail.com",
+  address: {
+    "@type": "PostalAddress",
+    addressLocality: "Ambato",
+    addressRegion: "Tungurahua",
+    addressCountry: "EC",
+  },
+  areaServed: {
+    "@type": "Country",
+    name: "Ecuador",
+  },
+  sameAs: [
+    "https://www.facebook.com/profile.php?id=61583767980524",
+    "https://www.instagram.com/franciscobarrera.ec/",
+    "https://www.tiktok.com/@franciscobarrera.ec",
+    "https://www.linkedin.com/in/franciscobarrera-ai/",
+    "https://github.com/fbarrerainversiones",
+  ],
+};
+
+const personSchema = {
+  "@context": "https://schema.org",
+  "@type": "Person",
+  "@id": `${SITE_URL}/#francisco`,
+  name: "Francisco Javier Barrera Bonilla",
+  givenName: "Francisco",
+  familyName: "Barrera Bonilla",
+  jobTitle: "Asesor Productor de Seguros",
+  description: "Asesor productor de seguros y especialista en automatizacion con IA.",
+  url: `${SITE_URL}/sobre-mi`,
+  worksFor: {
+    "@id": `${SITE_URL}/#organization`,
+  },
+  affiliation: {
+    "@type": "Organization",
+    name: "Insurance Trust",
+    url: "https://itbrokerec.com",
+    description: "Broker ecuatoriano registrado en SCVS (Cred. Nº 572619)",
+  },
+  workLocation: {
+    "@type": "Place",
+    address: {
+      "@type": "PostalAddress",
+      addressLocality: "Ambato",
+      addressRegion: "Tungurahua",
+      addressCountry: "EC",
+    },
+  },
+  knowsLanguage: ["es-EC", "es"],
+  sameAs: [
+    "https://www.instagram.com/franciscobarrera.ec/",
+    "https://www.linkedin.com/in/franciscobarrera-ai/",
+    "https://github.com/fbarrerainversiones",
+  ],
+};
+
+const websiteSchema = {
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  "@id": `${SITE_URL}/#website`,
+  url: SITE_URL,
+  name: "Barrera Global",
+  description: "Patrimonio que crece. Capital protegido.",
+  publisher: {
+    "@id": `${SITE_URL}/#organization`,
+  },
+  inLanguage: "es-EC",
+};
 ---
 
 <!doctype html>
 <html lang="es-EC">
   <head>
+    <!-- Charset y viewport -->
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content={description} />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+
+    <!-- SEO basico -->
     <title>{title}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonicalURL} />
+    {noindex && <meta name="robots" content="noindex, nofollow" />}
+
+    <!-- Idioma y region -->
+    <meta http-equiv="content-language" content="es-EC" />
+    <meta name="geo.region" content="EC-T" />
+    <meta name="geo.placename" content="Ambato, Tungurahua, Ecuador" />
+
+    <!-- Open Graph (Facebook, LinkedIn, WhatsApp link preview) -->
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Barrera Global" />
+    <meta property="og:locale" content="es_EC" />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonicalURL} />
+    <meta property="og:image" content={ogImageURL} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={ogImageURL} />
+
+    <!-- Theme color (barra navegador mobile) -->
+    <meta name="theme-color" content="#08080d" />
+
+    <!-- Icons (favicon temporal de Astro hasta tener el real) -->
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+
+    <!-- Performance hints -->
+    <meta name="generator" content={Astro.generator} />
+
+    <!-- JSON-LD Schema.org -->
+    <script type="application/ld+json" set:html={JSON.stringify(insuranceAgencySchema)} />
+    <script type="application/ld+json" set:html={JSON.stringify(personSchema)} />
+    <script type="application/ld+json" set:html={JSON.stringify(websiteSchema)} />
   </head>
+
   <body>
     <slot />
   </body>
