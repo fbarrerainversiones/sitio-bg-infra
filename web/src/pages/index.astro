@@ -19,103 +19,280 @@ const DESCRIPTION = "Asesoria especializada en seguros de vida, salud e inversio
 
   <main>
 
-    <section class="relative min-h-[80vh] flex items-center">
-      <div class="max-w-5xl mx-auto px-6 py-24 md:py-32">
+    <!-- HERO -->
+    <section class="relative min-h-[85vh] flex items-center overflow-hidden">
+      <div class="max-w-6xl mx-auto px-6 py-24 md:py-32 w-full">
+        <div class="grid grid-cols-1 md:grid-cols-12 gap-12 items-center">
 
-        <p class="font-mono text-xs text-gd uppercase tracking-widest mb-6">
-          Asesoria Productora de Seguros · Ecuador
+          <div class="md:col-span-7">
+
+            <p class="hero-entrance font-mono text-xs text-gd uppercase tracking-widest mb-6">
+              Asesoria Productora de Seguros · Ecuador
+            </p>
+
+            <h1 class="hero-entrance-delay-1 text-5xl md:text-7xl font-display font-semibold leading-tight tracking-tight text-tx mb-6">
+              Patrimonio que crece.
+              <br />
+              <span class="text-gd">Capital protegido.</span>
+            </h1>
+
+            <p class="hero-entrance-delay-2 font-body text-lg md:text-xl text-tx-muted max-w-2xl leading-relaxed mb-10">
+              Asesoria especializada en seguros de vida, salud e inversion.
+              Sin promesas vacias, sin presion, sin compromiso. Solo informacion clara
+              para que tomes la mejor decision para tu familia y tu patrimonio.
+            </p>
+
+            <div class="hero-entrance-delay-3 flex flex-col sm:flex-row gap-4">
+              <a
+                href={WHATSAPP_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                class="cta-lift inline-flex items-center justify-center gap-2 bg-gd px-7 py-4 rounded-md font-body font-medium text-base hover:bg-gd-light"
+                style="color:#08080d"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                  <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z" />
+                </svg>
+                <span>Conversar por WhatsApp</span>
+              </a>
+              <a
+                href="#productos"
+                class="inline-flex items-center justify-center gap-2 border border-gd text-gd px-7 py-4 rounded-md font-body font-medium text-base hover:bg-gd-light hover:border-gd-light hover:text-[#08080d] transition-colors"
+              >
+                Ver productos
+              </a>
+            </div>
+
+          </div>
+
+          <div class="md:col-span-5 hero-entrance-delay-2 hidden md:block">
+            <div class="photo-glow">
+              <div class="photo-frame">
+                <img
+                  src="/images/francisco-barrera.jpg"
+                  alt="Francisco Barrera, Asesor Productor de Seguros"
+                  width="500"
+                  height="500"
+                  loading="eager"
+                />
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- PRODUCTOS -->
+    <section id="productos" class="scroll-mt-24 border-t border-gd-muted py-24 md:py-32">
+      <div class="max-w-6xl mx-auto px-6">
+
+        <div class="reveal">
+          <p class="font-mono text-xs text-gd uppercase tracking-widest mb-4">
+            Productos
+          </p>
+          <h2 class="text-4xl md:text-5xl font-display font-semibold text-tx mb-6">
+            Tres pilares.
+            <span class="text-gd">Una estrategia.</span>
+          </h2>
+          <p class="font-body text-base md:text-lg text-tx-muted max-w-2xl leading-relaxed mb-16">
+            Coberturas seleccionadas con disciplina tecnica. Sin productos
+            empujados por comision. Cada solucion responde a un caso concreto
+            de proteccion patrimonial.
+          </p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+
+          <article class="card-product reveal border border-gd-muted rounded-lg p-8 bg-bg-elev-1">
+            <div class="w-12 h-12 rounded-full bg-gd-muted flex items-center justify-center mb-6">
+              <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="text-gd" aria-hidden="true">
+                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+              </svg>
+            </div>
+            <h3 class="text-2xl font-display font-semibold text-tx mb-3">Vida</h3>
+            <p class="font-body text-sm text-tx-muted leading-relaxed mb-5">
+              Proteccion economica para los tuyos si algo te pasa. Capital
+              para tu familia o para construir patrimonio a largo plazo.
+            </p>
+            <ul class="font-body text-sm text-tx-muted space-y-2 mb-6">
+              <li class="flex items-start gap-2">
+                <span class="text-gd mt-1">·</span>
+                <span>Vida a termino: cobertura por un plazo definido</span>
+              </li>
+              <li class="flex items-start gap-2">
+                <span class="text-gd mt-1">·</span>
+                <span>Vida indexada: proteccion + acumulacion vinculada a indices</span>
+              </li>
+            </ul>
+            <a
+              href={WHATSAPP_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              class="link-underline inline-flex items-center gap-1 text-sm font-body text-gd hover:text-gd-light transition-colors"
+            >
+              Cotizar vida →
+            </a>
+          </article>
+
+          <article class="card-product reveal border border-gd-muted rounded-lg p-8 bg-bg-elev-1">
+            <div class="w-12 h-12 rounded-full bg-gd-muted flex items-center justify-center mb-6">
+              <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="text-gd" aria-hidden="true">
+                <path d="M22 12h-4l-3 9L9 3l-3 9H2" />
+              </svg>
+            </div>
+            <h3 class="text-2xl font-display font-semibold text-tx mb-3">Salud</h3>
+            <p class="font-body text-sm text-tx-muted leading-relaxed mb-5">
+              Atencion medica oportuna y de calidad cuando mas importa,
+              sin que el bolsillo sea el limite.
+            </p>
+            <ul class="font-body text-sm text-tx-muted space-y-2 mb-6">
+              <li class="flex items-start gap-2">
+                <span class="text-gd mt-1">·</span>
+                <span>Salud nacional: red de clinicas y hospitales en Ecuador</span>
+              </li>
+              <li class="flex items-start gap-2">
+                <span class="text-gd mt-1">·</span>
+                <span>Salud internacional: cobertura global con USA opcional</span>
+              </li>
+            </ul>
+            <a
+              href={WHATSAPP_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              class="link-underline inline-flex items-center gap-1 text-sm font-body text-gd hover:text-gd-light transition-colors"
+            >
+              Cotizar salud →
+            </a>
+          </article>
+
+          <article class="card-product reveal border border-gd-muted rounded-lg p-8 bg-bg-elev-1">
+            <div class="w-12 h-12 rounded-full bg-gd-muted flex items-center justify-center mb-6">
+              <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="text-gd" aria-hidden="true">
+                <polyline points="22 7 13.5 15.5 8.5 10.5 2 17" />
+                <polyline points="16 7 22 7 22 13" />
+              </svg>
+            </div>
+            <h3 class="text-2xl font-display font-semibold text-tx mb-3">Inversion</h3>
+            <p class="font-body text-sm text-tx-muted leading-relaxed mb-5">
+              Patrimonio que trabaja con disciplina. Vehiculos de
+              acumulacion estructurados para largo plazo.
+            </p>
+            <ul class="font-body text-sm text-tx-muted space-y-2 mb-6">
+              <li class="flex items-start gap-2">
+                <span class="text-gd mt-1">·</span>
+                <span>Vehiculos offshore con carriers regulados</span>
+              </li>
+              <li class="flex items-start gap-2">
+                <span class="text-gd mt-1">·</span>
+                <span>Estrategia personalizada segun perfil y horizonte</span>
+              </li>
+            </ul>
+            <a
+              href={WHATSAPP_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              class="link-underline inline-flex items-center gap-1 text-sm font-body text-gd hover:text-gd-light transition-colors"
+            >
+              Conversar de inversion →
+            </a>
+          </article>
+
+        </div>
+
+        <p class="reveal font-mono text-xs text-tx-disabled mt-12 max-w-3xl">
+          Cotizaciones sin compromiso. Las primas se calculan caso por caso
+          segun perfil del asegurado. No publicamos precios genericos
+          conforme al Art. 11.6 SCVS.
         </p>
 
-        <h1 class="text-5xl md:text-7xl font-display font-semibold leading-tight tracking-tight text-tx mb-6">
-          Patrimonio que crece.
-          <br />
-          <span class="text-gd">Capital protegido.</span>
-        </h1>
+      </div>
+    </section>
 
-        <p class="font-body text-lg md:text-xl text-tx-muted max-w-2xl leading-relaxed mb-10">
-          Asesoria especializada en seguros de vida, salud e inversion.
-          Sin promesas vacias, sin presion, sin compromiso. Solo informacion clara
-          para que tomes la mejor decision para tu familia y tu patrimonio.
-        </p>
+    <!-- SOBRE MI -->
+    <section id="sobre-mi" class="scroll-mt-24 border-t border-gd-muted py-24 md:py-32 bg-bg-elev-1">
+      <div class="max-w-5xl mx-auto px-6">
 
-        <div class="flex flex-col sm:flex-row gap-4">
+        <div class="reveal">
+          <p class="font-mono text-xs text-gd uppercase tracking-widest mb-4">
+            Sobre mi
+          </p>
+          <h2 class="text-4xl md:text-5xl font-display font-semibold text-tx mb-12">
+            Francisco Barrera.
+            <br />
+            <span class="text-gd">Arquitectura financiera.</span>
+          </h2>
+        </div>
+
+        <div class="reveal space-y-6 font-body text-base md:text-lg text-tx-muted leading-relaxed max-w-3xl">
+          <p>
+            Mi nombre es Francisco Barrera. Soy ingeniero de sistemas de
+            profesion y Asesor Productor de Seguros por conviccion. Opero
+            bajo <span class="text-tx font-medium">Insurance Trust</span>
+            (Cred. SCVS Nº 572619) y vivo en Ambato.
+          </p>
+          <p>
+            Pase del lado del software al lado del cliente porque en seguros
+            e inversion el problema no es la falta de productos, es la falta
+            de claridad. Y ahi si puedo aportar valor real.
+          </p>
+          <p>
+            En Barrera Global combino dos cosas: la disciplina tecnica de
+            un ingeniero para analizar coberturas, comparar productos y
+            dimensionar proteccion correctamente. Y la automatizacion con
+            IA para que esa informacion llegue a vos sin filtros comerciales,
+            con respuestas reales en horarios que te convienen.
+          </p>
+          <p class="text-tx font-medium pt-2">
+            No vendo seguros. Diseño arquitectura financiera. Sin promesas,
+            sin presion, sin compromiso.
+          </p>
+        </div>
+
+        <div class="reveal mt-12">
           <a
             href={WHATSAPP_URL}
             target="_blank"
             rel="noopener noreferrer"
-            class="inline-flex items-center justify-center gap-2 bg-gd text-[#08080d] px-7 py-4 rounded-md font-body font-medium text-base hover:bg-gd-light transition-colors" style="color:#08080d"
+            class="link-underline inline-flex items-center gap-2 text-base font-body text-gd hover:text-gd-light transition-colors"
           >
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-              <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z" />
-            </svg>
-            <span>Conversar por WhatsApp</span>
-          </a>
-          <a
-            href="#productos"
-            class="inline-flex items-center justify-center gap-2 border border-gd text-gd px-7 py-4 rounded-md font-body font-medium text-base hover:bg-gd hover:text-[#08080d] transition-colors"
-          >
-            Ver productos
+            Conversar conmigo →
           </a>
         </div>
 
       </div>
     </section>
 
-    <section id="productos" class="border-t border-gd-muted py-24">
-      <div class="max-w-5xl mx-auto px-6">
-        <p class="font-mono text-xs text-gd uppercase tracking-widest mb-4">
-          Productos
-        </p>
-        <h2 class="text-4xl md:text-5xl font-display font-semibold text-tx mb-6">
-          Tres pilares.
-          <span class="text-gd">Una estrategia.</span>
-        </h2>
-        <p class="font-body text-base text-tx-muted max-w-2xl leading-relaxed">
-          (Contenido real en BLOQUE 4: seguros de vida + salud + inversion
-          con descripcion detallada de cada producto)
-        </p>
-      </div>
-    </section>
+    <!-- CONTACTO -->
+    <section id="contacto" class="scroll-mt-24 border-t border-gd-muted py-24 md:py-32">
+      <div class="max-w-3xl mx-auto px-6 text-center">
 
-    <section id="sobre-mi" class="border-t border-gd-muted py-24 bg-bg-elev-1">
-      <div class="max-w-5xl mx-auto px-6">
-        <p class="font-mono text-xs text-gd uppercase tracking-widest mb-4">
-          Sobre mi
-        </p>
-        <h2 class="text-4xl md:text-5xl font-display font-semibold text-tx mb-6">
-          Francisco Barrera.
-          <span class="text-gd">Asesor Productor de Seguros.</span>
-        </h2>
-        <p class="font-body text-base text-tx-muted max-w-2xl leading-relaxed">
-          (Bio real en BLOQUE 4: experiencia, credenciales, valores,
-          por que elegir un asesor independiente bajo broker)
-        </p>
-      </div>
-    </section>
+        <div class="reveal">
+          <p class="font-mono text-xs text-gd uppercase tracking-widest mb-4">
+            Contacto
+          </p>
+          <h2 class="text-4xl md:text-5xl font-display font-semibold text-tx mb-6">
+            Hablemos.
+          </h2>
+          <p class="font-body text-base md:text-lg text-tx-muted leading-relaxed mb-10 max-w-xl mx-auto">
+            La conversacion empieza por WhatsApp. Sin presion. Te respondemos
+            en horario laboral Ecuador.
+          </p>
 
-    <section id="contacto" class="border-t border-gd-muted py-24">
-      <div class="max-w-5xl mx-auto px-6 text-center">
-        <p class="font-mono text-xs text-gd uppercase tracking-widest mb-4">
-          Contacto
-        </p>
-        <h2 class="text-4xl md:text-5xl font-display font-semibold text-tx mb-6">
-          Hablemos.
-        </h2>
-        <p class="font-body text-base text-tx-muted max-w-xl mx-auto leading-relaxed mb-10">
-          La conversacion empieza por WhatsApp. Sin presion.
-          Te respondemos en horario laboral Ecuador.
-        </p>
-        <a
-          href={WHATSAPP_URL}
-          target="_blank"
-          rel="noopener noreferrer"
-          class="inline-flex items-center justify-center gap-2 bg-gd text-[#08080d] px-8 py-4 rounded-md font-body font-medium text-base hover:bg-gd-light transition-colors" style="color:#08080d"
-        >
-          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-            <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z" />
-          </svg>
-          <span>Escribir por WhatsApp</span>
-        </a>
+          <a
+            href={WHATSAPP_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            class="cta-lift inline-flex items-center justify-center gap-2 bg-gd px-8 py-4 rounded-md font-body font-medium text-base hover:bg-gd-light transition-colors"
+            style="color:#08080d"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+              <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z" />
+            </svg>
+            <span>Escribir por WhatsApp</span>
+          </a>
+        </div>
+
       </div>
     </section>
 
@@ -123,9 +300,19 @@ const DESCRIPTION = "Asesoria especializada en seguros de vida, salud e inversio
 
   <Footer />
 
+  <!-- Scroll reveal vanilla JS -->
+  <script>
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+          observer.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.15, rootMargin: '0px 0px -50px 0px' });
+
+    document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+  </script>
+
 </Layout>
-
-
-
-
 
