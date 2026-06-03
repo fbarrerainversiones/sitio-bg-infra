@@ -37,3 +37,7 @@ secrets/
 
 # Claude Code (permisos locales de sesión, NO se commitean)
 .claude/
+
+# Backups timestamp 
+*.bak.*
+*.bak
