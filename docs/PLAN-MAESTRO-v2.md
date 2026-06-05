@@ -2,8 +2,8 @@
 
 > **Documento maestro del proyecto, versión 2.** Reemplaza al `BG-WEB-PROYECTO-MAESTRO.md` v1.0 del 23/05/2026. Este es el primer documento que debe leer cualquier sesión de Claude (chat o Claude Code) que trabaje en este proyecto.
 
-**Versión:** 2.0
-**Fecha de creación v2:** 25 de mayo de 2026
+**Versión:** 2.1
+**Fecha de creación v2:** 02 de junio de 2026
 **Reemplaza:** BG-WEB-PROYECTO-MAESTRO.md v1.0 del 23/05/2026
 **Dueño operativo:** Francisco Javier Barrera Bonilla
 **Ubicación:** Ambato, Tungurahua, Ecuador (UTC-5)
@@ -81,7 +81,7 @@ Construir la **capa visible pública** del negocio de asesoría de seguros de Fr
 
 ### El sitio web SÍ es
 
-- Sitio estático construido en Astro 5.x + Tailwind v4 + islas React.
+- Sitio estático construido en Astro 6.3.8 + Tailwind v4.3.0 + islas React 19 (decisión D-18 del 26/05/2026).
 - Plataforma de captación de leads cualificados con atribución UTM end-to-end.
 - Cliente fino de Aurora vía webhook HTTPS público (`n8n.barreraglobal.com/webhook/lead-form`).
 - Cumplimiento estricto de LOPDP y Resolución SCVS-INS-2019-006.
@@ -301,18 +301,18 @@ Toda decisión de color, tipografía, eslogan, CTA, voz, efectos visuales se res
 
 ## 3. Decisiones técnicas firmes
 
-### 3.1 Stack frontend: Astro 5.x
+### 3.1 Stack frontend: Astro 6.3.8
 
 Confirmado por convergencia de las 4 investigaciones independientes (Informe Consolidado, Sección 2.3 Contradicción 2):
 
-| Criterio | Astro 5.x (elegido) | Next.js 14+ (descartado) |
+| Criterio | Astro 6.3.8 (elegido) | Next.js 14+ (descartado) |
 |---|---|---|
 | Sitio de contenido | Lighthouse 95+ por defecto | Requiere 80-120 KB JS baseline |
 | SSG/SSR | Nativo, output estático | Nativo, pero pesado |
 | Cotizador interactivo | Soportado via "islas" React | Nativo |
 | Ecosistema 2026 | Cloudflare lo adquirió enero 2026 | Maduro |
 
-**Conclusión:** Astro 5.x con islas de React (`@astrojs/react`) para cotizador y calculadoras.
+**Conclusión:** Astro 6.3.8 con islas de React 19 (`@astrojs/react`) para cotizador y calculadoras. La version 6 (no 5) fue confirmada al scaffolding el 26/05/2026 - decision D-18.
 
 Dependencias clave:
 
@@ -745,7 +745,7 @@ Decisión postergada a Fase 5.
 │  Duración estimada: semana 1-2                                       │
 │                                                                      │
 │  Entregables:                                                        │
-│  • Astro 5.x scaffolded con Tailwind v4                              │
+│  • Astro 6.3.8 scaffolded con Tailwind v4.3.0                        │
 │  • Sistema de diseño V17/Brand Book implementado:                    │
 │    - Tokens CSS (colores --bg, --gd, etc.)                           │
 │    - Tipografía self-hosted                                          │
@@ -996,10 +996,265 @@ Documentos que viven en el proyecto Claude.ai (knowledge base, ordenados por pri
 
 ---
 
-## 10. Bitácora viva
+
+## 10. Registro de Decisiones
+
+> **Decisiones tecnicas (D-XX) y memos (DM-XX) tomadas durante el proyecto.** Esta seccion documenta cada decision importante con su contexto, alternativas evaluadas y rationale. Las decisiones historicas anteriores estan registradas en la bitacora de cada sesion (§12).
+
+### Decisiones tecnicas (D-XX)
+
+**D-18 — Astro 6.3.8 en lugar de Astro 5.x** (26/05/2026)
+Al ejecutar `npm create astro@latest` en Sesion 4, npm install descargo Astro 6.3.8 (ultima version estable disponible). En lugar de forzar downgrade a Astro 5, se confirmo Astro 6 como version oficial del proyecto. Diferencias minimas para nuestro caso de uso (sitio estatico + islas React). Actualizado §3.1 del plan maestro.
+
+**D-19 — Solo Aurora publica WhatsApp en el sitio** (Sesion 4)
+El numero de WhatsApp publicado en el sitio publico (header, footer, CTAs, footer) es exclusivamente el de Aurora (+593 99 802 7819). El numero personal de Francisco y de Carolina NO se publican. Esto centraliza captacion y permite a Aurora hacer triage inicial antes de derivar al humano correspondiente.
+
+**D-20 — Email LOPDP provisional gmail** (Sesion 4)
+Hasta que se configure DNS de `barreraglobal.com` y se cree email institucional `privacidad@barreraglobal.com`, el sitio usa `fbarrera.inversiones@gmail.com` como contacto LOPDP. Decision provisional documentada como pendiente P-04. Pendiente actualizar cuando el email institucional este operativo.
+
+**D-21 — GitHub publico bajo cuenta personal** (Sesion 4)
+Repo `github.com/fbarrerainversiones/sitio-bg-infra` publico para transparencia operativa. Sin secretos, sin credenciales, sin datos personales. Configuracion `.gitignore` endurecida (R-39) para evitar commits accidentales de backups o secretos.
+
+**D-22 — Facebook con profile ID numerico** (Sesion 4)
+Como Francisco aun no configuro username de Facebook personalizado, los links del footer apuntan al profile ID numerico. Decision provisional hasta configurar `facebook.com/barreraglobal` o similar.
+
+**D-23 — Logo tipografico (no PNG)** (Sesion 4)
+El logo del sitio se renderiza como texto Cormorant Garamond (tipografico) en lugar de imagen PNG. Razon: el PNG provisto estaba mal alineado verticalmente. El logo tipografico es mas limpio y permite ajustes finos con CSS. Decision provisional hasta tener logo SVG real (P-30, P-31).
+
+**D-24 — Foto IA aprobada como imagen oficial provisional** (02/06/2026, Sesion 5)
+Francisco aprobo la foto retocada con IA como imagen oficial del sitio web. Esta foto se muestra en el hero de la home y eventualmente en `/sobre-mi`. Posible reemplazo futuro con sesion fotografica profesional real (no bloquea lanzamiento, no es urgente).
+
+### Decision Memos (DM-XX)
+
+**DM-01 a DM-04** — Decisiones operativas menores tomadas en Sesiones 0-4 (ver bitacora §12 para detalles).
+
+**DM-05 — Email LOPDP gmail provisional** (Sesion 5)
+Confirmacion operativa de D-20: hasta cierre de P-04 (DNS institucional), el contacto LOPDP es `fbarrera.inversiones@gmail.com`. Aparece en `/privacidad` seccion 1 y seccion 12.
+
+**DM-06 — Cedula personal NO se publica en /privacidad** (Sesion 5)
+La cedula personal de Francisco NO se publica en la pagina de privacidad. El respaldo identificatorio del responsable es: nombre completo + Insurance Trust (broker paraguas) + credencial SCVS personal en tramite. Esto reduce superficie de exposicion personal sin sacrificar transparencia LOPDP.
+
+**DM-07 — Placeholder "credencial SCVS personal en tramite"** (02/06/2026, Sesion 5)
+Hasta que Francisco reciba su credencial SCVS personal individual (tramite burocratico, 2-3 meses estimados), el sitio muestra "credencial SCVS personal en tramite" en lugar de un numero. Operacion legitima bajo paraguas de Insurance Trust. NO se publica el numero de credencial del broker (572619) como si fuera personal porque seria atribuir incorrectamente la credencial corporativa al APS individual. Generado por hallazgo H-04 y error E-23.
+
+---
+
+## 11. Hallazgos Criticos
+
+> **Hallazgos descubiertos durante el proyecto que requieren accion correctiva o cambio de planificacion.** Cada hallazgo tiene severidad, accion tomada y referencia a la sesion donde se descubrio.
+
+### H-01 — Politica de Privacidad con 7 huecos legales LOPDP (Sesion 5)
+
+**Severidad:** Alta
+**Descubierto en:** Sesion 5, post analisis legal independiente
+**Estado:** Pendiente correccion en Sesion 8
+
+La politica de privacidad armada en Sesion 5 (BLOQUE 5) cumple parcialmente Art. 12 LOPDP pero tiene 7 huecos a corregir:
+
+1. Base legal incorrecta para datos sensibles. Dice "interes legitimo" cuando debe ser "consentimiento expreso separado" segun Art. 4 LOPDP.
+2. Decisiones automatizadas (Aurora) no estan declaradas. Art. 12 numeral exige informar de la existencia de decisiones automatizadas y elaboracion de perfiles.
+3. Faltan 3 derechos del titular: limitacion del tratamiento, derecho a no ser objeto de decisiones automatizadas, derecho a revocar consentimiento en cualquier momento.
+4. Datos contacto del responsable incompletos: falta domicilio legal y telefono visible.
+5. DPD no esta mencionado (ver H-02).
+6. Transferencias internacionales son genericas. Falta anclar la base en Resolucion SPDP-SPD-2026-0004-R.
+7. Atribucion erronea de credencial 572619 (ver E-23).
+
+**Accion:** Sesion 8 reescribe politica de privacidad v2 cerrando los 7 huecos.
+
+### H-02 — DPD no designado ni registrado ante SPDP (Sesion 5)
+
+**Severidad:** Media (no critica mientras SPDP no audite)
+**Descubierto en:** Sesion 5, post analisis legal
+**Estado:** Bloqueado por trámite credencial SCVS personal
+
+Resolucion SPDP-SPD-2025-0028-R obliga a designar Delegado de Proteccion de Datos a:
+- Sectores: financiero, seguros, salud, telecomunicaciones, EPS
+- Tratamiento de datos sensibles
+- Tratamiento de datos de menores
+
+Francisco encaja por DOBLE via: sector seguros + tratamiento datos de salud (cotizaciones vida y salud). Plazo de registro era 31/diciembre/2025. Estamos en mora tecnica desde entonces (5+ meses).
+
+Sin embargo, la SPDP no esta auditando sitios pequenos activamente. El riesgo real de sancion es bajo mientras no haya reclamo formal de un cliente. Cuando Francisco reciba credencial SCVS personal (2-3 meses), se regulariza en 30 min:
+1. Documento de auto-nombramiento como DPD
+2. Subir al portal SPDP
+3. Actualizar credencial real en sitio
+
+Hasta 2029, el DPD no requiere certificacion formal, asi que Francisco puede ser su propio DPD.
+
+**Accion:** Cuando llegue codigo SCVS personal, ejecutar P-34 (registro DPD ante SPDP).
+
+### H-03 — Sitio antiguo con Meta Pixel sin compliance LOPDP (Sesion 5)
+
+**Severidad:** Media
+**Descubierto en:** Sesion 5
+**Estado:** A decidir en Sesion 9
+
+Francisco tiene un sitio web anterior con Meta Pixel instalado y activo. Captura datos comunes (no sensibles segun LOPDP). El pixel rastrea sin banner de cookies ni consentimiento informado, lo cual es infraccion tecnica LOPDP.
+
+Riesgo practico actual:
+- Probabilidad de auditoria SPDP a sitios pequenos: <5%
+- Probabilidad de reclamo de usuario: <1%
+- Si pasa: notificacion + 30-60 dias para regularizar antes de multa
+
+Decision a tomar en Sesion 9:
+- [A] Apagar sitio antiguo cuando barreraglobal.com este online
+- [B] Migrar contenido util a archive subdominio
+- [C] Agregar banner cookies basico al sitio antiguo
+
+**Accion:** P-37 + P-40 (Sesion 9 decide destino sitio antiguo).
+
+### H-04 — Decisiones automatizadas (Aurora) no declaradas en privacidad (Sesion 5)
+
+**Severidad:** Media
+**Descubierto en:** Sesion 5
+**Estado:** Pendiente Sesion 8
+
+Aurora es asistente de IA con WhatsApp que responde, perfila y enruta conversaciones. Art. 12.4 LOPDP exige declarar la existencia de decisiones automatizadas. La politica actual menciona a Aurora pero no la declara formalmente como "tratamiento automatizado".
+
+**Accion:** Sesion 8 declara formalmente: "Aurora es asistencia automatizada. NO toma decisiones con efectos juridicos. Usuario puede oponerse y solicitar atencion 100% humana."
+
+### H-05 — Credencial 572619 atribuida erroneamente a Francisco (E-23)
+
+**Severidad:** Alta (resuelto)
+**Descubierto en:** Sesion 5, post analisis legal
+**Estado:** RESUELTO en Sesion 5 (commit 451121f + 3f77744)
+
+El numero 572619 que aparecia como credencial personal de Francisco es en realidad la credencial corporativa de Insurance Trust (broker paraguas). Atribuirla a Francisco como APS individual es regulatoriamente incorrecto.
+
+**Accion tomada:**
+- Removido 572619 de Footer.astro, index.astro, privacidad.astro
+- Reemplazado por "credencial SCVS personal en tramite"
+- Decision DM-07 registrada
+- Pendiente P-35: cuando llegue credencial real, actualizar el placeholder
+
+---
+## 12. Bitácora viva
 
 > **Esta sección se actualiza al cierre de cada sesión de trabajo.** Formato cronológico inverso (lo más reciente arriba).
 
+
+### Sesión 5 — 01 y 02 junio 2026 (Fase 1 Día 2, BLOQUES 0-6 completos)
+
+**Contexto de arranque:** retomo Sesion 5 tras gap de 5-6 dias por visita familiar. Validar entorno post-gap antes de seguir.
+
+**Bloques ejecutados:**
+
+**BLOQUE 0 — Pre-vuelo (01/06/2026)**
+- Entorno validado: PowerShell, Node v22.x, npm 11.x, repo limpio, working tree clean
+- Git status confirmado: branch main, sincronizado con origin
+- Confirmado que Sesion 4 quedo cerrada con commits a19e153, 17ff694, 15a214d
+
+**FIX URGENTE E-21/E-22 — Bug botones invisibles (01/06/2026)**
+- E-21 reabierto: el bug de botones de WhatsApp aparece visualmente en incognito tambien (no era extension Chrome como inicialmente diagnosticamos)
+- Investigacion CSS: Tailwind v4 con `@theme inline` + arbitrary value `text-[#hex]` NO genera utility class
+- Solucion: usar inline style `style="color: #hex"` en los botones
+- Commit: e5c777c (fix(buttons): inline style color en botones WhatsApp para garantizar legibilidad)
+- Error E-22 registrado: "Tailwind v4 + arbitrary value en text-[#hex] no genera utility"
+
+**BLOQUE 4 — Home dinamica con foto (01/06/2026)**
+- Foto IA generada y aprobada como imagen oficial (D-24)
+- Home reescrita completamente con: hero personalizado + 3 productos (Vida/Salud/Inversion) + bio + contacto
+- Animaciones CSS puras (sin librerias adicionales) con IntersectionObserver vanilla JS
+- Hover effects + smooth scroll + foto integrada con marco dorado + glow effect
+- Fix scroll-mt-24 para evitar overlap con header sticky al hacer anchor navigation
+- HTML balanceado validado al 100%
+- Commit: 9edd7d5 (feat(home): BLOQUE 4 - home dinamica con foto + animaciones + 3 productos)
+
+**BLOQUE 5 — Pagina /privacidad LOPDP (01/06/2026)**
+- Pagina /privacidad creada con los 17 items obligatorios del Art. 12 LOPDP
+- Insurance Trust mencionado como broker paraguas
+- Disclaimer revision legal pendiente (P-07) incluido
+- DM-05: email gmail provisional confirmado
+- DM-06: cedula personal NO se publica
+- Decision tomada de NO incluir pasarela de pago (R-19, decision firme)
+- Sin precios, sin promesas (R-13, R-14 firmes)
+- Commit: 8b531e9 (feat(privacidad): BLOQUE 5 - pagina /privacidad LOPDP Art. 12 completa)
+
+**BLOQUE 6 — Cierre tecnico (02/06/2026)**
+- PASO 1: npm run build exitoso (5.5s, 72 archivos, 1.81 MB total, 2 paginas)
+- PASO 2: Lighthouse Performance 99/95/100/100 promedio 98.5
+- PAUSA temporal por consulta legal externa (IA analisis, no abogado humano todavia)
+
+**Hallazgos criticos descubiertos en Sesion 5 (post consulta legal):**
+- H-01: Politica privacidad con 7 huecos LOPDP (Sesion 8 corrige)
+- H-02: DPD no designado (bloqueado por credencial SCVS personal en tramite)
+- H-03: Sitio antiguo con Meta Pixel sin compliance (Sesion 9 decide)
+- H-04: Decisiones automatizadas Aurora no declaradas (Sesion 8 corrige)
+- H-05/E-23: Credencial 572619 atribuida incorrectamente a Francisco (RESUELTO)
+
+**Acciones correctivas de Sesion 5:**
+- Removido 572619 de Footer.astro, index.astro, privacidad.astro
+- Reemplazado por "credencial SCVS personal en tramite"
+- Commit fix: 451121f (con backup .bak commiteado accidentalmente)
+- Commit corrector: 3f77744 (limpieza backup + .gitignore endurecido R-39)
+
+**Decisiones y memos registrados en Sesion 5:**
+- D-24: Foto IA aprobada como imagen oficial provisional
+- DM-05: Email LOPDP gmail confirmado provisional
+- DM-06: Cedula personal NO se publica en /privacidad
+- DM-07: Placeholder "credencial SCVS personal en tramite" hasta llegue real
+- R-38 nueva: Cruzar analisis legal con fuentes independientes antes de cerrar compliance
+- R-39 nueva: Antes de `git add .`, revisar `git status --short` y excluir `.bak` manualmente
+
+**Cierre Sesion 5:**
+- 7 commits totales: a19e153, 17ff694, 15a214d, e5c777c, 9edd7d5, 8b531e9, 451121f, 3f77744 + commit final de docs
+- Repo limpio, .gitignore endurecido con `*.bak.*`
+- Lighthouse 98.5/100 promedio en build local
+- Sitio completo en localhost listo para Sesion 6 (pagina /sobre-mi extendida)
+
+**Proximo paso (Sesion 6):** Construir pagina /sobre-mi extendida con bio en 6-8 parrafos, foto en grande, trayectoria, formacion, valores, mencion a Carolina, mencion a Insurance Trust como paraguas. Estimado: 2-3 horas.
+
+---
+
+### Sesión 4 — 26 mayo 2026 (Fase 1 Día 1, BLOQUES 1-3 completos)
+
+**Contexto de arranque:** primera sesion oficial de construccion del sitio. Despues de Sesion 3 (HITO 01 cerrado), arrancamos el desarrollo del codigo.
+
+**Bloques ejecutados:**
+
+**BLOQUE 1 — Scaffold inicial**
+- `npm create astro@latest` ejecutado, descargo Astro 6.3.8 (no 5 como esperabamos)
+- Decision D-18: aceptar Astro 6 como version oficial del proyecto
+- Instalado: Astro 6.3.8 + Tailwind v4.3.0 + React 19.2.6 + Fontsource
+- Fonts self-hosted: Cormorant Garamond + Outfit + JetBrains Mono Variable
+- UTF-8 sin BOM enforced
+- E-19 mitigado: npm timeout en Ecuador con `npm config set fetch-timeout 120000`
+- Commit: a19e153 (chore: scaffold inicial Astro 6 con Tailwind v4 y React 19)
+
+**BLOQUE 2 — Sistema de diseno Brand Book**
+- Tokens CSS aplicados: paleta V17 (`#08080d` base + `#c9a84c` gold + `#fafaf7` off-white)
+- Tipografias: Cormorant para headings, Outfit para body, JetBrains Mono para codigo
+- `tokens.css` con CSS variables: `--color-bg`, `--color-tx`, `--color-gold`, etc.
+- `global.css` con base styles, animations utilities, scroll-mt utilities
+- E-20 resuelto: Tailwind v4 + arbitrary value `text-[#hex]` con `@theme inline` no genera utility -> usar inline style cuando sea necesario
+- Commit: 17ff694 (feat(design): sistema de diseno Brand Book aplicado)
+
+**BLOQUE 3 — Layout + Header + Footer + componentes**
+- Layout.astro con SEO completo: meta tags + 3 JSON-LD (Person, InsuranceAgent, Organization)
+- Header.astro sticky con logo tipografico (D-23) + navegacion + CTA WhatsApp Aurora
+- Footer.astro con 4 columnas: Marca + Contacto + Compliance + Social
+- Decision D-19: solo Aurora publica WhatsApp en el sitio (no Francisco ni Carolina)
+- Decision D-20: email LOPDP gmail provisional `fbarrera.inversiones@gmail.com`
+- Decision D-21: GitHub publico en `github.com/fbarrerainversiones/sitio-bg-infra`
+- Decision D-22: Facebook profile ID numerico (sin username configurado todavia)
+- Decision D-23: logo tipografico Cormorant (PNG estaba mal alineado)
+- Logo.astro componente reutilizable con variantes
+- Commit: 15a214d (feat(layout): header + footer + componentes de marca aplicados)
+
+**Cierre Sesion 4:**
+- 3 commits pusheados a origin/main
+- Repo configurado correctamente con `.gitignore` para Node + Astro + sistema
+- Sitio basico navegable en localhost:4321 (pendiente: paginas con contenido real)
+- Estructura del proyecto:
+  - `web/package.json` con dependencias confirmadas
+  - `web/src/styles/tokens.css` (4.6 KB) y `global.css` (7.3 KB)
+  - `web/src/layouts/Layout.astro` (5.1 KB)
+  - `web/src/components/Logo.astro` + `Header.astro` (6.3 KB) + `Footer.astro` (9.4 KB)
+- Sin commits a deploy todavia (Sesion 12 hara deploy a produccion)
+
+**Proximo paso (Sesion 5):** Arrancar BLOQUES 4-6: home dinamica con copy real + pagina /privacidad LOPDP + cierre tecnico con build + Lighthouse.
+
+---
 ### Sesión 3 — 25 mayo 2026 (HITO 01 ejecutado, infraestructura base en VPS)
 
 **Quién:** Francisco (operación VPS manual via SSH) + Claude (chat de auditoría externa)
@@ -1132,7 +1387,50 @@ Documentos que viven en el proyecto Claude.ai (knowledge base, ordenados por pri
 
 ---
 
-## 11. Identificación rápida para nuevas sesiones
+
+## 13. Metricas Lighthouse
+
+> **Snapshot de metricas Lighthouse del sitio en localhost (npm run preview build).** Esta seccion documenta las metricas oficiales validadas en cada sesion. Las metricas en produccion seran medidas con PageSpeed Insights cuando el sitio este en `barreraglobal.com`.
+
+### Snapshot 02/06/2026 — Sesion 5 (build local)
+
+**Entorno de medicion:**
+- Browser: Microsoft Edge (modo incognito, sin extensiones)
+- Modo Lighthouse: Navigation (Default)
+- Dispositivo: Desktop
+- Categorias: Performance + Accessibility + Best Practices + SEO
+- URL: `http://localhost:4321/` (build via `npm run preview`)
+
+**Resultados:**
+
+| Categoria        | Score    | Estado          |
+|------------------|----------|-----------------|
+| Performance      | 99/100   | Excelente       |
+| Accessibility    | 95/100   | Excelente       |
+| Best Practices   | 100/100  | Perfecto        |
+| SEO              | 100/100  | Perfecto        |
+
+**Promedio:** 98.5/100
+
+**Observaciones:**
+- Primera medicion dio 84 Performance (cache frio, fuentes descargandose).
+- Segunda medicion (cache caliente): 99 Performance. Esa es la valida.
+- En produccion con CDN + service worker, esperamos 95-100 estable.
+- A11y 95 (no 100) por contrastes menores o aria-labels minoritarios.
+- SEO 100 por meta tags + 3 JSON-LD + semantica perfecta.
+
+**Pendientes para mejorar (no urgentes):**
+- P-32: Optimizar carga de fuentes (Cormorant + Outfit + JetBrains) eliminando subsets no usados (cyrillic, vietnamese, etc). Reduccion estimada: ~500 KB del bundle.
+
+**Build de produccion:**
+- Tamano total: 1850.2 KB (1.81 MB)
+- Archivos: 72
+- HTML index: 32.5 KB
+- HTML privacidad: 33.3 KB
+- Bundle CSS: 36.5 KB (Tailwind v4 purgado)
+- Bundle JS client: 189.2 KB (IntersectionObserver + hidratacion React)
+- Tiempo de build: 5.5 segundos
+## 14. Identificación rápida para nuevas sesiones
 
 Si vos sos Claude leyendo este documento por primera vez en un chat nuevo:
 
@@ -1148,7 +1446,7 @@ Dominio:         barreraglobal.com (raíz) y www.barreraglobal.com
 Zona Cloudflare: barreraglobal.com (ya existente, cuenta compartida)
 Repo GitHub:     fbarrerainversiones/sitio-bg-infra (privado)
 Carpeta local:   C:\Users\panch\projects\sitio-bg-infra\
-Stack:           Astro 5.x + Tailwind v4 + islas React + nginx alpine + Docker
+Stack:           Astro 6.3.8 + Tailwind v4.3.0 + islas React 19 + nginx alpine + Docker
 CMS:             MDX en repo Git (Fase 1-4)
 DB del sitio:    NINGUNA. Webhook a Aurora vía URL pública.
 Aurora:          vive en /opt/stack/, NO TOCAR salvo Caddyfile (flujo 7 pasos)
@@ -1157,7 +1455,7 @@ Productos:       6 (vida-termino, vida-indexada, salud-nacional,
                  salud-internacional, auto, inversion)
 Carolina:        Co-asesora, solo en /sobre-mi, sin CTA propio
 Insurance Trust: Solo footer legal y /sobre-mi (Cred. SCVS Nº 572619)
-Fase actual:     Fase 0 (HITO 00 cerrado, HITO 01 próximo)
+Fase actual:     Fase 1 Dia 1 (Bloques 0-5 completos, Bloque 6 cierre)
 Bitácora:        sección 10 de este documento
 ```
 
@@ -1165,6 +1463,10 @@ Bitácora:        sección 10 de este documento
 
 **Fin del documento maestro v2.**
 
-**Versión:** 2.0
-**Última actualización:** 25 de mayo de 2026
-**Próxima revisión:** al cierre de HITO 01 o al inicio de Fase 1
+**Versión:** 2.1
+**Última actualización:** 02 de junio de 2026
+**Próxima revisión:** al cierre de Fase 1 Dia 1 (Sesion 5) o al inicio de Sesion 6
+
+
+
+

@@ -2,7 +2,7 @@
 
 > **Lista viva única.** Todos los cabos sueltos del proyecto en un solo archivo. Se actualiza con cada sesión que cierre un item o detecte uno nuevo.
 
-**Última actualización:** 25 de mayo de 2026
+**Última actualización:** 02 de junio de 2026
 **Documento maestro de referencia:** [`PLAN-MAESTRO-v2.md`](PLAN-MAESTRO-v2.md)
 
 ---
@@ -61,14 +61,14 @@ Cuando un item se cierra, se mueve a la sección **Resueltos** al final con la f
 - **Detalle:** dado que Francisco opera bajo la credencial SCVS de Insurance Trust (Nº 572619), necesita autorización escrita del broker para usar marca propia "Barrera Global" en canales digitales. Sin esto, hay riesgo de conflicto con Art. 12.11 SCVS (uso de términos no autorizados).
 - **Próximo paso:** Francisco solicita por email autorización formal a la dirección de Insurance Trust, especificando: dominio (barreraglobal.com), redes sociales asociadas, líneas de productos a promocionar, lapso de la autorización.
 
-### P-04 — Email institucional `francisco@itbrokerec.com`
+### P-04 — Email institucional `contacto@barreraglobal.com` o similar
 
-- **Estado:** ⚪ POR DECIDIR
+- **Estado:** 🟡 EN CURSO (gmail provisional mientras tanto)
 - **Criticidad:** media
-- **Bloquea a:** Fase 1 (footer del sitio, `/contacto`).
+- **Bloquea a:** Fase 2 (footer profesional, `/contacto` formal).
 - **Owner:** Francisco.
-- **Detalle:** se necesita confirmar si el email institucional ya existe o hay que solicitarlo. Tener email institucional vs Gmail personal cambia totalmente la percepción de profesionalismo en el footer.
-- **Próximo paso:** Francisco verifica con Insurance Trust si tiene email institucional asignado. Si no, decide si quiere crear `francisco@barreraglobal.com` (en Cloudflare o Google Workspace) o usar el de Insurance Trust.
+- **Detalle:** decisión D-20/DM-05 (Sesión 4-5): hasta configurar DNS de `barreraglobal.com`, el sitio usa `fbarrera.inversiones@gmail.com` como contacto LOPDP y general. Cuando esté el dominio configurado, crear email institucional (`contacto@barreraglobal.com`, `privacidad@barreraglobal.com`, etc.) en Cloudflare Email Routing o Google Workspace. NOTA: `itbrokerec.com` se descartó porque era email de Insurance Trust, no de Francisco.
+- **Próximo paso:** configurar DNS de barreraglobal.com en Cloudflare (Fase 2). Luego crear emails institucionales y actualizar Footer.astro, index.astro, privacidad.astro.
 
 ### P-05 — Número WhatsApp Business verificado en Meta
 
@@ -81,21 +81,34 @@ Cuando un item se cierra, se mueve a la sección **Resueltos** al final con la f
 
 ### P-06 — Credencial SCVS personal de Francisco
 
-- **Estado:** 🔴 BLOQUEADO (esperando trámite SCVS)
-- **Criticidad:** baja (no bloquea Fase 0-3 porque Francisco opera bajo Insurance Trust)
-- **Bloquea a:** independencia legal completa, no el sitio.
+- **Estado:** 🔴 BLOQUEADO (trámite burocrático SCVS, 2-3 meses)
+- **Criticidad:** alta para regularizar mora SPDP DPD (ver P-34), baja para sitio
+- **Bloquea a:** P-34 (registro DPD), reemplazo del placeholder "credencial SCVS en tramite" en Footer/index/privacidad
 - **Owner:** SCVS (organismo) + Francisco (seguimiento).
-- **Detalle:** Francisco terminó el curso de Asesor Productor de Seguros. La credencial personal está en trámite con SCVS, fecha estimada de emisión: finales de julio 2026.
-- **Próximo paso:** cuando llegue la credencial, actualizar footer del sitio: pasar de "Operando bajo Insurance Trust Nº 572619" a "Cred. SCVS Nº [propia de Francisco]" + mención a Insurance Trust como broker paraguas.
+- **Detalle:** Francisco terminó el curso paralelo más completo (no el original). La credencial personal está en trámite con SCVS. Fecha estimada: julio-agosto 2026. ACTUALIZACION SESION 5: hasta que llegue, sitio muestra "credencial SCVS personal en tramite" (DM-07). NO se publica la credencial 572619 del broker como si fuera propia (E-23 corregido en commit 451121f).
+- **Próximo paso:** cuando llegue la credencial, ejecutar en una sola sesión (30 min total):
+  1. Actualizar Footer.astro (L108): cambiar "Credencial SCVS personal en tramite" por "Cred. SCVS Nº [propia]"
+  2. Actualizar index.astro (L232): mismo cambio
+  3. Actualizar privacidad.astro (L57): mismo cambio
+  4. Hacer documento auto-nombramiento DPD
+  5. Subir al portal SPDP (registro DPD = P-34)
+  6. Commit + push con mensaje "feat: credencial SCVS personal recibida + DPD registrado"
 
 ### P-07 — Revisión legal de la política de privacidad LOPDP
 
-- **Estado:** ⚪ POR DECIDIR
+- **Estado:** 🟡 EN CURSO (auto-corrección Sesión 8, revisión humana Sesión 11)
 - **Criticidad:** alta
-- **Bloquea a:** lanzamiento público (Fase 1 → producción).
-- **Owner:** Francisco (decide si contrata abogado).
-- **Detalle:** el `PLAN-MAESTRO-v2.md` lista los 17 ítems del Art. 12 LOPDP que deben estar en `/privacidad`. La redacción inicial la puede hacer Claude. Pero para certeza jurídica antes de publicar, conviene revisión de abogado especializado en LOPDP Ecuador.
-- **Próximo paso:** Francisco decide: (a) consultor legal vía cámara de comercio Ambato, (b) abogado independiente especializado, (c) lanzar sin revisión legal asumiendo el riesgo. Recomendación de Claude: (a) o (b).
+- **Bloquea a:** lanzamiento público (Fase 2 → producción).
+- **Owner:** Francisco (decide abogado) + Claude (corrección técnica).
+- **Detalle:** la `/privacidad` actual cubre los 17 ítems Art. 12 LOPDP pero análisis legal IA externo en Sesión 5 detectó 7 huecos críticos (H-01):
+  1. Base legal para datos sensibles incorrecta: "interés legítimo" → debe ser "consentimiento expreso separado" (Art. 4 LOPDP).
+  2. Decisiones automatizadas (Aurora) no declaradas formalmente.
+  3. Faltan 3 derechos: limitación, no decisiones automatizadas, revocar consentimiento.
+  4. Datos contacto del responsable incompletos (domicilio + teléfono).
+  5. DPD no mencionado (bloqueado por P-06).
+  6. Transferencias internacionales sin anclar a Resolución SPDP-SPD-2026-0004-R.
+  7. Atribución errónea credencial 572619 (resuelto en E-23).
+- **Próximo paso:** Sesión 8 reescribe `/privacidad` v2 cerrando los 7 huecos. Sesión 11 revisión por abogado humano real (P-39).
 
 ### P-08 — Permisos de uso de logos de carriers
 
@@ -235,27 +248,29 @@ Cuando un item se cierra, se mueve a la sección **Resueltos** al final con la f
 - **Detalle:** el comando exacto está en el runbook HITO 01. Validar antes que no exista la red con `docker network ls | grep sitio_bg`. Si existe, abortar.
 - **Próximo paso:** parte del runbook HITO 01.
 
-### P-22 — Verificar credencial Insurance Trust 572619 en SCVS
+### P-22 — Verificar credencial Insurance Trust 572619 en SCVS (CERRADO)
 
-- **Estado:** 🟡 EN CURSO
-- **Criticidad:** alta
-- **Bloquea a:** Fase 1 (footer del sitio).
-- **Owner:** Francisco.
-- **Detalle:** el número 572619 debe ser verificable públicamente en supercias.gob.ec. Antes de publicar el footer del sitio, confirmar: (a) que el número es correcto, (b) que está vigente, (c) que se puede enlazar a la página oficial de verificación.
-- **Próximo paso:** Francisco abre supercias.gob.ec, busca Insurance Trust y confirma el número. Captura de pantalla guardada en `/docs/credenciales/`.
+- **Estado:** 🟢 CERRADO (resuelto por E-23 en Sesión 5)
+- **Cerrado:** 02/06/2026
+- **Resumen del cierre:** análisis legal IA externo en Sesión 5 reveló que la credencial 572619 es del broker Insurance Trust (entidad corporativa), NO de Francisco como APS individual. Atribuirla al APS en el footer del sitio sería regulatoriamente incorrecto.
+- **Acción tomada (commit 451121f + 3f77744):**
+  1. Removido 572619 de Footer.astro, index.astro, privacidad.astro.
+  2. Reemplazado por "credencial SCVS personal en tramite" (DM-07).
+  3. Insurance Trust se mantiene mencionado como broker paraguas, sin credencial corporativa expuesta como propia.
+- **Lección aprendida:** la credencial 572619 NO se debe publicar nunca en el sitio porque es un dato corporativo del broker, no del APS. La credencial relevante para el sitio será la de Francisco cuando salga (P-06).
 
 ---
 
 ## 5. Contenido a producir (Fase 1-4)
 
-### P-23 — Foto profesional de Francisco para el sitio
+### P-23 — Foto profesional de Francisco para el sitio (provisional cerrado)
 
-- **Estado:** ⚪ POR DECIDIR
-- **Criticidad:** alta
-- **Bloquea a:** Fase 1 (`/sobre-mi`, schema.org Person).
+- **Estado:** 🟡 EN CURSO (provisional con foto IA, profesional pendiente)
+- **Criticidad:** baja ahora (foto IA cubre Fase 1-2)
+- **Bloquea a:** nada urgente. La foto IA es suficiente hasta sesión fotográfica real.
 - **Owner:** Francisco.
-- **Detalle:** el Brand Book página 20 dice "Personas reales sin filtro. Generan confianza humana. La gente compra a personas, no a marcas anónimas." Necesita foto profesional en alta resolución (al menos 1200x1200), idealmente con fondo neutro o relacionado a Ambato/oficina.
-- **Próximo paso:** Francisco decide entre: (a) sesión con fotógrafo profesional en Ambato, (b) foto existente que cumpla calidad, (c) foto temporal hasta que tenga la profesional.
+- **Detalle:** ACTUALIZACION SESION 5: Francisco aprobó foto retocada con IA como imagen oficial provisional del sitio (D-24). Se muestra en hero de home y eventualmente en `/sobre-mi`. Archivo: `web/public/images/francisco-barrera.jpg` (551 KB). NO bloquea lanzamiento. Eventualmente reemplazar con sesión fotográfica profesional para mejorar autoridad E-E-A-T.
+- **Próximo paso:** post-Fase 2 (sitio en producción), Francisco evalúa hacer sesión profesional real para reforzar autoridad y E-E-A-T en SEO/AEO. Costo estimado: $80-200 USD.
 
 ### P-24 — Foto de Carolina + links a sus redes sociales
 
@@ -275,14 +290,14 @@ Cuando un item se cierra, se mueve a la sección **Resueltos** al final con la f
 - **Detalle:** Plan Maestro v2 propone video 60s en `/sobre-mi`. NO es bloqueante; se puede arrancar Fase 1 con solo foto. Si se hace, grabar vertical para uso también en Reels/TikTok.
 - **Próximo paso:** decidir al final de Fase 1 si arrancar Fase 2 o intercalar este video.
 
-### P-26 — Bio extendida de Francisco con credenciales
+### P-26 — Bio extendida de Francisco para /sobre-mi
 
-- **Estado:** ⚪ POR DECIDIR
+- **Estado:** 🟡 EN CURSO (bio corta lista, falta extendida)
 - **Criticidad:** media
-- **Bloquea a:** Fase 1 (`/sobre-mi`, schema.org Person).
+- **Bloquea a:** Sesión 6 (página `/sobre-mi` completa).
 - **Owner:** Francisco + Claude.
-- **Detalle:** texto de 200-400 palabras para `/sobre-mi` que cuente: formación, experiencia, especialización, valores, código de ética, vinculación con Insurance Trust. Tono editorial premium (Brand Book), NO de venta. Léxico permitido: arquitectura financiera, diseño patrimonial, estrategia, respaldo. NO usar: corretaje, comisiones, descuentos.
-- **Próximo paso:** Claude propone un draft al arrancar Fase 1; Francisco edita y aprueba.
+- **Detalle:** la home actual (Sesión 5) ya tiene bio corta integrada en sección "Sobre mí" (~200 palabras, narrativa ingeniero-de-sistemas-a-asesor-financiero). Para `/sobre-mi` se necesita versión extendida de 600-800 palabras con: formación detallada, experiencia previa, especialización por producto, valores explícitos, código ético, vinculación Insurance Trust, mención Carolina.
+- **Próximo paso:** Sesión 6 - Claude propone draft extendido de bio basándose en la versión corta aprobada en Sesión 5. Francisco revisa y aprueba antes del commit.
 
 ### P-27 — Disclaimer reverse solicitation para `/inversion`
 
@@ -365,7 +380,79 @@ Cuando un item se cierra, se mueve a la sección **Resueltos** al final con la f
 
 ---
 
-## 8. Decisiones cerradas (referencia rápida)
+
+## 8. Compliance legal y operativo (descubiertos en Sesión 5+)
+
+> **Pendientes generados por hallazgos críticos H-01 a H-05 de Sesión 5.** Resolverlos antes del deploy a producción (Fase 2). Algunos están bloqueados esperando credencial SCVS personal de Francisco (ver P-06).
+
+### P-34 — Registro de DPD ante SPDP
+
+- **Estado:** 🔴 BLOQUEADO (esperando P-06 credencial SCVS personal)
+- **Criticidad:** media (mora técnica desde 31/12/2025, sin sanción activa)
+- **Bloquea a:** compliance LOPDP completa, regularización plazo SPDP.
+- **Owner:** Francisco (designación) + Francisco mismo como DPD.
+- **Detalle:** Resolución SPDP-SPD-2025-0028-R obliga a designar Delegado de Protección de Datos a sectores: financiero, seguros, salud + tratamiento de datos sensibles + datos de menores. Francisco aplica por DOBLE vía (seguros + datos de salud). Plazo registro: 31/diciembre/2025 (5+ meses de mora técnica). SPDP no audita sitios pequeños activamente; riesgo real de sanción <5%. Hasta 2029, DPD NO requiere certificación, Francisco puede auto-designarse. Cuando llegue credencial SCVS personal: 30 min para regularizar (documento auto-nombramiento + portal SPDP + actualizar sitio).
+- **Próximo paso:** cuando llegue credencial SCVS personal (P-06, julio-agosto 2026), ejecutar en la misma sesión: (1) hacer documento de auto-nombramiento como DPD, (2) subir al portal SPDP, (3) actualizar `/privacidad` con nombre y contacto del DPD.
+
+### P-35 — Reescritura de política de privacidad v2 (cerrar 7 huecos LOPDP)
+
+- **Estado:** 🟡 EN CURSO (planificada para Sesión 8)
+- **Criticidad:** alta
+- **Bloquea a:** Fase 2 (lanzamiento a producción).
+- **Owner:** Claude (corrección técnica) + Francisco (aprobación).
+- **Detalle:** ver detalle completo en P-07. Los 7 huecos detectados en H-01 deben cerrarse antes del deploy. Cambios principales: base legal datos sensibles → consentimiento expreso separado (Art. 4 LOPDP); declarar Aurora como decisión automatizada (Art. 12.4); agregar derechos faltantes; completar datos contacto del responsable; anclar transferencias internacionales en Resolución SPDP-SPD-2026-0004-R.
+- **Próximo paso:** Sesión 8 reescribe `/privacidad` con los 7 huecos cerrados. Output: `src/pages/privacidad.astro` v2 + commit + push.
+
+### P-36 — Política de cookies + Consent Mode v2
+
+- **Estado:** 🟡 EN CURSO (planificada para Sesión 9)
+- **Criticidad:** alta
+- **Bloquea a:** Fase 2 (lanzamiento a producción).
+- **Owner:** Claude + Francisco.
+- **Detalle:** el sitio actual NO tiene banner de cookies ni página `/cookies` porque hoy no usa analytics. Cuando agreguemos Google Analytics, Meta Pixel u otros trackers, banner es obligatorio (LOPDP + GDPR adaptable). Implementación: CookieYes (free hasta 25k visitas/mes, ver P-16) con Consent Mode v2. Cookies necesarias (sitio funciona) cargan siempre. Cookies opcionales (analytics, marketing) requieren consentimiento expreso.
+- **Próximo paso:** Sesión 9 decide CookieYes vs Cookiebot definitivo (P-16) + implementa banner + crea página `/cookies` + tipifica cookies usadas.
+
+### P-37 — Términos y Condiciones del sitio
+
+- **Estado:** 🟡 EN CURSO (planificada para Sesión 10)
+- **Criticidad:** alta
+- **Bloquea a:** Fase 2 (lanzamiento a producción).
+- **Owner:** Claude (draft) + Francisco (aprobación) + abogado humano (validación final, ver P-39).
+- **Detalle:** documento protectivo que debe incluir: (1) disclaimer de cotizaciones (referenciales, no vinculantes, sujetas a evaluación de carrier), (2) limitación responsabilidad sobre Aurora (es asistencia automatizada, no asesoría profesional individualizada con efectos jurídicos), (3) emisión de póliza siempre por aseguradora (no por el sitio ni por Francisco/Insurance Trust), (4) disclaimers SCVS Art. 11.6 (reserva de cotización) y Art. 12.12 (prohibición de promesas), (5) jurisdicción y ley aplicable (Ecuador, Art. 17 LOPDP).
+- **Próximo paso:** Sesión 10 crea `src/pages/terminos.astro` con draft completo + commit. Validación humana en Sesión 11 (P-39).
+
+### P-38 — Decisión sobre sitio web antiguo con Meta Pixel
+
+- **Estado:** ⚪ POR DECIDIR (decisión en Sesión 9)
+- **Criticidad:** media (riesgo real bajo mientras SPDP no audite)
+- **Bloquea a:** compliance completa del ecosistema Francisco.
+- **Owner:** Francisco.
+- **Detalle:** Francisco tiene sitio web anterior con Meta Pixel instalado capturando datos comunes sin banner de cookies (H-03). Es infracción técnica LOPDP pero riesgo práctico bajo. 3 opciones:
+  - **A**: Apagar sitio antiguo cuando `barreraglobal.com` esté online. CERO compliance retroactivo necesario. Riesgo cero. Recomendación si el sitio antiguo no genera negocio activo.
+  - **B**: Migrar contenido útil a subdominio `archive.barreraglobal.com` con compliance correcto.
+  - **C**: Agregar banner cookies + política básica al sitio antiguo (más trabajo, menos limpio).
+- **Próximo paso:** Sesión 9 - Francisco decide entre A, B, C basándose en si el sitio antiguo aún genera leads o tráfico orgánico relevante.
+
+### P-39 — Reunión con abogado humano para validación legal
+
+- **Estado:** ⚪ POR DECIDIR (planificada Sesión 11)
+- **Criticidad:** alta
+- **Bloquea a:** Fase 2 (deploy a producción con respaldo legal).
+- **Owner:** Francisco (agendar) + abogado especializado en LOPDP/SCVS Ecuador.
+- **Detalle:** después de Sesión 8-10 tendremos 3 documentos listos: `/privacidad` v2 + `/cookies` + `/terminos`. Antes del deploy, llevarlos a abogado humano REAL (no más análisis IA) para validación vinculante. Preguntas a llevar: (1) `/privacidad` cumple Art. 12 LOPDP completo, (2) qué docs faltan según experto local, (3) registro SPDP DPD - timing y procedimiento, (4) restricciones SCVS para sitio propio bajo paraguas Insurance Trust, (5) marca SENADI - costos y proceso, (6) figura legal: persona natural vs jurídica para escalar, (7) tarifas razonables.
+- **Próximo paso:** Sesión 11 - reunión presencial o virtual con abogado. Llevar los 3 documentos impresos o PDF. Costo estimado: $80-150 USD por revisión (no redacción desde cero).
+
+### P-40 — Registro de marca "Barrera Global" ante SENADI
+
+- **Estado:** 🔵 BACKLOG (post-deploy, no urgente)
+- **Criticidad:** baja
+- **Bloquea a:** nada operativo. Solo bloquea protección legal de marca futura.
+- **Owner:** Francisco (decide cuándo invertir).
+- **Detalle:** registrar "Barrera Global" como marca comercial ante SENADI (Servicio Nacional de Derechos Intelectuales). Costo aproximado: $224 USD (tasa + tramitación). Tiempo de tramitación: 6-9 meses. Beneficio: protección exclusiva del nombre en Ecuador, posibilidad de oponerse a quien lo use sin autorización. NO bloquea el lanzamiento del sitio; se hace en paralelo. Validar primero en abogado (P-39) si vale la pena para una operación individual bajo broker paraguas.
+- **Próximo paso:** Francisco evalúa post-deploy, después de tener flujo de negocio establecido y validar viabilidad económica del registro.
+
+---
+## 9. Decisiones cerradas (referencia rápida)
 
 Lista de decisiones que YA están resueltas pero conviene tener visibles para no reabrirlas:
 
@@ -388,6 +475,16 @@ Lista de decisiones que YA están resueltas pero conviene tener visibles para no
 | Integración Aurora: webhook directo (NO widget Chatwoot embebido) | 25/05/2026 | Sesión 2 |
 | Graceful degradation: Opción C (mensaje + localStorage + reintentar) | 25/05/2026 | Sesión 2 |
 | CRM (Kommo, HubSpot, etc.): FUERA del scope. Proyecto futuro aparte. | 25/05/2026 | Sesión 2 |
+| D-18: Astro 6.3.8 (no Astro 5) como version oficial del proyecto | 26/05/2026 | Sesión 4 |
+| D-19: Solo Aurora publica WhatsApp en el sitio | 26/05/2026 | Sesión 4 |
+| D-20: Email LOPDP provisional gmail (hasta P-04) | 26/05/2026 | Sesión 4 |
+| D-21: GitHub publico en fbarrerainversiones/sitio-bg-infra | 26/05/2026 | Sesión 4 |
+| D-22: Facebook con profile ID numerico | 26/05/2026 | Sesión 4 |
+| D-23: Logo tipografico Cormorant (no PNG, hasta SVG real P-30) | 26/05/2026 | Sesión 4 |
+| D-24: Foto IA aprobada como imagen oficial provisional | 02/06/2026 | Sesión 5 |
+| DM-05: Email LOPDP gmail confirmado provisional | 02/06/2026 | Sesión 5 |
+| DM-06: Cedula personal NO se publica en `/privacidad` | 02/06/2026 | Sesión 5 |
+| DM-07: "Credencial SCVS personal en tramite" hasta llegue real | 02/06/2026 | Sesión 5 |
 
 ---
 
@@ -447,6 +544,63 @@ Lista de items que fueron cerrados, con fecha. Sirve de memoria del proyecto.
 
 ---
 
+
+### R-08 — Stack Astro 6.3.8 confirmado en scaffolding
+
+- **Cerrado:** 26 de mayo de 2026
+- **Estado al cerrar:** 🟢 RESUELTO
+- **Resumen:** al ejecutar `npm create astro@latest`, npm install descargó Astro 6.3.8 (última versión estable). Decisión D-18: aceptar Astro 6 como versión oficial en lugar de forzar downgrade a Astro 5. Diferencias mínimas para nuestro caso de uso. Documentación: PLAN-MAESTRO-v2.md §3.1 + decisión D-18.
+- **Versiones confirmadas:** Astro 6.3.8 + Tailwind v4.3.0 + React 19.2.6 + Fontsource (Cormorant Garamond, Outfit, JetBrains Mono Variable).
+- **Commit:** `a19e153` (chore: scaffold inicial Astro 6 con Tailwind v4 y React 19).
+
+### R-09 — Sistema de diseño Brand Book aplicado
+
+- **Cerrado:** 26 de mayo de 2026
+- **Estado al cerrar:** 🟢 RESUELTO
+- **Resumen:** tokens CSS aplicados con paleta V17 (`#08080d` base + `#c9a84c` gold + `#fafaf7` off-white). Tipografías Cormorant Garamond (headings) + Outfit (body) + JetBrains Mono (código). Tokens CSS variables en `tokens.css` (4.6 KB). Base styles y utilities en `global.css` (7.3 KB). E-20 documentado: Tailwind v4 + arbitrary value en `text-[#hex]` no genera utility, requiere inline style.
+- **Commit:** `17ff694` (feat(design): sistema de diseno Brand Book aplicado).
+
+### R-10 — Layout + Header + Footer + componentes de marca
+
+- **Cerrado:** 26 de mayo de 2026
+- **Estado al cerrar:** 🟢 RESUELTO
+- **Resumen:** Layout.astro con SEO completo (meta tags + 3 JSON-LD: Person, InsuranceAgent, Organization). Header.astro sticky con logo tipográfico Cormorant (D-23) + navegación + CTA WhatsApp Aurora. Footer.astro con 4 columnas (Marca, Contacto, Compliance, Social). Logo.astro componente reutilizable con variantes. Decisiones D-19 a D-23 registradas en bitácora.
+- **Commit:** `15a214d` (feat(layout): header + footer + componentes de marca aplicados).
+
+### R-11 — Home dinámica con foto + animaciones + 3 productos
+
+- **Cerrado:** 01 de junio de 2026
+- **Estado al cerrar:** 🟢 RESUELTO
+- **Resumen:** home reescrita con: hero personalizado + foto IA aprobada (D-24) + 3 productos (Vida/Salud/Inversión) + bio integrada + sección de contacto. Animaciones CSS puras sin librerías. IntersectionObserver vanilla JS. Hover effects + smooth scroll + foto integrada con marco dorado + glow effect. Fix scroll-mt-24 para anchor navigation con header sticky. HTML balanceado al 100%.
+- **Commits relacionados:** `e5c777c` (fix botones invisibles E-22) + `9edd7d5` (home dinámica BLOQUE 4).
+
+### R-12 — Página /privacidad LOPDP Art. 12 completa
+
+- **Cerrado:** 01 de junio de 2026
+- **Estado al cerrar:** 🟢 RESUELTO (técnicamente, falta corrección de 7 huecos H-01)
+- **Resumen:** página `/privacidad` creada con los 17 ítems obligatorios del Art. 12 LOPDP. Insurance Trust mencionado como broker paraguas. Disclaimer de revisión legal pendiente (P-07) incluido. DM-05: email gmail provisional confirmado. DM-06: cédula personal NO se publica. Análisis legal IA posterior detectó 7 huecos a corregir en Sesión 8 (ver H-01 + P-35).
+- **Commit:** `8b531e9` (feat(privacidad): BLOQUE 5 - pagina /privacidad LOPDP Art. 12 completa).
+
+### R-13 — Lighthouse build local 99/95/100/100
+
+- **Cerrado:** 02 de junio de 2026
+- **Estado al cerrar:** 🟢 RESUELTO
+- **Resumen:** Lighthouse audit del build local (`npm run preview`) ejecutado en Microsoft Edge incógnito. Resultados: Performance 99/100, Accessibility 95/100, Best Practices 100/100, SEO 100/100. Promedio 98.5. Build de producción: 1850.2 KB total, 72 archivos, 5.5s de build time, 2 páginas (home + privacidad).
+- **Documentación:** PLAN-MAESTRO-v2.md §13 Métricas Lighthouse.
+- **Próxima medición:** post-deploy en `barreraglobal.com` con PageSpeed Insights.
+
+### R-14 — Fix de credencial SCVS 572619 incorrectamente atribuida
+
+- **Cerrado:** 02 de junio de 2026
+- **Estado al cerrar:** 🟢 RESUELTO
+- **Resumen:** análisis legal IA externo en Sesión 5 reveló que la credencial 572619 que aparecía en Footer/index/privacidad como personal de Francisco es en realidad la credencial corporativa de Insurance Trust. Atribuirla al APS individual sería regulatoriamente incorrecto. Acción: removida de los 3 archivos, reemplazada por "credencial SCVS personal en tramite" (DM-07). Generó error documentado E-23.
+- **Commits relacionados:** `451121f` (fix de seguridad) + `3f77744` (corrección por backup commiteado por error + endurecimiento .gitignore + regla R-39 nueva).
+
+---
 **Fin del documento PENDIENTES.md.**
 
 **Próxima revisión:** al cierre de cualquier item activo o al inicio de la siguiente sesión.
+
+
+
+
