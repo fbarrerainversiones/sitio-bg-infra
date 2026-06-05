@@ -1133,6 +1133,112 @@ El numero 572619 que aparecia como credencial personal de Francisco es en realid
 > **Esta sección se actualiza al cierre de cada sesión de trabajo.** Formato cronológico inverso (lo más reciente arriba).
 
 
+### Sesión 6 — viernes 05 de junio de 2026 (sincronización y cierre administrativo)
+
+**Hora inicio:** ~16:00 H Ecuador
+**Hora cierre:** ~22:00 H Ecuador
+**Duración real:** ~6 horas (con pausas)
+**Gap desde sesión anterior:** 3 días (último trabajo 02/06/2026)
+
+#### Objetivo de la sesión
+
+Cerrar formalmente el ciclo administrativo de Sesión 5 que quedó incompleto el 02/06 (no se hizo commit final ni se sincronizó el knowledge) + actualizar la infraestructura de Claude Code con referencias a los documentos clave y las reglas operativas.
+
+#### Logros principales
+
+**1. Commit final de Sesión 5 (commit `e97155f`)**
+
+Se subieron al repo los 3 documentos nuevos generados el 02/06 que quedaron sin commitear:
+- `docs/ESTADO-GENERAL-PROYECTO.md` (475 líneas, 22 KB)
+- `docs/DIAGRAMA-FLUJO-PROYECTO.md` (691 líneas, 49 KB)
+- `docs/ERRORES-Y-APRENDIZAJES.md` v2.0 (509 líneas, 31 KB)
+
+Más actualizaciones de:
+- `docs/PLAN-MAESTRO-v2.md` (v2.1 con Astro 6.3.8, secciones 10/11/13 nuevas, bitácora 6 sesiones)
+- `docs/PENDIENTES.md` (606 líneas con P-34 a P-40 + R-08 a R-14)
+
+Total: 5 archivos, 2179 insertions, 49 deletions, pusheado a `origin/main`.
+
+**2. Limpieza completa del knowledge de Claude.ai**
+
+Auditoría completa del knowledge del proyecto reveló 16 archivos con 7 obsoletos y 2 desactualizados. Acción tomada:
+
+- **Eliminados (7):** `ERRORES-Y-APRENDIZAJES (1).md`, `ERRORES-Y-APRENDIZAJES.md` v1.0, `CONTINUIDAD.md`, `PROCESOS-COMPLETOS.md`, `FLUJOGRAMA-2026-06-01.md`, `PLAN-EJECUCION-2026-06-01.md`, `ESTADO-ACTUAL-2026-06-01.md`
+- **Reemplazados (2):** `PENDIENTES.md` (vieja 453 líneas → nueva 607), `PLAN-MAESTRO-v2.md` (vieja 1117 líneas → v2.1 con 1473)
+- **Resultado:** 9 archivos limpios sin duplicados (Brand Book, Informe, Identidad, Plan Maestro v2.1, Pendientes nueva, Errores v2.0, Estado, Diagrama, HITO 01 runbook)
+- **Capacidad usada:** 6% del proyecto
+
+**3. Actualización de CLAUDE.md a v2.0 (commit `167b734`)**
+
+El `CLAUDE.md` del repo estaba en v1.0 con contenido desactualizado (Fase 0, Astro 5.x, repo privado) y CERO referencias a los documentos clave del proyecto. Se reemplazó por v2.0:
+
+- 13 KB / 288 líneas (era 5.4 KB / 109 líneas)
+- 7 menciones a `ERRORES-Y-APRENDIZAJES.md`
+- 3 menciones a `PLAN-MAESTRO-v2.md`
+- 37 reglas R-XX inline (era 5)
+- 5 hallazgos H-XX listados
+- Stack actualizado a Astro 6.3.8
+- Política de errores y near-miss documentada
+- Checklist de inicio de sesión
+
+Asegura que Claude Code (CLI) al arrancar lea OBLIGATORIAMENTE los documentos clave y respete las 39 reglas operativas.
+
+#### Errores documentados en la sesión
+
+**E-24 (nuevo):** Copy-Item descarga archivo equivocado cuando hay varios con mismo nombre en Downloads. El navegador renombra el nuevo con "(1)" cuando ya existe uno con el nombre original. Generó copia del archivo viejo de otro proyecto (20.7 KB) en lugar del nuevo CLAUDE.md generado (13 KB). Detectado por validación de contenido con regex antes de commitear. Rollback usando backup `.bak` generado previamente (cumplió R-39).
+
+**Regla nueva R-40:** Al copiar archivos desde Downloads, validar SIEMPRE: (a) tamaño del archivo origen antes de copiar, (b) fecha de modificación reciente, (c) si hay duplicados con "(1)", usar el path con paréntesis explícito.
+
+**E-25 (nuevo, observado):** Cierres de PowerShell durante sesión por pegado de scripts grandes con here-strings y triple-backticks. Patrón recurrente desde Sesión 5 (E-10 ya documentado). Solución adoptada: generar archivos grandes con tool `create_file` de Claude del chat y entregarlos como descargables en lugar de scripts inline.
+
+#### Decisiones tomadas
+
+**D-25:** El CLAUDE.md del repo es la fuente de verdad para Claude Code. Cualquier cambio en reglas operativas o documentos clave debe reflejarse en CLAUDE.md vía nuevo commit + push.
+
+**D-26:** Sincronización obligatoria en 4 lugares: knowledge Claude.ai + repo local Windows + GitHub origin/main + CLAUDE.md del repo. Si alguno desincronizado, alertar antes de actuar.
+
+#### Métricas de la sesión
+
+```
+Duración real:                  ~6 horas (con pausas)
+Commits creados:                2 (e97155f + 167b734)
+Push a GitHub:                  2 exitosos
+Archivos modificados en repo:   6 (5 docs + CLAUDE.md)
+Insertions totales:             2462 líneas
+Deletions totales:              153 líneas
+Errores nuevos documentados:    2 (E-24, E-25)
+Reglas nuevas:                  1 (R-40)
+Cierres de PowerShell:          ~3 (sin pérdida de datos por disciplina .bak)
+Aurora downtime:                0 minutos
+Re-trabajo:                     ~20 min (descarga equivocada CLAUDE.md)
+Decisiones nuevas:              2 (D-25, D-26)
+```
+
+#### Estado al cierre
+
+- HEAD en commit `167b734`, sincronizado con `origin/main`
+- 10 commits totales en `main` desde inicio del proyecto
+- Working tree clean (los `.bak` están ignorados por gitignore)
+- Knowledge limpio con 9 archivos vivos
+- CLAUDE.md v2.0 propagando reglas a Claude Code
+- Sincronización 100% entre knowledge / repo / GitHub / CLAUDE.md
+
+#### Pendientes inmediatos (para Sesión 7)
+
+- **P-12:** página `/sobre-mi` extendida con bio profesional
+- **P-13:** página `/contacto` con form provisional (sin backend en Fase 1)
+- Cierre formal de Fase 1 al 100%
+
+#### Reflexión de cierre
+
+La disciplina con `.bak` antes de cada modificación nos salvó dos veces en esta sesión: una con el archivo equivocado de CLAUDE.md, y otra con la validación de contenido por regex antes de commitear. La regla R-39 (revisar git status antes de add) y R-22 (verificar contenido antes de modificar) demostraron su valor real.
+
+El knowledge ahora tiene 9 archivos coherentes sin duplicados, listos para que futuras sesiones de Claude lean información consistente. El CLAUDE.md v2.0 garantiza que Claude Code también respete las mismas reglas al operar localmente.
+
+Fase 1 al 95%. Solo faltan `/sobre-mi` y `/contacto` (Sesión 7) para cerrar Fase 1 completa.
+
+---
+
 ### Sesión 5 — 01 y 02 junio 2026 (Fase 1 Día 2, BLOQUES 0-6 completos)
 
 **Contexto de arranque:** retomo Sesion 5 tras gap de 5-6 dias por visita familiar. Validar entorno post-gap antes de seguir.
@@ -1466,6 +1572,7 @@ Bitácora:        sección 10 de este documento
 **Versión:** 2.1
 **Última actualización:** 02 de junio de 2026
 **Próxima revisión:** al cierre de Fase 1 Dia 1 (Sesion 5) o al inicio de Sesion 6
+
 
 
 
