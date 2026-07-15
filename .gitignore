@@ -41,3 +41,7 @@ secrets/
 # Backups timestamp 
 *.bak.*
 *.bak
+
+# Documentos de otros proyectos (Aurora) - nunca deben estar aca
+04-LEGAL-Y-COMPLIANCE*.md
+*-LEGAL-Y-COMPLIANCE*.md
