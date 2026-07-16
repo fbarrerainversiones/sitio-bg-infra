@@ -1,0 +1,37 @@
+# ============================================================
+# docker-compose — sitio estatico Barrera Global
+# Un solo service (sitio-bg-web) en la red propia sitio_bg_net.
+#
+# Restricciones del VPS compartido respetadas:
+#   - Prefijo de container: sitio-bg-* (Regla 3).
+#   - Red propia sitio_bg_net / subnet 172.22.10.0/24 (NO stack_net
+#     de Aurora ni fbe_net de FBE Sport).
+#   - SIN 'ports:' -> no se abre puerto en el host (Regla 4). El Caddy
+#     compartido enruta por la red interna al puerto interno 8080 del
+#     container (nginx unprivileged, non-root).
+# ============================================================
+
+services:
+  sitio-bg-web:
+    # nginx corre NON-ROOT y escucha en el puerto INTERNO 8080.
+    # El Caddy compartido del VPS debe enrutar a  sitio-bg-web:8080 .
+    container_name: sitio-bg-web
+    build:
+      context: ..
+      dockerfile: infra/Dockerfile
+    image: sitio-bg-web:latest
+    restart: unless-stopped
+    networks:
+      sitio_bg_net:
+        # IP fija segun la topologia documentada (PLAN-MAESTRO 4.5).
+        ipv4_address: 172.22.10.10
+    # Sin 'ports:' a proposito. El routing publico entra por el Caddy
+    # compartido del VPS, que alcanza a sitio-bg-web:8080 por la red interna.
+
+networks:
+  # La red la crea el VPS fuera de compose (HITO-01, con subnet/gateway/
+  # labels propios). 'external: true' => compose NO la crea ni la gestiona,
+  # solo se conecta a la existente. Evita conflictos de subnet.
+  sitio_bg_net:
+    external: true
+    name: sitio_bg_net

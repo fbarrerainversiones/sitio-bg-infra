@@ -1,0 +1,39 @@
+# Contexto de build = raiz del repo. La imagen solo necesita web/
+# (fuente Astro) e infra/nginx.conf. Todo lo demas se excluye para
+# un contexto minimo y para no filtrar nada sensible.
+
+# deps y outputs (se regeneran dentro de la imagen)
+**/node_modules
+**/dist
+**/.astro
+
+# git y meta del repo
+.git
+.gitignore
+.gitattributes
+.githooks
+.dockerignore
+
+# editores / agentes / IDE
+.claude
+.vscode
+**/.vscode
+**/.idea
+
+# documentacion y utilidades (no entran a la imagen)
+docs
+backups
+scripts
+*.md
+**/*.md
+
+# backups timestamped y cualquier secreto (nunca al contexto de build)
+*.bak
+*.bak.*
+*.backup
+**/.env
+**/.env.*
+*.pem
+*.key
+secrets/
+credentials/
