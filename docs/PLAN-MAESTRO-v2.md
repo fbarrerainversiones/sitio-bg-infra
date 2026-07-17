@@ -1133,6 +1133,96 @@ El numero 572619 que aparecia como credencial personal de Francisco es en realid
 > **Esta sección se actualiza al cierre de cada sesión de trabajo.** Formato cronológico inverso (lo más reciente arriba).
 
 
+### Sesión 8 — 14 al 16 de julio de 2026 (cierre de Fase 1: /sobre-mi, /contacto, privacidad v2 y paquete Docker)
+
+**Ventana:** 14 al 16 de julio de 2026 (distribuida en 3 días)
+**Gap desde sesión anterior:** ~5 semanas (último trabajo formal 05/06/2026, Sesión 6)
+**HEAD al cierre:** `acdea1d`
+**Nota de numeración:** la Sesión 7 parcial (05/06) quedó absorbida dentro de esta sesión con el commit `09cabc7`; no existe entrada de Sesión 7 independiente.
+
+#### Objetivo de la sesión
+
+Cerrar Fase 1 al 100%: completar las páginas `/sobre-mi` y `/contacto` que quedaron pendientes, endurecer la política de privacidad (H-01), sacar del repo un documento con cédula que no debía estar ahí, y preparar el paquete Docker de deploy con nginx endurecido. Todo el trabajo se hizo vía Claude Code con prompts CoT (R-45).
+
+#### Logros principales — los 6 commits reales (hashes verificados contra `git log`)
+
+En orden cronológico ascendente (del más antiguo al más reciente):
+
+**1. `09cabc7` — Página `/sobre-mi` + corrección de navegación del Header**
+
+Se construyó la página `/sobre-mi` y se corrigieron los anchors de navegación del Header. Este commit cierra la parte de Fase 1 que la Sesión 7 parcial (05/06) había dejado abierta.
+
+**2. `28c543b` — Página `/contacto` sin formulario (D-27 / D-28)**
+
+Página `/contacto` sin formulario ni backend, con link desde el Header. Se registraron las decisiones D-27 y D-28. Coherente con "no procesar datos en Fase 1".
+
+**3. `43a1420` — Blindaje del `.gitignore` tras sacar del repo un documento con cédula**
+
+Se detectó y removió del repo un documento LEGAL-Y-COMPLIANCE perteneciente a otro proyecto (Aurora) que contenía una cédula personal. Se endureció el `.gitignore` para que documentos de ese tipo no puedan volver a entrar al repo público.
+
+**4. `9416505` — Privacidad v2: 4 huecos LOPDP cerrados con resoluciones SPDP reales**
+
+Se cerraron 4 de los huecos LOPDP identificados en H-01, apoyándose en resoluciones SPDP reales (no inventadas). Avance concreto sobre el hallazgo H-01.
+
+**5. `53a309c` — Paquete Docker con nginx endurecido para deploy**
+
+Paquete Docker con nginx unprivileged non-root, puerto interno 8080, `HEALTHCHECK` y headers de seguridad. **La validación fue estática y local: no se construyó la imagen en Docker todavía.**
+
+**6. `acdea1d` — Header sticky con z-index real (z-sticky → z-50)**
+
+El header sticky no tenía z-index efectivo porque usaba la clase `z-sticky`, que es inválida (no existe en la configuración de Tailwind). Se reemplazó por `z-50`, que sí genera z-index real.
+
+#### Nota de corrección de registro
+
+Notas previas de trabajo citaban avances que no corresponden al historial real. Se dejan corregidas aquí para que ninguna sesión futura arranque con datos falsos:
+
+- **Hashes fantasma `0caf39e` y `ce9dc22`:** fueron planeados pero **nunca se materializaron**. No existen en el repo (verificado con `git cat-file -t`, que responde "fatal: Not a valid object name"). Toda referencia previa a ellos es inválida.
+- **No hubo "encendido de Tailwind":** el import `@import "tailwindcss";` ya estaba commiteado desde antes en `web/src/styles/global.css:31`. En esta sesión no se activó Tailwind; ya estaba activo.
+- **El fix real del header** no fue tocar Tailwind sino reemplazar la clase inválida `z-sticky` por `z-50` (commit `acdea1d`).
+
+#### Reglas que funcionaron
+
+- **R-45:** todo cambio de esta sesión se hizo vía Claude Code con prompts CoT (Chain of Thought). Trazabilidad limpia commit a commit.
+- **Protocolo DETENTE:** atrapó DOS mensajes de commit inexactos antes de que llegaran al historial público. Sin ese protocolo, los hashes fantasma y descripciones erróneas habrían quedado grabados en `origin/main`.
+
+#### Métricas de la sesión
+
+```
+Ventana:                        14 al 16 de julio de 2026 (3 días)
+Commits creados:                6 (09cabc7 → acdea1d)
+Push a GitHub:                  6 exitosos
+HEAD al cierre:                 acdea1d
+Páginas nuevas:                 2 (/sobre-mi, /contacto)
+Huecos LOPDP cerrados:          4 (avance sobre H-01)
+Fase 1:                         100% (cerrada)
+Mensajes de commit corregidos:  2 (protocolo DETENTE)
+Hashes fantasma depurados:      2 (0caf39e, ce9dc22 — nunca existieron)
+Aurora downtime:                0 minutos
+```
+
+#### Estado al cierre
+
+- HEAD en `acdea1d`, sincronizado con `origin/main`.
+- Working tree limpio.
+- Fase 1 cerrada al 100%: home + privacidad v2 + `/sobre-mi` + `/contacto`.
+- Paquete Docker listo en el repo, pero **aún no construido** en el VPS (validación local estática).
+- Sitio sin deploy todavía. Siguiente hito: STAGING protegido en el VPS.
+
+#### Pendientes inmediatos (para la próxima sesión, en orden)
+
+1. **DEPLOY A STAGING protegido en el VPS** con protocolo Gate 0 de Aurora antes y después. El Caddy compartido debe enrutar a `sitio-bg-web:8080` (puerto interno del nginx endurecido).
+2. **Construcción real de la imagen Docker en el VPS** — la validación local fue estática, sin Docker corriendo.
+3. **P-39:** revisión legal humana antes del deploy PÚBLICO.
+4. **P-46:** links legales del footer en la página 404.
+5. **P-47:** optimizar la foto `francisco-barrera.jpg` (551 KB).
+6. **Decisiones pendientes de Francisco:** sección bio del home y video del hero.
+
+#### Reflexión de cierre
+
+Fase 1 quedó cerrada al 100% con las dos páginas que faltaban y con la privacidad endurecida. Lo más valioso de la sesión no fue el código sino la disciplina de registro: el protocolo DETENTE frenó dos mensajes de commit inexactos antes de tocar el historial público, y la depuración de los hashes fantasma (`0caf39e`, `ce9dc22`) evita que futuras sesiones citen commits que nunca existieron. El paquete Docker está listo pero sin construir: el próximo paso real es el deploy a STAGING con el protocolo Gate 0 de Aurora, sin excepción.
+
+---
+
 ### Sesión 6 — viernes 05 de junio de 2026 (sincronización y cierre administrativo)
 
 **Hora inicio:** ~16:00 H Ecuador
