@@ -460,6 +460,33 @@ Cuando un item se cierra, se mueve a la sección **Resueltos** al final con la f
 - **Detalle:** hallazgo del 16/07/2026. El saludo de Aurora se presenta como "asesora virtual", pero la privacidad v2 del sitio (`/privacidad`) declara que el asistente automatizado se identifica como asistente de IA, anclado en la Resolución SPDP-SPD-2026-0009-R. Existe inconsistencia entre lo que el sitio declara y cómo Aurora se presenta realmente. El ajuste del saludo corresponde al proyecto Aurora (`/opt/stack/`), NO a este repo, por R-34 (no modificar comportamiento ni containers de Aurora desde este proyecto). Aquí solo queda registrado el hallazgo para que no se pierda.
 - **Próximo paso:** Francisco coordina con quien mantiene Aurora que el saludo del bot se alinee con la declaración de la privacidad v2 (identificación explícita como asistente de IA, Art. 12.4 LOPDP + Res. SPDP-SPD-2026-0009-R). En este repo NO se ejecuta ningún cambio.
 
+### P-42 — Página `/404.astro` premium (con identidad de marca)
+
+- **Estado:** 🔵 BACKLOG (polish pre-deploy Fase 1)
+- **Criticidad:** baja (UX; no bloquea funcionalidad, pero conviene tenerla antes del deploy público).
+- **Bloquea a:** nada crítico. Mejora la experiencia ante URLs inexistentes en producción.
+- **Owner:** Claude (implementa) + Francisco (aprueba copy).
+- **Detalle:** hoy NO existe `web/src/pages/404.astro` (páginas actuales: `index`, `sobre-mi`, `contacto`, `privacidad`). Cualquier URL inexistente cae en la 404 por defecto (Astro/nginx sin marca). Falta una página 404 con identidad Barrera Global: paleta `#08080d`/`#c9a84c`, logo, mensaje y CTAs de retorno al home y a secciones clave. NOTA: una 404 premium NO corrige los links rotos del footer (eso es P-43); son entregables distintos (una 404 bonita sigue siendo un 404 para quien hace clic en "Términos"). **Trazabilidad:** este ítem NO tuvo número propio en la bitácora Sesión 8; surge de la reconciliación del 17/07/2026, del mismo hallazgo que motivó la referencia P-46 de la bitácora (ver P-43).
+- **Próximo paso:** Claude crea `web/src/pages/404.astro` con el Layout de marca + CTAs de retorno; verificar que el nginx del paquete Docker (commit `53a309c`) sirva correctamente la 404 de Astro (`try_files` / `error_page`).
+
+### P-43 — Links legales del footer que dan 404 (`/terminos`, `/cookies`, `/lopdp`)
+
+- **Estado:** 🟡 EN CURSO (dos de tres cubiertas por P-36 y P-37; `/lopdp` sin página planificada)
+- **Criticidad:** alta (no se debe hacer deploy PÚBLICO con links del footer que devuelven 404).
+- **Bloquea a:** deploy público (Fase 2). Es un gate de higiene pre-deploy.
+- **Owner:** Claude (implementa/repunta) + Francisco (decide destino de `/lopdp`).
+- **Detalle:** el Footer (`web/src/components/Footer.astro`) tiene 4 links legales: `/privacidad` (L44, existe ✓), `/terminos` (L49), `/cookies` (L54) y `/lopdp` (L59). Hoy solo existe `/privacidad`; los otros tres devuelven 404. Cobertura actual: la página `/cookies` la crea **P-36** (Sesión 9) y `/terminos` la crea **P-37** (Sesión 10). `/lopdp` ("Cumplimiento LOPDP") NO tiene pendiente que la cree — hay que decidir: (a) crear página `/lopdp`, (b) repuntar el link a `/privacidad` (que ya cubre los 17 ítems Art. 12 LOPDP), o (c) quitar el link. Regla dura: antes del deploy PÚBLICO ningún link del footer puede dar 404. **Trazabilidad:** referenciado en bitácora Sesión 8 como P-46 (numeración de notas, no oficial).
+- **Próximo paso:** (1) resolver `/lopdp` (recomendación: repuntar a `/privacidad` y reservar `/lopdp` para cuando haya contenido propio); (2) confirmar que P-36 y P-37 entreguen `/cookies` y `/terminos` antes del deploy; (3) en cualquier STAGING protegido previo, no exponer los links rotos.
+
+### P-44 — Optimizar foto `francisco-barrera.jpg` (551 KB)
+
+- **Estado:** 🔵 BACKLOG (performance pre-deploy)
+- **Criticidad:** media (performance / LCP; el hero del home carga esta imagen).
+- **Bloquea a:** nada funcional. Mejora Lighthouse Performance y LCP antes/después del deploy.
+- **Owner:** Claude (optimiza) + Francisco (aprueba resultado visual).
+- **Detalle:** `web/public/images/francisco-barrera.jpg` pesa 551 KB y se muestra en el hero del home y en `/sobre-mi`. 551 KB es alto para una imagen above-the-fold. Optimización: convertir a WebP/AVIF con fallback, redimensionar a los tamaños realmente usados y servir `srcset` responsivo. DISTINTO de **P-23** (que trata de reemplazar la foto IA por una sesión fotográfica profesional para E-E-A-T): aquí solo es optimización técnica del archivo actual, sin cambiar la imagen. **Trazabilidad:** referenciado en bitácora Sesión 8 como P-47 (numeración de notas, no oficial).
+- **Próximo paso:** Claude genera variantes WebP/AVIF + tamaños responsivos, actualiza el `<img>`/`<picture>` en home y `/sobre-mi`, y re-mide Lighthouse. Objetivo: bajar el peso del hero manteniendo calidad visual.
+
 ---
 ## 9. Decisiones cerradas (referencia rápida)
 
