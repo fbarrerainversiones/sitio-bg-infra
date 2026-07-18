@@ -451,6 +451,15 @@ Cuando un item se cierra, se mueve a la sección **Resueltos** al final con la f
 - **Detalle:** registrar "Barrera Global" como marca comercial ante SENADI (Servicio Nacional de Derechos Intelectuales). Costo aproximado: $224 USD (tasa + tramitación). Tiempo de tramitación: 6-9 meses. Beneficio: protección exclusiva del nombre en Ecuador, posibilidad de oponerse a quien lo use sin autorización. NO bloquea el lanzamiento del sitio; se hace en paralelo. Validar primero en abogado (P-39) si vale la pena para una operación individual bajo broker paraguas.
 - **Próximo paso:** Francisco evalúa post-deploy, después de tener flujo de negocio establecido y validar viabilidad económica del registro.
 
+### P-41 — Saludo de Aurora vs privacidad v2 (hallazgo 16/07/2026)
+
+- **Estado:** 🔵 BACKLOG (hallazgo registrado; la acción vive en el proyecto Aurora, no en este repo)
+- **Criticidad:** media (inconsistencia de compliance entre la política publicada y el comportamiento real de Aurora; riesgo práctico bajo mientras SPDP no audite)
+- **Bloquea a:** nada en este repo. Afecta la coherencia de compliance del ecosistema (sitio ↔ Aurora).
+- **Owner:** Francisco (coordina con quien mantiene Aurora). Ajuste técnico: proyecto Aurora (`/opt/stack/`).
+- **Detalle:** hallazgo del 16/07/2026. El saludo de Aurora se presenta como "asesora virtual", pero la privacidad v2 del sitio (`/privacidad`) declara que el asistente automatizado se identifica como asistente de IA, anclado en la Resolución SPDP-SPD-2026-0009-R. Existe inconsistencia entre lo que el sitio declara y cómo Aurora se presenta realmente. El ajuste del saludo corresponde al proyecto Aurora (`/opt/stack/`), NO a este repo, por R-34 (no modificar comportamiento ni containers de Aurora desde este proyecto). Aquí solo queda registrado el hallazgo para que no se pierda.
+- **Próximo paso:** Francisco coordina con quien mantiene Aurora que el saludo del bot se alinee con la declaración de la privacidad v2 (identificación explícita como asistente de IA, Art. 12.4 LOPDP + Res. SPDP-SPD-2026-0009-R). En este repo NO se ejecuta ningún cambio.
+
 ---
 ## 9. Decisiones cerradas (referencia rápida)
 
