@@ -1,0 +1,52 @@
+# ============================================================
+# Sitio Barrera Global — BLOQUE DE REFERENCIA para el Caddyfile compartido
+# Destino: /opt/stack/caddy/Caddyfile (Caddy compartido de Aurora)
+#
+# ESTE ARCHIVO NO SE DESPLIEGA. Es una plantilla. El bloque de abajo se
+# agrega al Caddyfile compartido siguiendo el flujo de 7 pasos (Regla 5 del
+# PLAN-MAESTRO-v2.md) — ver docs/DEPLOY-STAGING-runbook.md, bloque B5.
+# ============================================================
+#
+# NOTAS DE OPERACION (leer antes de pegar):
+#
+# (a) HASH DE LA CLAVE — se genera EN EL VPS, nunca en el repo ni en el chat:
+#         sudo docker exec -it caddy caddy hash-password
+#     Es interactivo: pide la clave por prompt (NO queda en el history del
+#     shell). Devuelve un hash bcrypt tipo  $2a$14$....  Ese valor reemplaza
+#     a {BCRYPT_HASH}. La clave en texto plano JAMAS se escribe en un archivo.
+#
+# (b) DIRECTIVA basicauth vs basic_auth — en Caddy 2.x la directiva es
+#     `basicauth`. Desde Caddy v2.8 se prefiere `basic_auth` (basicauth queda
+#     como alias deprecado que sigue funcionando). En el VPS, `caddy validate`
+#     (paso 4 del flujo) confirma cual acepta la version instalada; si marca
+#     `basicauth` como deprecado, cambiar a `basic_auth` (misma sintaxis
+#     interna: <usuario> <hash>).
+#
+# (c) reverse_proxy POR NOMBRE — `reverse_proxy sitio-bg-web:8080` resuelve el
+#     nombre por el DNS interno de Docker. Eso EXIGE que el container `caddy`
+#     este conectado tambien a la red `sitio_bg_net` (decision D1: operacion
+#     aditiva `docker network connect sitio_bg_net caddy`, caddy NO sale de
+#     stack_net). Sin ese connect, el nombre no resuelve y el proxy da 502.
+#     Ver runbook B4. (Alternativa por IP fija: `reverse_proxy 172.22.10.10:8080`.)
+#
+# (d) CONTINGENCIA TLS — staging.barreraglobal.com necesita registro DNS
+#     (A -> 212.85.14.172) en Cloudflare antes del reload. Si el registro esta
+#     PROXIED (nube naranja) y la emision del certificado Let's Encrypt falla
+#     (Caddy no completa el challenge HTTP-01/TLS-ALPN por el proxy de CF),
+#     pasar el registro a DNS-only (nube gris) temporalmente, reintentar el
+#     reload, y una vez emitido el cert se puede reactivar el proxy si se desea.
+#
+# ------------------------------------------------------------
+# Reemplazar {STAGING_USER} por el usuario en texto plano (ej. staging) y
+# {BCRYPT_HASH} por el hash bcrypt del paso (a). NO son placeholders de Caddy:
+# son marcadores de relleno de esta plantilla, hay que sustituirlos a mano.
+# ------------------------------------------------------------
+
+# ── Sitio Barrera Global — STAGING (protegido, noindex) ──
+staging.barreraglobal.com {
+    basicauth {
+        {STAGING_USER} {BCRYPT_HASH}
+    }
+    header X-Robots-Tag "noindex, nofollow"
+    reverse_proxy sitio-bg-web:8080
+}
