@@ -402,6 +402,14 @@ Al final del documento estan las **reglas consolidadas (R-01 a R-39)** que salen
 - **Aprendizaje:** antes de git add ., siempre revisar git status --short y excluir manualmente archivos .bak con git restore --staged si aparecen. Documentado como R-39 nueva.
 - **Como se resolvio:** commit corrector 3f77744 que removio el .bak + endurecio .gitignore con el patron *.bak.* para prevenir recurrencia.
 
+### NM-07 — Falso negativo de grep al "probar ausencia" (cita real del 522 descartada como alucinacion)
+
+- **Fecha:** 19/07/2026, Sesion 9 (deploy staging).
+- **Que paso:** al verificar la cita de un agente sobre el incidente 522 (Caddy conectado a una red ajena), un grep con alternacion compleja y un `\n` literal en el patron fallo silenciosamente al "probar ausencia" del termino 522. El "no encontrado" produjo un falso negativo que llevo a descartar como "alucinacion" una cita que en realidad era real.
+- **Como se atajo:** el auditor del chat contrasto contra la copia del PLAN-MAESTRO en el knowledge de Claude.ai y pidio re-hacer el grep con termino simple. El grep limpio de `522` encontro 8 apariciones reales (incluida PLAN-MAESTRO-v2.md:158, la advertencia del propio incidente).
+- **Por que pudo ser grave:** descartar evidencia real como alucinada invierte la disciplina anti-alucinacion del proyecto (se duda de lo inventado, no de lo documentado). Ademas pudo ocultar la advertencia del incidente 522 justo antes de ejecutar D1 (docker network connect del caddy a sitio_bg_net), que es de la misma familia de operacion que causo ese incidente.
+- **Aprendizaje:** para probar ausencia de un termino, usar greps simples de un solo termino literal. Un "no encontrado" de un patron complejo (alternaciones, `.*`, `\n` literales) NO es prueba de ausencia. Documentado como R-40.
+
 ---
 
 ## Reglas operativas consolidadas (R-01 a R-39)
@@ -477,6 +485,10 @@ De los 23 errores y 6 near-miss anteriores, salen estas reglas vivas para no rep
 - **R-38:** Cruzar analisis legal con fuentes independientes antes de cerrar compliance. Cualquier afirmacion regulatoria importante (atribucion de credenciales, base legal LOPDP, decisiones SCVS) debe validarse con al menos 2 fuentes: documentacion oficial del organismo + analisis legal IA o humano externo. Antes de Sesion 5, se asumio que la credencial 572619 era atribuible a Francisco; analisis legal externo lo desmintio. Esta regla previene errores conceptuales graves que se materializan en codigo publico.
 
 - **R-39:** Antes de git add ., revisar git status --short y excluir manualmente archivos .bak o backups timestamped. Si aparecen en el listado, ejecutar git restore --staged <archivo> antes del commit, o usar git add con paths especificos en lugar de punto. El .gitignore endurecido (Sesion 5) tiene patron *.bak.* pero como capa adicional, validar manualmente lo que va al stage area antes de commitear.
+
+### Reglas nuevas (Sesion 9)
+
+- **R-40:** Para probar la AUSENCIA de un termino, usar greps simples de un solo termino literal. Un "no encontrado" de un patron complejo (alternaciones con `|`, `.*`, o `\n` literales) NO es prueba de ausencia: puede ser un falso negativo silencioso del motor de regex. Antes de concluir "no existe" o "es alucinacion", repetir el grep con el termino simple y confirmar. (Origen: NM-07, falso negativo del grep de `522`.)
 
 ---
 
