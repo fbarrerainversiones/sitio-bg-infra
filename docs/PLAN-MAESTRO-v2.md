@@ -1133,6 +1133,70 @@ El numero 572619 que aparecia como credencial personal de Francisco es en realid
 > **Esta sección se actualiza al cierre de cada sesión de trabajo.** Formato cronológico inverso (lo más reciente arriba).
 
 
+### Sesión 9 — 19 de julio de 2026 (deploy a staging)
+
+**Fecha:** domingo 19 de julio de 2026
+**Gap desde sesión anterior:** ~3 días (Sesión 8 cerró el 16/07)
+**HEAD al cierre:** el commit de CLAUDE.md de este cierre (ver `git log`)
+**Resultado:** **DEPLOY A STAGING COMPLETADO** — runbook `docs/DEPLOY-STAGING-runbook.md` ejecutado 8/8 (B0→B7). `https://staging.barreraglobal.com` vivo, protegido con basicauth + `X-Robots-Tag: noindex`. Visto visual de Francisco con screenshot del sitio vivo. Gate 0 final 5/5 en 200.
+
+#### Objetivo de la sesión
+
+Construir y desplegar por primera vez la imagen Docker del sitio en el VPS, detrás del Caddy compartido, en un staging protegido — sin tocar Aurora salvo el Caddyfile (flujo de 7 pasos) y la conexión de red del caddy (D1).
+
+#### Cronología resumida
+
+1. **Pre-vuelo GO** corrido **dos veces** desde la laptop (repo, build, consistencia a–e de artefactos, DNS, Gate 0, sonda SSH). Sin defecto bloqueante.
+2. **Coordinación inter-proyectos** con el Claude de Aurora: hold total de operaciones de Aurora + baseline del Caddyfile (**5562 bytes**) como cross-check antes de tocar nada.
+3. **B0–B3 limpios:** Gate 0 PRE verde, repo en el VPS, **build real de la imagen en 23 s** (imagen **77.5 MB**), container `sitio-bg-web` healthy en `172.22.10.10` sin puertos al host.
+4. **INCIDENTE B4 v1 (contenido):** `docker network connect` sin `--gw-priority` movió el default gateway del caddy → 3 dominios de Aurora (barreraglobal.com, www, beszel) a `000` ~5 min. Gate 0 inmediato lo detectó; rollback (`network disconnect`) en ~5 min; recuperación total verificada dos veces.
+5. **Diagnóstico + fix:** `ip route` confirmó el baseline `default via 172.20.10.1`; el flag `--gw-priority` existe en Docker 29.4.3. **B4 v2** con `--gw-priority=-100` → ruta por defecto conservada (verificada al instante), Gate 0 5/5, wget interno OK.
+6. **B4 v2 → B7 verdes:** Caddyfile con el flujo de 7 pasos (5562 → **5776 bytes**), staging vivo (401 sin clave / 200 con clave / noindex), Gate 0 POST 5/5.
+
+#### Métricas honestas
+
+```
+Runbook:                8/8 bloques
+Incidentes contenidos:  1 (B4 v1, ~5 min — vs 45,5 h del 522 en mayo)
+Degradacion parcial:    3 dominios ~5 min durante B4 v1; cero perdida fuera de eso
+Rollbacks ejecutados:   1 (primer rollback real del proyecto)
+Caddyfile:              5562 -> 5776 bytes
+Imagen Docker:          77.5 MB, build 23 s
+Aurora perdida datos:   0
+```
+
+#### Commits del día
+
+- `60a3fac` — prep deploy (snippet Caddy + verificación CSP + runbook).
+- `b09b10e` — NM-07 + R-40 (falso negativo de grep al probar ausencia).
+- `1a91f4e` — fix(runbook): B4 con `--gw-priority` tras el incidente contenido.
+- `d2c209d` — docs(errores): E-24 + NM-08/09 + reconciliación de contadores.
+- (Este cierre) — bitácora Sesión 9 + actualización de CLAUDE.md (hashes en `git log` tras el push).
+
+#### Reconciliaciones
+
+- **Repo privado → público:** seguía PRIVADO pese a D-21; se accionó "Make public" tras doble auditoría de secretos. D-21 por fin efectiva.
+- **Credenciales de staging:** verificadas y mantenidas **fuera del repo** (hash bcrypt generado en el VPS).
+
+#### Estado al cierre
+
+- Fase 1 al **100%** + **STAGING DESPLEGADO** y vivo.
+- `caddy` en **dos redes** (stack_net con default gateway + sitio_bg_net con `--gw-priority=-100`); `sitio-bg-web` up; staging con candado (basicauth + noindex).
+- Sitio **aún no público**.
+
+#### Pendientes
+
+1. **P-39 — revisión legal humana ANTES del pase a PÚBLICO** (quitar basicauth/noindex). Es el **gate** del próximo hito.
+2. `basicauth` → `basic_auth` al pase a público (hoy `basicauth` funciona pero emite warning de deprecado).
+3. **P-42 / P-43 / P-44** vigentes.
+4. **Fase 3** — páginas de productos.
+
+#### Reflexión de cierre
+
+El deploy salió, y lo más valioso fue cómo se manejó el único tropiezo: el flip del default gateway en B4 v1 pudo ser otro 522, pero el Gate 0 inmediato y un rollback de un comando lo cerraron en ~5 min sin pérdida de datos. La lección quedó grabada como E-24 + R-41 y el runbook ya lleva el fix (`--gw-priority` + verificación de `ip route`), así que un re-deploy no repite el incidente.
+
+---
+
 ### Sesión 8 — 14 al 16 de julio de 2026 (cierre de Fase 1: /sobre-mi, /contacto, privacidad v2 y paquete Docker)
 
 **Ventana:** 14 al 16 de julio de 2026 (distribuida en 3 días)
