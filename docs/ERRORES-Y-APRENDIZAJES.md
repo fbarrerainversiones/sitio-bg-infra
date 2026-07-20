@@ -2,10 +2,10 @@
 
 > **Catalogo consolidado de TODOS los errores, accidentes operativos, malentendidos, bugs y near-miss detectados desde el inicio del proyecto.** Este documento sube al knowledge del proyecto Claude.ai para que futuras sesiones aprendan del historico y no repitan errores.
 
-**Version:** 2.0
+**Version:** 2.1
 **Generado:** martes 26 de mayo de 2026
-**Ultima actualizacion:** 02 de junio de 2026 (Sesion 5)
-**Cubre las sesiones:** 0 (23/05), 1 (24/05), 2 (25/05 AM), 3 (25/05 PM), 4 (26/05), 5 (01-02/06)
+**Ultima actualizacion:** 19 de julio de 2026 (Sesion 9)
+**Cubre las sesiones:** 0 (23/05), 1 (24/05), 2 (25/05 AM), 3 (25/05 PM), 4 (26/05), 5 (01-02/06), 9 (19/07 deploy staging)
 **Documento maestro de referencia:** `PLAN-MAESTRO-v2.md`
 **Documentos hermanos:** `PROCESOS-COMPLETOS.md`, `CONTINUIDAD.md`
 
@@ -24,7 +24,7 @@ Cada error tiene la misma estructura:
 - **Como se resolvio.**
 - **Regla operativa para no repetir.**
 
-Al final del documento estan las **reglas consolidadas (R-01 a R-39)** que salen de estos errores.
+Al final del documento estan las **reglas consolidadas (R-01 a R-41)** que salen de estos errores.
 
 ---
 
@@ -55,6 +55,7 @@ Al final del documento estan las **reglas consolidadas (R-01 a R-39)** que salen
 | E-21 | Bug botones invisibles reabierto, NO era extension Chrome | 5 | media |
 | E-22 | Tailwind v4 con arbitrary value text-[#hex] no genera utility class | 5 | media |
 | E-23 | Credencial SCVS 572619 atribuida incorrectamente a Francisco | 5 | alta |
+| E-24 | Flip del default gateway del caddy al conectar segunda red (degradacion Aurora ~5 min) | 9 | alta |
 
 ---
 
@@ -357,6 +358,19 @@ Al final del documento estan las **reglas consolidadas (R-01 a R-39)** que salen
 
 ---
 
+## E-24 — Flip del default gateway del caddy al conectarlo a una segunda red (degradacion parcial de Aurora ~5 min)
+
+- **Fecha detectado:** 19/07/2026
+- **Sesion:** 9 (deploy a staging, bloque B4)
+- **Categoria:** infra / Docker / red
+- **Severidad:** alta (degradacion real de servicio en dominios productivos de Aurora)
+- **Dano real:** 3 de los 5 dominios de Aurora (barreraglobal.com, www, beszel) cayeron a HTTP 000 durante ~5 min. n8n y chat siguieron en 200. Cero perdida de datos. Recuperacion total verificada dos veces.
+- **Causa raiz:** `docker network connect sitio_bg_net caddy` SIN el flag `--gw-priority`. Al conectar el caddy a una segunda red, Docker (29.4.3) movio la puerta de salida por defecto del container a la red nueva (`sitio_bg_net`, gateway 172.22.10.1), quitandosela a `stack_net` (172.20.10.1). El caddy perdio la ruta de salida por la que respondia esos dominios.
+- **Como se resolvio:** rollback inmediato de un solo comando (`docker network disconnect sitio_bg_net caddy`) apenas el Gate 0 detecto los 000; recuperacion total en ~5 min. Diagnostico con `docker exec caddy ip route` (baseline "default via 172.20.10.1 dev eth0"). Re-conexion con `docker network connect --gw-priority=-100 sitio_bg_net caddy`: la ruta por defecto se conservo (verificada al instante con `ip route`), Gate 0 5/5, wget interno OK. Primer rollback ejecutado del proyecto.
+- **Regla operativa para no repetir:** R-41. `docker network connect` sobre un container con trafico productivo SIEMPRE con `--gw-priority` explicito y negativo, mas verificacion de `ip route` INMEDIATAMENTE despues del connect, antes incluso del Gate 0. El runbook B4 quedo corregido con el flag y el chequeo B4.1b.
+
+---
+
 ## Near-miss (cosas que casi salen mal pero se atajaron a tiempo)
 
 ### NM-01 — Casi se renombra container caddy de Aurora
@@ -410,11 +424,29 @@ Al final del documento estan las **reglas consolidadas (R-01 a R-39)** que salen
 - **Por que pudo ser grave:** descartar evidencia real como alucinada invierte la disciplina anti-alucinacion del proyecto (se duda de lo inventado, no de lo documentado). Ademas pudo ocultar la advertencia del incidente 522 justo antes de ejecutar D1 (docker network connect del caddy a sitio_bg_net), que es de la misma familia de operacion que causo ese incidente.
 - **Aprendizaje:** para probar ausencia de un termino, usar greps simples de un solo termino literal. Un "no encontrado" de un patron complejo (alternaciones, `.*`, `\n` literales) NO es prueba de ausencia. Documentado como R-40.
 
+### NM-08 — Bloque pegado sobre un prompt interactivo de la terminal
+
+- **Fecha:** 19/07/2026, Sesion 9 (deploy staging).
+- **Que paso:** se pego un bloque de comandos mientras la terminal estaba esperando una respuesta interactiva; la primera linea del bloque se consumio como respuesta al prompt (quedo como "username" de un prompt de credenciales de GitHub). Cero dano: se aborto y se repitio limpio.
+- **Por que pudo ser grave:** un bloque pegado sobre un prompt puede enviar texto arbitrario a donde no se quiere o ejecutar fragmentos fuera de contexto.
+- **Aprendizaje:** si la terminal esta preguntando algo, primero Ctrl+C para salir del prompt; recien ahi pegar el bloque. Nunca pegar bloques encima de un prompt interactivo (refuerza R-05/R-06).
+
+### NM-09 — El render del chat linkifica URLs y puede corromper comandos al copiar
+
+- **Fecha:** 19/07/2026, Sesion 9 (deploy staging).
+- **Que paso:** el cliente de chat convierte URLs en enlaces al renderizar; al copiar un comando que las contiene puede arrastrar corchetes/markup que rompen el comando en la terminal. Misma familia que E-12 (linkificacion de URLs rompiendo un for loop).
+- **Por que pudo ser grave:** un comando corrupto pegado al VPS puede fallar en silencio o hacer algo distinto a lo previsto.
+- **Aprendizaje:** los bloques que van al VPS se copian del ARCHIVO del runbook (`docs/DEPLOY-STAGING-runbook.md`), no del render del chat. Mitigacion adicional: usar variables (p.ej. `$B` para tokens linkificables) para que la URL no viaje literal en la linea copiada.
+
+### Nota de reconciliacion (Sesion 9) — repo GitHub privado pese a D-21
+
+El repo `fbarrerainversiones/sitio-bg-infra` seguia PRIVADO en GitHub pese a que D-21 lo daba por publico: el switch nunca se acciono. Resuelto el 19/07/2026 con "Make public" tras una DOBLE auditoria de secretos (nada sensible en el historial). Con esto D-21 queda por fin accionada y la documentacion coincide con la realidad. Riesgo latente que se evito: exponer un repo con secretos commiteados al hacerlo publico; mitigado por la auditoria previa.
+
 ---
 
-## Reglas operativas consolidadas (R-01 a R-39)
+## Reglas operativas consolidadas (R-01 a R-41)
 
-De los 23 errores y 6 near-miss anteriores, salen estas reglas vivas para no repetir.
+De los 24 errores y 9 near-miss anteriores, salen estas reglas vivas para no repetir.
 
 ### Reglas de herramientas
 
@@ -490,17 +522,19 @@ De los 23 errores y 6 near-miss anteriores, salen estas reglas vivas para no rep
 
 - **R-40:** Para probar la AUSENCIA de un termino, usar greps simples de un solo termino literal. Un "no encontrado" de un patron complejo (alternaciones con `|`, `.*`, o `\n` literales) NO es prueba de ausencia: puede ser un falso negativo silencioso del motor de regex. Antes de concluir "no existe" o "es alucinacion", repetir el grep con el termino simple y confirmar. (Origen: NM-07, falso negativo del grep de `522`.)
 
+- **R-41:** `docker network connect` sobre un container con trafico productivo (p.ej. el `caddy` compartido) SIEMPRE con `--gw-priority` explicito y NEGATIVO (p.ej. `--gw-priority=-100`), para no robarle el default gateway a su red original. Inmediatamente despues del connect, `docker exec <container> ip route` y confirmar que la linea `default via ...` NO cambio; si cambio, `docker network disconnect` al instante, ANTES incluso del Gate 0. (Origen: E-24, degradacion parcial de Aurora ~5 min el 19/07.)
+
 ---
 
 ## Estadisticas del historico
 
 ```
-Errores documentados:    23
-Near-miss documentados:  6
-Reglas operativas:       39
-Rollbacks ejecutados:    0
-Incidentes Aurora:       0
-Danos reales:            ~115 min acumulados de re-trabajo + 8 min espera reboot
+Errores documentados:    24
+Near-miss documentados:  9
+Reglas operativas:       41
+Rollbacks ejecutados:    1 (B4 v1 -> network disconnect, Sesion 9)
+Incidentes Aurora:       1 (contenido ~5 min, B4 v1 Sesion 9 — sin perdida de datos)
+Danos reales:            ~115 min re-trabajo + 8 min espera reboot + ~5 min degradacion parcial 3 dominios (B4 v1)
 Danos evitados:          incalculables (cualquier near-miss pudo replicar el 522 v2.0)
 ```
 
@@ -511,11 +545,11 @@ Danos evitados:          incalculables (cualquier near-miss pudo replicar el 522
 Si vos sos Claude leyendo este documento por primera vez en una sesion nueva:
 
 1. **Lee este documento ANTES de proponer cualquier accion tecnica.**
-2. Las 39 reglas (R-01 a R-39) son **inviolables** salvo argumento explicito de Francisco.
+2. Las 41 reglas (R-01 a R-41) son **inviolables** salvo argumento explicito de Francisco.
 3. Si una propuesta tuya contradice una regla, para y discutilo antes.
 4. Cuando detectes un error nuevo, agregalo a este documento con la misma estructura. La memoria del proyecto se construye con historico, no con olvido.
 
 **Fin del documento de errores y aprendizajes.**
 
-**Ultima revision:** 02 de junio de 2026, Sesion 5.
+**Ultima revision:** 19 de julio de 2026, Sesion 9.
 **Proxima revision:** al cierre de la proxima sesion (cuando se detecten errores nuevos).
