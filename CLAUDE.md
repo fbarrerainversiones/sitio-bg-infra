@@ -4,9 +4,9 @@
 > Tambien sirve como referencia rapida para cualquier sesion de chat (Claude.ai).
 > NO editar sin actualizar la version y la fecha al final.
 
-**Version:** 2.0
-**Ultima actualizacion:** viernes 05 de junio de 2026 (Sesion 6)
-**Cubre el estado del proyecto hasta:** Sesion 5 cerrada (02/06/2026)
+**Version:** 2.1
+**Ultima actualizacion:** domingo 19 de julio de 2026 (Sesion 9)
+**Cubre el estado del proyecto hasta:** Sesion 9 cerrada (19/07/2026 — deploy a staging)
 
 ---
 
@@ -14,7 +14,7 @@
 
 Antes de proponer cualquier accion tecnica, Claude Code debe leer estos archivos en este orden:
 
-1. **`docs/ERRORES-Y-APRENDIZAJES.md`** — 23 errores + 6 near-miss + 39 reglas operativas. NO repetir errores ya documentados.
+1. **`docs/ERRORES-Y-APRENDIZAJES.md`** — 24 errores + 9 near-miss + 41 reglas operativas. NO repetir errores ya documentados.
 2. **`docs/PLAN-MAESTRO-v2.md`** — documento maestro con decisiones tecnicas firmes, bitacora de 6 sesiones, hallazgos legales.
 3. **`docs/PENDIENTES.md`** — 40 items pendientes vivos (P-01 a P-40) + 14 resueltos historicos (R-01 a R-14).
 4. **`docs/ESTADO-GENERAL-PROYECTO.md`** — estado consolidado del proyecto al cierre de Sesion 5.
@@ -27,14 +27,14 @@ Si una propuesta tuya contradice algo de estos documentos, PARAR y discutirlo co
 ## Identidad
 
 - **Proyecto:** Sitio web publico de Barrera Global (asesoria de seguros, Ecuador).
-- **Dominio:** barreraglobal.com y www.barreraglobal.com (sin deploy todavia).
+- **Dominio:** barreraglobal.com y www.barreraglobal.com (staging desplegado en staging.barreraglobal.com; produccion publica pendiente de P-39).
 - **Marca:** Barrera Global (marca personal de Francisco Javier Barrera Bonilla).
 - **Vinculacion legal:** Francisco opera como APS bajo paraguas de Insurance Trust (Cred. SCVS Nro 572619).
 - **Slug interno:** sitio-bg
 - **Carpeta local:** `C:\Users\panch\projects\sitio-bg-infra\`
 - **Carpeta VPS:** `/opt/sitio-bg/` (creada en HITO 01)
 - **Repo GitHub:** `fbarrerainversiones/sitio-bg-infra` (publico, D-21)
-- **Fase actual:** Fase 1 al 95% (Sitio Web Base, falta Sesion 7 con /sobre-mi y /contacto)
+- **Fase actual:** Fase 1 al 100% (Sitio Web Base cerrado) + **STAGING DESPLEGADO** (staging.barreraglobal.com vivo con basicauth + noindex, Sesion 9). Sitio aun NO publico.
 
 ---
 
@@ -55,9 +55,9 @@ Si una propuesta tuya contradice algo de estos documentos, PARAR y discutirlo co
 - **Tipografias:** Cormorant Garamond + Outfit + JetBrains Mono Variable (self-hosted via Fontsource)
 - **Build:** Docker multi-stage (Astro build a nginx alpine) — pendiente Fase 2
 - **Hosting:** VPS Hostinger 212.85.14.172 (compartido con Aurora y FBE Sport)
-- **Red Docker:** `sitio_bg_net` (172.22.10.0/24) — creada, sin containers todavia
+- **Red Docker:** `sitio_bg_net` (172.22.10.0/24) — con `sitio-bg-web` (172.22.10.10) healthy. El `caddy` compartido esta en DOS redes: `stack_net` (default gateway) + `sitio_bg_net` (con `--gw-priority=-100`, ver R-41/E-24)
 - **Reverse proxy:** Caddy compartido (NO se toca sin flujo de 7 pasos del Plan Maestro §2)
-- **DNS:** Cloudflare (sin configurar barreraglobal.com todavia)
+- **DNS:** Cloudflare (barreraglobal.com proxied; staging.barreraglobal.com creado para el deploy)
 - **SSL:** Let's Encrypt automatico via Caddy
 
 ---
@@ -87,7 +87,7 @@ Paginas individuales (futuras, Fase 3):
 
 ---
 
-## REGLAS DURAS INVIOLABLES (resumen de las 39 reglas)
+## REGLAS DURAS INVIOLABLES (resumen de las 41 reglas)
 
 ### Herramientas
 - **R-01:** SIEMPRE pwsh 7 en Windows. NUNCA Windows PowerShell 5.1 ni ISE.
@@ -133,6 +133,7 @@ Paginas individuales (futuras, Fase 3):
 - **R-33:** `docker container prune` PROHIBIDO sin revision explicita.
 - **R-34:** Nunca renombrar, detener ni reiniciar containers de Aurora o FBE Sport.
 - **R-35:** Cualquier reboot del VPS se coordina con Aurora y horario de bajo trafico.
+- **R-41:** `docker network connect` sobre un container con trafico productivo (p.ej. el `caddy` compartido) SIEMPRE con `--gw-priority` NEGATIVO (`--gw-priority=-100`) + verificar `ip route` justo despues (la linea `default via ...` NO debe cambiar), antes incluso del Gate 0. Origen: E-24 (flip del default gateway, degradacion parcial ~5 min, 19/07).
 
 ### Secretos
 - **R-36:** `.env`, `*.env`, `secrets/`, `*.key`, `*.pem` siempre en `.gitignore` desde dia 0.
@@ -141,7 +142,7 @@ Paginas individuales (futuras, Fase 3):
 ### Compliance (Sesion 5)
 - **R-38:** Cruzar analisis legal con fuentes independientes antes de cerrar compliance. Cualquier afirmacion regulatoria importante (atribucion de credenciales, base legal LOPDP, decisiones SCVS) debe validarse con al menos 2 fuentes: documentacion oficial del organismo + analisis legal IA o humano externo.
 
-**Lista completa de las 39 reglas:** ver `docs/ERRORES-Y-APRENDIZAJES.md` seccion "Reglas operativas consolidadas".
+**Lista completa de las 41 reglas:** ver `docs/ERRORES-Y-APRENDIZAJES.md` seccion "Reglas operativas consolidadas".
 
 ---
 
@@ -166,7 +167,7 @@ sitio-bg-infra/
 ├── docs/
 │   ├── PLAN-MAESTRO-v2.md          ← doc maestro (LEER PRIMERO)
 │   ├── PENDIENTES.md                ← 40 items pendientes
-│   ├── ERRORES-Y-APRENDIZAJES.md    ← 23 errores + 6 NM + 39 reglas
+│   ├── ERRORES-Y-APRENDIZAJES.md    ← 24 errores + 9 NM + 41 reglas
 │   ├── ESTADO-GENERAL-PROYECTO.md   ← estado consolidado Sesion 5
 │   ├── DIAGRAMA-FLUJO-PROYECTO.md   ← visualizacion completa
 │   ├── IDENTIDAD-MARCA.md           ← Brand Book extraido
@@ -185,14 +186,15 @@ sitio-bg-infra/
 
 ---
 
-## Estado actual (al cierre de Sesion 5, 02/06/2026)
+## Estado actual (al cierre de Sesion 9, 19/07/2026 — deploy a staging)
 
-- **Commits pusheados a GitHub:** 9 (HEAD en `e97155f`)
-- **Lighthouse build local:** Performance 99 / Accessibility 95 / BP 100 / SEO 100 (promedio 98.5)
-- **Paginas creadas:** home (15.5 KB) + privacidad (16.9 KB, con 17 items LOPDP Art. 12)
-- **Build produccion local:** 1850.2 KB total, 72 archivos, 5.5s build time
-- **Aurora downtime acumulado:** 0 minutos
-- **Re-trabajo acumulado:** ~115 minutos (10% del tiempo total)
+- **HEAD:** cierre de Sesion 9 (commit `docs(claude-md)` de este cierre; ver `git log`). Base previa: `b09b10e`.
+- **Deploy:** STAGING vivo en `https://staging.barreraglobal.com` (basicauth + `X-Robots-Tag: noindex`). Runbook 8/8. Sitio aun NO publico.
+- **VPS:** `caddy` en dos redes (stack_net con default gateway + sitio_bg_net con `--gw-priority=-100`); `sitio-bg-web` healthy en 172.22.10.10; Caddyfile 5562 -> 5776 bytes.
+- **Paginas:** 4 (home, /sobre-mi, /contacto, /privacidad v2).
+- **Incidente Sesion 9:** 1 contenido (~5 min, B4 v1, degradacion parcial de 3 dominios Aurora) — E-24, primer rollback del proyecto. Cero perdida de datos.
+- **Aurora downtime real acumulado:** ~5 minutos (unico incidente, contenido).
+- **Proximo gate:** P-39 revision legal humana ANTES del pase a PUBLICO.
 
 ---
 
@@ -270,7 +272,7 @@ Si Claude detecta desincronizacion entre estos 3 lugares, ALERTAR a Francisco an
 ## Checklist al iniciar cada sesion
 
 ```
-[ ] Leer ERRORES-Y-APRENDIZAJES.md (al menos las reglas R-01 a R-39)
+[ ] Leer ERRORES-Y-APRENDIZAJES.md (al menos las reglas R-01 a R-41)
 [ ] Leer ESTADO-GENERAL-PROYECTO.md (saber donde estamos)
 [ ] Confirmar pwsh 7 activo ($PSVersionTable.PSVersion)
 [ ] cd al repo + git pull origin main
@@ -285,4 +287,4 @@ Si Claude detecta desincronizacion entre estos 3 lugares, ALERTAR a Francisco an
 
 **Fin del CLAUDE.md.**
 
-**Proxima revision:** cuando se cierre Sesion 6 o cuando se modifique cualquiera de los 5 documentos clave del knowledge.
+**Proxima revision:** al pase a PUBLICO (P-39) o cuando se modifique cualquiera de los 5 documentos clave del knowledge.
