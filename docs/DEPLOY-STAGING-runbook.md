@@ -30,6 +30,13 @@ A partir de este deploy, el estado sano de `caddy` es **dos redes**. Los chequeo
 antiguos de "una sola red" quedan **supersedidos** por esta decisión. NO se editan
 los docs históricos (HITO-01 no se toca); esta nota es la que rige.
 
+> **Estado REAL alcanzado (Sesión 9, 19/07/2026 — deploy completado 8/8):**
+> `caddy` en **dos redes**: `stack_net` **conserva el default gateway** y
+> `sitio_bg_net` quedó conectada con **`--gw-priority=-100`** (ver B4). El
+> `Caddyfile` pasó de **5562 a 5776 bytes**. `sitio-bg-web` **healthy** en
+> `172.22.10.10`. `staging.barreraglobal.com` vivo (401 sin clave / 200 con
+> clave / `X-Robots-Tag: noindex`). Gate 0 final **5/5 en 200**.
+
 > **Precedente crítico — incidente 522 v2.0** (`PLAN-MAESTRO-v2.md:158`):
 > *"El incidente 522 v2.0 fue exactamente esto: conectar un Caddy a una red que no
 > era la suya."* Fueron **45,5 h de downtime** (19–21 mayo 2026). El bloque **B4**
@@ -175,9 +182,27 @@ el sitio; la red es `external`, no se elimina; Aurora intacta).
 > **Bloque sensible — releer la nota del incidente 522 arriba.** Operación
 > **aditiva**: caddy mantiene `stack_net` y suma `sitio_bg_net`. Sin restart.
 
+> **⚠️ Incidente del 19/07/2026 (contenido).** En el primer intento, B4.1 **SIN**
+> `--gw-priority` hizo que Docker (29.4.3) moviera el **default gateway** del
+> `caddy` a `sitio_bg_net`. 3 de los 5 dominios de Aurora (barreraglobal.com,
+> www, beszel) cayeron a `000` durante ~5 min (n8n y chat siguieron en 200). El
+> Gate 0 inmediato lo detectó y el `docker network disconnect` lo revirtió en
+> ~5 min, con recuperación total verificada dos veces. El fix permanente son el
+> flag `--gw-priority=-100` (B4.1) y la verificación de `ip route` (B4.1b).
+
 ```bash
-# B4.1 — Conectar el container caddy TAMBIÉN a sitio_bg_net
-sudo docker network connect sitio_bg_net caddy
+# B4.1 — Conectar el caddy TAMBIÉN a sitio_bg_net.
+#         --gw-priority=-100 es OBLIGATORIO: sin él, Docker mueve el default
+#         gateway del caddy a la red nueva y tumba dominios de Aurora (incidente
+#         del 19/07). El valor negativo mantiene stack_net como salida por defecto.
+sudo docker network connect --gw-priority=-100 sitio_bg_net caddy
+
+# B4.1b — VERIFICAR LA RUTA POR DEFECTO ANTES QUE NADA (antes incluso del Gate 0)
+sudo docker exec caddy ip route | head -4
+# La línea "default via 172.20.10.1 dev eth0" (stack_net) DEBE conservarse.
+# Si la ruta por defecto cambió (apunta a 172.22.10.1 / la red nueva) ->
+# ROLLBACK INMEDIATO: sudo docker network disconnect sitio_bg_net caddy
+# SIN esperar el Gate 0.
 
 # B4.2 — GATE 0 INMEDIATO: confirmar que Aurora no se inmutó por el connect
 for d in barreraglobal.com www.barreraglobal.com n8n.barreraglobal.com chat.barreraglobal.com beszel.barreraglobal.com; do
@@ -257,6 +282,11 @@ for d in barreraglobal.com www.barreraglobal.com n8n.barreraglobal.com chat.barr
 done
 # Esperado: TODOS 200
 ```
+
+**Nota `basicauth` (19/07):** en el deploy, `basicauth` **funcionó** pero Caddy
+emitió un **warning de deprecado** en los logs (Caddy ≥ v2.8 prefiere `basic_auth`).
+Se deja `basicauth` en staging; **al pase a PÚBLICO se cambiará a `basic_auth`**
+(misma sintaxis interna: `<usuario> <hash>`).
 
 **Contingencia TLS (D2):** si al recargar, Caddy no emite el certificado de
 `staging.barreraglobal.com` (el registro está *proxied* en Cloudflare y falla el
