@@ -104,7 +104,7 @@ const DESCRIPTION = "Asesoria especializada en seguros de vida, salud e inversio
 
         <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
 
-          <article class="card-product reveal border border-gd-muted rounded-lg p-8 bg-bg-elev-1">
+          <article class="card-product reveal border border-gd-muted rounded-lg p-8 bg-bg-elev-1 flex flex-col">
             <div class="w-12 h-12 rounded-full bg-gd-muted flex items-center justify-center mb-6">
               <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="text-gd" aria-hidden="true">
                 <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
@@ -125,17 +125,33 @@ const DESCRIPTION = "Asesoria especializada en seguros de vida, salud e inversio
                 <span>Vida indexada: proteccion + acumulacion vinculada a indices</span>
               </li>
             </ul>
-            <a
-              href={WHATSAPP_URL}
-              target="_blank"
-              rel="noopener noreferrer"
-              class="link-underline inline-flex items-center gap-1 text-sm font-body text-gd hover:text-gd-light transition-colors"
-            >
-              Cotizar vida →
-            </a>
+            <div class="mt-auto flex flex-col gap-4">
+              <div class="flex flex-col gap-2">
+                <a
+                  href="/seguros/vida-termino"
+                  class="link-underline inline-flex items-center gap-1 text-sm font-body font-medium text-gd hover:text-gd-light transition-colors"
+                >
+                  Conocer vida a termino →
+                </a>
+                <a
+                  href="/seguros/vida-indexada"
+                  class="link-underline inline-flex items-center gap-1 text-sm font-body font-medium text-gd hover:text-gd-light transition-colors"
+                >
+                  Conocer vida indexada →
+                </a>
+              </div>
+              <a
+                href={WHATSAPP_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                class="inline-flex items-center gap-1 text-sm font-body text-tx-muted hover:text-gd transition-colors"
+              >
+                o cotizar por WhatsApp →
+              </a>
+            </div>
           </article>
 
-          <article class="card-product reveal border border-gd-muted rounded-lg p-8 bg-bg-elev-1">
+          <article class="card-product reveal border border-gd-muted rounded-lg p-8 bg-bg-elev-1 flex flex-col">
             <div class="w-12 h-12 rounded-full bg-gd-muted flex items-center justify-center mb-6">
               <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="text-gd" aria-hidden="true">
                 <path d="M22 12h-4l-3 9L9 3l-3 9H2" />
@@ -156,17 +172,33 @@ const DESCRIPTION = "Asesoria especializada en seguros de vida, salud e inversio
                 <span>Salud internacional: cobertura global con USA opcional</span>
               </li>
             </ul>
-            <a
-              href={WHATSAPP_URL}
-              target="_blank"
-              rel="noopener noreferrer"
-              class="link-underline inline-flex items-center gap-1 text-sm font-body text-gd hover:text-gd-light transition-colors"
-            >
-              Cotizar salud →
-            </a>
+            <div class="mt-auto flex flex-col gap-4">
+              <div class="flex flex-col gap-2">
+                <a
+                  href="/seguros/salud-nacional"
+                  class="link-underline inline-flex items-center gap-1 text-sm font-body font-medium text-gd hover:text-gd-light transition-colors"
+                >
+                  Conocer salud nacional →
+                </a>
+                <a
+                  href="/seguros/salud-internacional"
+                  class="link-underline inline-flex items-center gap-1 text-sm font-body font-medium text-gd hover:text-gd-light transition-colors"
+                >
+                  Conocer salud internacional →
+                </a>
+              </div>
+              <a
+                href={WHATSAPP_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                class="inline-flex items-center gap-1 text-sm font-body text-tx-muted hover:text-gd transition-colors"
+              >
+                o cotizar por WhatsApp →
+              </a>
+            </div>
           </article>
 
-          <article class="card-product reveal border border-gd-muted rounded-lg p-8 bg-bg-elev-1">
+          <article class="card-product reveal border border-gd-muted rounded-lg p-8 bg-bg-elev-1 flex flex-col">
             <div class="w-12 h-12 rounded-full bg-gd-muted flex items-center justify-center mb-6">
               <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="text-gd" aria-hidden="true">
                 <polyline points="22 7 13.5 15.5 8.5 10.5 2 17" />
@@ -188,14 +220,22 @@ const DESCRIPTION = "Asesoria especializada en seguros de vida, salud e inversio
                 <span>Estrategia personalizada segun perfil y horizonte</span>
               </li>
             </ul>
-            <a
-              href={WHATSAPP_URL}
-              target="_blank"
-              rel="noopener noreferrer"
-              class="link-underline inline-flex items-center gap-1 text-sm font-body text-gd hover:text-gd-light transition-colors"
-            >
-              Conversar de inversion →
-            </a>
+            <div class="mt-auto flex flex-col gap-4">
+              <a
+                href="/inversion"
+                class="link-underline inline-flex items-center gap-1 text-sm font-body font-medium text-gd hover:text-gd-light transition-colors"
+              >
+                Conocer inversion →
+              </a>
+              <a
+                href={WHATSAPP_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                class="inline-flex items-center gap-1 text-sm font-body text-tx-muted hover:text-gd transition-colors"
+              >
+                o conversar por WhatsApp →
+              </a>
+            </div>
           </article>
 
         </div>
