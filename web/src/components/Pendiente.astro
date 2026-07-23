@@ -1,0 +1,18 @@
+---
+/**
+ * Marcador visible de contenido pendiente de decision de Francisco.
+ * Uso: <Pendiente>decision Francisco — tema a definir</Pendiente>
+ * Renderiza: [PENDIENTE: decision Francisco — tema a definir]
+ *
+ * Intencional: es un placeholder honesto, NO contenido final. Se retira
+ * cuando Francisco define la sustancia real del producto (Fase 3).
+ */
+---
+<p
+  role="note"
+  class="font-mono text-xs md:text-sm text-gd-light bg-gd-muted border border-dashed border-gd rounded-md px-4 py-3 my-2 leading-relaxed"
+>
+  <span class="uppercase tracking-widest text-gd font-medium">[PENDIENTE:</span>
+  <slot />
+  <span class="text-gd">]</span>
+</p>

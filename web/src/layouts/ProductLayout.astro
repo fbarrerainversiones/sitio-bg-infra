@@ -1,0 +1,291 @@
+---
+import Layout from "./Layout.astro";
+import Header from "../components/Header.astro";
+import Footer from "../components/Footer.astro";
+
+/**
+ * ProductLayout — plantilla reutilizable de pagina de producto (Fase 3).
+ * Calcada del design system del home (index.astro) y de /sobre-mi.
+ *
+ * Secciones fijas y compartidas por TODOS los productos:
+ *   - Hero (titulo + subtitulo + CTAs)
+ *   - "Que es y para quien"  -> contenido por pagina via <slot />
+ *   - "Como funciona"        -> proceso neutral, reutiliza disclaimer Art. 11.6
+ *   - "Preguntas frecuentes" -> SOLO proceso (nada de datos de producto)
+ *   - CTA final (WhatsApp + ver otros productos)
+ *
+ * Atribucion de leads: replica el patron REAL del sitio (mensaje de
+ * WhatsApp personalizado por pagina; ver sobre-mi.astro / contacto.astro).
+ * El home NO usa UTM y wa.me ignora query params ajenos a phone/text, por
+ * eso NO se usa utm_content. Ver REPORTE-SESION-10.md (hallazgo UTM).
+ */
+
+interface Props {
+  title: string;        // <title> SEO, unico por pagina
+  description: string;  // meta description, unica por pagina
+  canonical: string;    // URL canonica propia
+  eyebrow: string;      // etiqueta mono sobre el h1 (grupo de producto)
+  productName: string;  // nombre del producto (h1)
+  heroSubtitle: string; // subtitulo corto del hero
+  whatsappMessage: string; // texto del mensaje de WhatsApp (atribucion)
+  slug: string;         // slug del producto (referencia interna)
+}
+
+const {
+  title,
+  description,
+  canonical,
+  eyebrow,
+  productName,
+  heroSubtitle,
+  whatsappMessage,
+  slug,
+} = Astro.props;
+
+const WHATSAPP_AURORA = "593998027819";
+const WHATSAPP_URL = `https://wa.me/${WHATSAPP_AURORA}?text=${encodeURIComponent(whatsappMessage)}`;
+
+// Path del icono de WhatsApp (mismo que en el resto del sitio)
+const WA_PATH =
+  "M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z";
+
+// Proceso neutral de cotizacion (igual para todos los productos)
+const PROCESO = [
+  {
+    n: "01",
+    t: "Conversamos",
+    d: "Escribinos por WhatsApp y nos cuentas tu situacion. Sin formularios largos, sin compromiso.",
+  },
+  {
+    n: "02",
+    t: "Analizamos tu caso",
+    d: "Dimensionamos la cobertura segun tu perfil con criterio tecnico, no con presion de venta.",
+  },
+  {
+    n: "03",
+    t: "Cotizamos a tu medida",
+    d: "La prima se calcula caso por caso segun tu perfil. No publicamos precios genericos (Art. 11.6 SCVS).",
+  },
+  {
+    n: "04",
+    t: "Decides con claridad",
+    d: "Te explicamos que cubre, que excluye y por que. La decision es tuya.",
+  },
+];
+
+// Preguntas frecuentes SOLO de proceso (nada de datos de producto)
+const FAQ = [
+  {
+    q: "¿Como se calcula la prima?",
+    a: "Caso por caso, segun tu perfil (edad, coberturas que elijas y otros factores del asegurado). No publicamos precios genericos: cada cotizacion es personal (Art. 11.6 SCVS).",
+  },
+  {
+    q: "¿Que necesito para empezar a cotizar?",
+    a: "Una conversacion. Escribinos por WhatsApp y definimos juntos que cobertura se ajusta a tu caso. Sin formularios largos.",
+  },
+  {
+    q: "¿Me comprometo a algo al escribir?",
+    a: "No. Sin compromiso y sin presion. La primera conversacion es solo para entender tu caso.",
+  },
+  {
+    q: "¿Quien responde mi mensaje?",
+    a: "Aurora, un asistente automatizado, atiende primero por WhatsApp y escala a Francisco cuando se requiere analisis humano. Tus datos se tratan conforme a la LOPDP.",
+  },
+];
+---
+
+<Layout title={title} description={description} canonical={canonical}>
+  <Header />
+
+  <main>
+
+    <!-- HERO PRODUCTO -->
+    <section class="relative py-24 md:py-32 overflow-hidden">
+      <div class="max-w-5xl mx-auto px-6">
+
+        <p class="hero-entrance font-mono text-xs text-gd uppercase tracking-widest mb-6">
+          {eyebrow}
+        </p>
+
+        <h1 class="hero-entrance-delay-1 text-5xl md:text-7xl font-display font-semibold leading-tight tracking-tight text-tx mb-6">
+          {productName}
+        </h1>
+
+        <p class="hero-entrance-delay-2 font-body text-lg md:text-xl text-tx-muted max-w-2xl leading-relaxed mb-10">
+          {heroSubtitle}
+        </p>
+
+        <div class="hero-entrance-delay-3 flex flex-col sm:flex-row gap-4">
+          <a
+            href={WHATSAPP_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            class="cta-lift inline-flex items-center justify-center gap-2 bg-gd px-7 py-4 rounded-md font-body font-medium text-base hover:bg-gd-light"
+            style="color:#08080d"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+              <path d={WA_PATH} />
+            </svg>
+            <span>Conversar por WhatsApp</span>
+          </a>
+          <a
+            href="/#productos"
+            class="inline-flex items-center justify-center gap-2 border border-gd text-gd px-7 py-4 rounded-md font-body font-medium text-base hover:bg-gd-light hover:border-gd-light hover:text-[#08080d] transition-colors"
+          >
+            Ver otros productos
+          </a>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- QUE ES / PARA QUIEN -->
+    <section id="que-es" class="scroll-mt-24 border-t border-gd-muted py-24 md:py-32">
+      <div class="max-w-3xl mx-auto px-6">
+
+        <div class="reveal mb-10">
+          <p class="font-mono text-xs text-gd uppercase tracking-widest mb-4">
+            Que es y para quien
+          </p>
+          <h2 class="text-4xl md:text-5xl font-display font-semibold text-tx leading-tight">
+            Lo esencial,
+            <span class="text-gd">sin rodeos.</span>
+          </h2>
+        </div>
+
+        <div class="reveal space-y-6 font-body text-base md:text-lg text-tx-muted leading-relaxed">
+          <slot />
+        </div>
+
+      </div>
+    </section>
+
+    <!-- COMO FUNCIONA -->
+    <section id="como-funciona" class="scroll-mt-24 border-t border-gd-muted py-24 md:py-32 bg-bg-elev-1">
+      <div class="max-w-4xl mx-auto px-6">
+
+        <div class="reveal mb-16">
+          <p class="font-mono text-xs text-gd uppercase tracking-widest mb-4">
+            Como funciona
+          </p>
+          <h2 class="text-4xl md:text-5xl font-display font-semibold text-tx leading-tight">
+            Cotizacion personalizada,
+            <span class="text-gd">paso a paso.</span>
+          </h2>
+        </div>
+
+        <div class="reveal grid grid-cols-1 md:grid-cols-2 gap-10 md:gap-x-16 md:gap-y-12">
+          {PROCESO.map((step) => (
+            <div class="space-y-3">
+              <div class="flex items-center gap-3 mb-2">
+                <span class="font-mono text-xs text-gd uppercase tracking-widest">{step.n}</span>
+                <span class="h-px flex-grow bg-gd-muted"></span>
+              </div>
+              <h3 class="text-2xl font-display font-semibold text-tx">{step.t}</h3>
+              <p class="font-body text-base text-tx-muted leading-relaxed">{step.d}</p>
+            </div>
+          ))}
+        </div>
+
+        <p class="reveal font-mono text-xs text-tx-disabled mt-12 max-w-3xl leading-relaxed">
+          Las primas se calculan caso por caso segun perfil del asegurado.
+          No publicamos precios genericos conforme al Art. 11.6 SCVS.
+        </p>
+
+      </div>
+    </section>
+
+    <!-- PREGUNTAS FRECUENTES (solo proceso) -->
+    <section id="preguntas" class="scroll-mt-24 border-t border-gd-muted py-24 md:py-32">
+      <div class="max-w-3xl mx-auto px-6">
+
+        <div class="reveal mb-12">
+          <p class="font-mono text-xs text-gd uppercase tracking-widest mb-4">
+            Preguntas frecuentes
+          </p>
+          <h2 class="text-4xl md:text-5xl font-display font-semibold text-tx leading-tight">
+            Sobre el
+            <span class="text-gd">proceso.</span>
+          </h2>
+        </div>
+
+        <div class="reveal space-y-8">
+          {FAQ.map((item) => (
+            <div class="border-l-2 border-gd-muted pl-6">
+              <h3 class="font-display text-xl md:text-2xl font-semibold text-tx mb-2">{item.q}</h3>
+              <p class="font-body text-base text-tx-muted leading-relaxed">{item.a}</p>
+            </div>
+          ))}
+        </div>
+
+        <p class="reveal font-body text-sm text-tx-muted mt-12 pt-8 border-t border-gd-muted leading-relaxed max-w-2xl">
+          ¿Tienes una pregunta especifica sobre este producto? La respuesta
+          honesta es que depende de tu caso.
+          <a
+            href={WHATSAPP_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            class="link-underline text-gd hover:text-gd-light transition-colors"
+          >Conversemos por WhatsApp</a>
+          y lo vemos juntos.
+        </p>
+
+      </div>
+    </section>
+
+    <!-- CTA FINAL -->
+    <section class="scroll-mt-24 border-t border-gd-muted py-24 md:py-32">
+      <div class="max-w-3xl mx-auto px-6 text-center">
+
+        <div class="reveal">
+          <h2 class="text-4xl md:text-5xl font-display font-semibold text-tx mb-6">
+            Hablemos de {productName.toLowerCase()}.
+          </h2>
+          <p class="font-body text-base md:text-lg text-tx-muted leading-relaxed mb-10 max-w-xl mx-auto">
+            La conversacion empieza por WhatsApp. Sin presion, sin compromiso.
+            Te respondemos en horario laboral Ecuador.
+          </p>
+
+          <div class="flex flex-col sm:flex-row gap-4 justify-center">
+            <a
+              href={WHATSAPP_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              class="cta-lift inline-flex items-center justify-center gap-2 bg-gd px-8 py-4 rounded-md font-body font-medium text-base hover:bg-gd-light"
+              style="color:#08080d"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                <path d={WA_PATH} />
+              </svg>
+              <span>Conversar por WhatsApp</span>
+            </a>
+            <a
+              href="/#productos"
+              class="inline-flex items-center justify-center gap-2 border border-gd text-gd px-8 py-4 rounded-md font-body font-medium text-base hover:bg-gd-light hover:border-gd-light hover:text-[#08080d] transition-colors"
+            >
+              Ver otros productos
+            </a>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+  </main>
+
+  <Footer />
+
+  <!-- Scroll reveal vanilla JS (mismo patron que index.astro) -->
+  <script>
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add("visible");
+          observer.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.15, rootMargin: "0px 0px -50px 0px" });
+
+    document.querySelectorAll(".reveal").forEach((el) => observer.observe(el));
+  </script>
+</Layout>
