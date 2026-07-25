@@ -59,6 +59,10 @@ Mono), ritmo de secciones (`py-24 md:py-32`, `border-t border-gd-muted`),
 CTA de WhatsApp y `.reveal` **con su IntersectionObserver incluido** (sin
 él, el contenido `.reveal` quedaría invisible — ver hallazgo 3).
 
+> **Actualización 25/07:** desde el fix P2 el observer ya no se duplica en
+> cada layout; vive una sola vez en `Layout.astro` y lo heredan las 11
+> páginas. Ver "Fixes post-revisión (25/07)".
+
 ### Contenido: cero invención
 Semillas = **frases exactas de las tarjetas del home**, expandidas SOLO en
 estructura. Todo lo demás es `[PENDIENTE]`. **Cero** precios, cero primas,
@@ -154,12 +158,13 @@ de copy YA aprobado, no de invención nueva**:
    (`sobre-mi.astro`, `contacto.astro`). → Repliqué ese patrón real: cada
    página de producto lleva su mensaje propio. Un `utm_content` sería
    inerte, así que no lo agregué.
-3. **`.reveal` sin observer en `/sobre-mi` (preexistente, fuera de alcance):**
-   el script `IntersectionObserver` que añade `.visible` solo está en
-   `index.astro`. `sobre-mi.astro` usa clases `.reveal` pero **no incluye
-   el script**, por lo que ese contenido podría quedar invisible (salvo
-   `prefers-reduced-motion`). No lo toqué (fuera de alcance). Mis páginas de
-   producto SÍ incluyen el observer, así que no heredan el problema.
+3. **`.reveal` sin observer en `/sobre-mi`** — ✅ **RESUELTO el 25/07**
+   (commit `28d6b55`). Se detectó como preexistente y fuera de alcance el
+   22/07: el `IntersectionObserver` que añade `.visible` solo estaba en
+   `index.astro`, y `sobre-mi.astro` usa 16 clases `.reveal` sin incluir el
+   script, por lo que ese contenido quedaba invisible (salvo
+   `prefers-reduced-motion`). Confirmado en la revisión visual de Francisco.
+   Ver "Fixes post-revisión (25/07)", problema P2.
 4. **Ortografía del sitio (decisión D3):** el copy visible ya publicado está
    en español **sin acentos agudos** (p. ej. "Asesoria", "inversion",
    "proteccion"), conservando ñ solo en algunas palabras. Para consistencia
@@ -210,15 +215,76 @@ de copy YA aprobado, no de invención nueva**:
 
 ---
 
+## FIXES POST-REVISIÓN (25/07/2026)
+
+Francisco revisó visualmente la rama y encontró **3 problemas de navegación
+y visibilidad**. Se corrigieron **en la rama `sesion-10-estructura`**, sin
+merge a `main` y sin tocar el VPS. Build verificado tras cada fix.
+
+| # | Problema | Diagnóstico (línea) | Fix | Commit |
+|---|---|---|---|---|
+| P1 | "Productos" no navega desde ninguna subpágina | `Header.astro:5` — `NAV_LINKS` usaba la ancla **relativa** `#productos`, y ese array alimenta **las dos** navegaciones (desktop `:23-30` y menú móvil `:68-75`). El `id="productos"` existe solo en `index.astro:87`, así que desde `/sobre-mi` el navegador resolvía `/sobre-mi#productos` → elemento inexistente | Ancla **absoluta** `/#productos` en `Header.astro` y en el CTA del hero `index.astro:59` | `be25550` |
+| P2 | Contenido de `/sobre-mi` invisible | `sobre-mi.astro` usa **16** clases `.reveal` y **cero** `IntersectionObserver`; el script vivía solo en `index.astro:344-355` y duplicado en `ProductLayout.astro:279-290`. `global.css:185-189` define `.reveal { opacity: 0 }` → invisible permanente | Observer movido a `Layout.astro` (una sola vez, heredado por las 11 páginas) y eliminadas **las dos** copias | `28d6b55` |
+| P3 | Footer sin vuelta al sitio | `Footer.astro` tenía marca (`:25-36`), Legal (`:38-64`), Contacto (`:66-95`) y redes (`:115-127`): **ningún** enlace de navegación del sitio | Columna **"Navegación"** (Inicio · Productos · Sobre mí · Contacto) calcada del markup de la columna "Legal"; grilla `md:grid-cols-3` → `md:grid-cols-4` | `7faf2d4` |
+
+### Veredicto CSP (P2)
+
+**Los hashes NO cambiaron. `infra/nginx.conf` no requiere edición.**
+
+Verificado con el procedimiento de `infra/README-hashes.md` sobre `web/dist`,
+antes y después del cambio:
+
+| Hash | Antes | Después |
+|---|---|---|
+| `sha256-IpuDn/ODXnvlsW4BOK3Y58F0Qf1lmA9OPQHicTjTPos=` (toggle menú móvil) | 11 páginas | 11 páginas |
+| `sha256-Qra3eTJV60gng4dzuHtxcR7XY8lE1nLbTAAJ5T7jyto=` (scroll-reveal) | **7** páginas | **11** páginas |
+
+Cruce bidireccional: los 2 hashes del build están declarados en
+`nginx.conf`, y los 2 de `nginx.conf` los usa el build. Cero huérfanos,
+cero faltantes.
+
+**Por qué el hash sobrevive al movimiento:** el minificador de Astro
+normaliza el script antes de emitirlo. Las dos copias del fuente diferían
+(comillas simples vs dobles, `entry =>` vs `(entry) =>`) y ya producían el
+**mismo** hash; la indentación tampoco lo afecta. Se movió el mismo código
+token por token, así que el output minificado es idéntico. Astro además lo
+mantuvo **inline** al compartirse entre las 11 páginas (no lo extrajo a un
+`<script src>`), igual que hace con el toggle del Header.
+
+### QA de cierre de los fixes
+
+Build limpio desde cero (`dist/` borrado): **11/11 páginas**, sin errores.
+
+| Chequeo | Resultado |
+|---|---|
+| `href="#productos"` relativo residual | ✅ **0** en fuente y en las 11 páginas de `dist` |
+| Ancla absoluta presente | ✅ 11/11 páginas (≥2 c/u: nav desktop + nav móvil) |
+| Observer por página | ✅ exactamente **1** en las 11 (antes: 1 en 7 páginas, 0 en 4) |
+| Scripts inline ejecutables por página | ✅ 2 (toggle + observer), 0 `<script src>` nuevos |
+| `.reveal` de `/sobre-mi` cubiertos | ✅ los 16, con el observer minificado presente en el HTML |
+| Columna "Navegación" del footer | ✅ 1 vez en las 11 páginas |
+| Destinos del footer nuevo | ✅ `/`, `/#productos`, `/sobre-mi`, `/contacto` — los 4 existen |
+| Enlaces internos rotos | ⚠️ solo `/terminos`, `/cookies`, `/lopdp` — **preexistentes, P-43/D4**, no tocados |
+
+### Alcance de lo NO hecho
+
+- **P-43/D4** (`/terminos`, `/cookies`, `/lopdp` → 404) sigue abierto: es un
+  gate de higiene previo al deploy público, no de esta corrección.
+- **D1** (`/seguros/auto`) sigue huérfana a propósito, a la espera de tu
+  decisión. Su enlace no se agregó al footer nuevo.
+- No se tocó `main`, ni el VPS, ni `infra/nginx.conf`.
+
+---
+
 ## Estado final
 
 - **`main`:** intacto en `27ae9a2` (Bloque A), pusheado. Working tree limpio.
-- **Rama `sesion-10-estructura`:** Bloque B completo, pusheada a origin. **Sin
-  merge a `main`** (queda para tu revisión).
+- **Rama `sesion-10-estructura`:** Bloque B + los 3 fixes post-revisión del
+  25/07, pusheada a origin. **Sin merge a `main`** (queda para tu revisión).
 - **VPS:** no se tocó. Staging sigue como al cierre de Sesión 9.
 - **Próximo gate real:** **P-39** (revisión legal humana) ANTES del pase a
   público.
 
 ---
 
-*Última actualización: 22/07/2026 tras Bloque B (cierre de sesión).*
+*Última actualización: 25/07/2026 tras los fixes post-revisión.*
