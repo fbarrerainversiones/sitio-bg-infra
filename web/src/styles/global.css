@@ -237,6 +237,17 @@ html {
   box-shadow: 0 12px 32px -8px rgba(201, 168, 76, 0.4);
 }
 
+/* Boton outline (borde dorado sobre fondo transparente).
+   En hover el fondo pasa a dorado, asi que el texto tiene que oscurecerse
+   o desaparece. La utilidad hover:text-[#08080d] de Tailwind NO alcanza:
+   vive dentro de @layer utilities, y en CSS una declaracion sin capa
+   —como la regla `a:hover` de este mismo archivo— le gana siempre, sin
+   importar la especificidad. Esta regla tambien va sin capa y con mayor
+   especificidad, asi que restituye la intencion original. */
+a.btn-outline:hover {
+  color: #08080d;
+}
+
 /* Underline animado en links dorados */
 .link-underline {
   position: relative;
