@@ -163,5 +163,23 @@ const websiteSchema = {
 
   <body>
     <slot />
+
+    <!-- Scroll reveal vanilla JS — unico para todo el sitio.
+         Vive aca (y no en cada pagina) para que cualquier pagina que use
+         .reveal muestre su contenido. Sin el, .reveal queda opacity:0
+         permanente (ver global.css). Si cambia su contenido, REGENERAR el
+         hash CSP de infra/nginx.conf (ver infra/README-hashes.md). -->
+    <script>
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('visible');
+            observer.unobserve(entry.target);
+          }
+        });
+      }, { threshold: 0.15, rootMargin: '0px 0px -50px 0px' });
+
+      document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+    </script>
   </body>
 </html>
