@@ -198,6 +198,15 @@ de copy YA aprobado, no de invención nueva**:
   Gate de higiene ANTES del deploy público. (No es de esta sesión.)
 - **D5 — Items Aurora:** formalizar como P-XX el "informe Aurora / cuestionario"
   y el "hooks caídos → Aurora" cuando confirmes el detalle.
+- **D6 — Capas CSS (`@layer`), causa raíz del botón fantasma:** las reglas base
+  de `global.css` (`a { color: var(--gd) }`) van **sin capa** y por eso anulan
+  a **cualquier** utilidad de color de Tailwind, que vive en `@layer utilities`.
+  Consecuencia silenciosa: los `text-tx-muted` del Header y del Footer **no
+  se aplican** — esos enlaces se ven dorados, no gris apagado. Hoy es el
+  aspecto que ya aprobaste visualmente. Arreglarlo de raíz (envolver las
+  reglas base en `@layer base`) haría que las utilidades ganen y **cambiaría
+  el color de los enlaces en todo el sitio**: es un rediseño, no un fix, y no
+  lo toqué. Decide si quieres esa pasada. Detalle en "Ajustes finales 25/07".
 
 ### Contenido de producto (13 marcadores en las páginas)
 - **Vida a término:** (1) perfil objetivo, edades y situaciones típicas;
@@ -276,15 +285,124 @@ Build limpio desde cero (`dist/` borrado): **11/11 páginas**, sin errores.
 
 ---
 
+## AJUSTES FINALES (25/07/2026)
+
+Segunda revisión visual de Francisco: los 3 fixes anteriores **aprobados**.
+Encontró 3 ajustes nuevos. Al diagnosticar el primero apareció un cuarto
+defecto de la misma familia, que también se corrigió. Todo en la rama, sin
+merge y sin tocar el VPS. Build verificado tras cada commit.
+
+| # | Ajuste | Diagnóstico | Commit |
+|---|---|---|---|
+| 1 | CTA final de `/sobre-mi` era un rectángulo dorado vacío | Ver "Causa raíz" abajo. `sobre-mi.astro:425` fijaba el color con la clase `text-bg`; era **el único** CTA dorado del sitio que no usaba el `style` inline | `968e4a8` |
+| 2 | Rol de Carolina Andrade incorrecto | Decía "co-asesora del equipo extendido"; su rol real es líder de ventas de Insurance Trust (broker matriz, Quito) | `609277e` |
+| 3 | "Productos" no desplegaba las páginas de producto | `Header.astro` solo tenía el enlace al ancla del home | `fdd1f3a` |
+| 4 | **Extra:** botones outline con texto invisible **en hover** | Misma causa raíz que el #1, segunda manifestación. Detectado al auditar el patrón, no reportado por Francisco | `e94300d` |
+
+### Causa raíz del botón fantasma: capas de cascada CSS
+
+No era texto ausente ni una clase inexistente. La utilidad **sí se genera**;
+lo que falla es la cascada:
+
+| Regla | Índice en el CSS compilado | Capa |
+|---|---|---|
+| `.text-bg{color:var(--bg)}` | 32285 | **dentro** de `@layer utilities{}` (23658-36174) |
+| `a{color:var(--gd)}` (`global.css:114`) | 36973 | **fuera de toda capa** |
+
+En CSS, una declaración **sin capa gana a cualquier declaración en capa**, sin
+importar la especificidad. Así que el texto quedaba **dorado sobre fondo
+dorado**, y el `<svg>` de la flecha (`stroke="currentColor"`) desaparecía con
+él: rectángulo vacío.
+
+La prueba de que el sitio ya convivía con esto: **los otros 8 CTA dorados
+llevan `style="color:#08080d"` inline** (`index` 51/327, `contacto` 44, `404`
+61, `Header` 40/80, `ProductLayout` 124/255). Un estilo inline gana a todo.
+`sobre-mi:425` fue el único que confió en una clase. Se le aplicó el mismo
+patrón de la casa y se eliminó la clase inerte.
+
+**Segunda manifestación (ajuste 4):** los 3 botones outline declaraban
+`hover:bg-gd-light` + `hover:text-[#08080d]`; esa utilidad (índice 33903,
+en `utilities`) pierde contra `a:hover{color:var(--gd-light)}` (índice 37052,
+sin capa) → en hover quedaban texto `gd-light` sobre fondo `gd-light`, o sea
+**invisibles**. Se resolvió con la clase `.btn-outline` y una regla sin capa
+de mayor especificidad. La causa raíz sistémica **no** se tocó: ver **D6**.
+
+### Eñes restauradas (8 en 3 páginas)
+
+`sobre-mi` ("dos años", "Compañias", "durante años", "diseñadas", "Diseño
+arquitectura financiera" — el home ya la tenía), `vida-indexada` ("el
+mañana"), `privacidad` ("5 años", "Compañias aseguradoras"). Solo se restituyó
+la eñe; **no** se agregaron acentos agudos, para no adelantar **D3**.
+
+### Dropdown de Productos: CSS puro, cero JavaScript
+
+- **Desktop:** el texto "Productos" sigue navegando a `/#productos` al click.
+  El panel aparece en `hover` **y** en `focus-within`. Se oculta con
+  `opacity` + `pointer-events`, **no** con `hidden`/`invisible`: un elemento
+  con `visibility:hidden` no puede recibir foco, así que `focus-within` nunca
+  dispararía y el submenú quedaría muerto para quien navega con Tab.
+- **Móvil:** `<details>/<summary>` nativo dentro del menú existente, con
+  chevron que rota vía `group-open`. El script que cierra el menú al hacer
+  click solo escucha `<a>`, así que abrir el submenú no lo cierra y elegir un
+  producto sí.
+- **Items (6):** Vida a término, Vida indexada, Salud nacional, Salud
+  internacional, Inversión, y "Ver todos →". **`/seguros/auto` NO se lista**
+  (decisión **D1** pendiente): 0 referencias en todo el build.
+- Se verificó que Tailwind **emitió las 12 utilidades** usadas
+  (`group-hover`, `group-focus-within`, `group-open`, `list-none`, el
+  arbitrario `::-webkit-details-marker`, `min-w-56`…). Una utilidad no
+  generada es exactamente como este tipo de menú falla en silencio.
+
+### Veredicto CSP
+
+**Los hashes NO cambiaron. `infra/nginx.conf` no requirió edición.** El
+dropdown es CSS puro y el único script del Header (toggle móvil) no se tocó.
+
+| Hash | Páginas | En `nginx.conf` |
+|---|---|---|
+| `sha256-IpuDn/ODXnvlsW4BOK3Y58F0Qf1lmA9OPQHicTjTPos=` (toggle móvil) | 11 | ✅ |
+| `sha256-Qra3eTJV60gng4dzuHtxcR7XY8lE1nLbTAAJ5T7jyto=` (scroll-reveal) | 11 | ✅ |
+
+Cruce bidireccional sobre build limpio: 2 hashes en el build, 2 en
+`nginx.conf`, cero huérfanos, cero faltantes, **0 scripts externos nuevos**.
+
+### QA de cierre
+
+Build limpio con `dist/` borrado: **11/11 páginas**, sin errores.
+
+| Chequeo | Resultado |
+|---|---|
+| Dropdown desktop + móvil | ✅ 1 de cada uno en las 11 páginas |
+| Destinos del dropdown | ✅ los 5 productos ×2 navegaciones en cada página |
+| `/seguros/auto` en el dropdown | ✅ **0 referencias** (D1 respetada) |
+| Botones dorados sin color inline | ✅ **0** (antes: 1) |
+| Botones outline con `.btn-outline` | ✅ 13 · clases inertes residuales: **0** |
+| CTA de `/sobre-mi` con texto y color | ✅ presente en el HTML generado |
+| Párrafo de Carolina | ✅ rol nuevo presente · rastro de "co-asesora": **0** |
+| Eñes en el HTML generado | ✅ 9 |
+
+### Ambigüedades para tu ojo
+
+- **`Insurance Trust` sin negrita en el párrafo de Carolina.** El resto de la
+  página lo resalta con `text-tx font-medium` en cada mención. Aquí respeté el
+  texto exacto que dictaste y solo conservé el tratamiento de **su nombre**,
+  como pediste. Si quieres el resaltado, es una línea.
+- **"Ver todos →" sin separador** respecto de los 5 productos, para mantener
+  el desplegable sobrio. La flecha es lo único que lo distingue.
+- **D6** (capas CSS) queda abierta: es la causa raíz de esta familia de bugs.
+
+---
+
 ## Estado final
 
 - **`main`:** intacto en `27ae9a2` (Bloque A), pusheado. Working tree limpio.
-- **Rama `sesion-10-estructura`:** Bloque B + los 3 fixes post-revisión del
-  25/07, pusheada a origin. **Sin merge a `main`** (queda para tu revisión).
+- **Rama `sesion-10-estructura`:** Bloque B + los 3 fixes post-revisión y los
+  4 ajustes finales del 25/07, pusheada a origin. **Sin merge a `main`**
+  (queda para tu revisión).
 - **VPS:** no se tocó. Staging sigue como al cierre de Sesión 9.
 - **Próximo gate real:** **P-39** (revisión legal humana) ANTES del pase a
   público.
 
 ---
 
-*Última actualización: 25/07/2026 tras los fixes post-revisión.*
+*Última actualización: 25/07/2026 tras los ajustes finales.*
