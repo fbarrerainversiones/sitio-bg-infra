@@ -393,6 +393,88 @@ Build limpio con `dist/` borrado: **11/11 páginas**, sin errores.
 
 ---
 
+## QA PRE-MERGE (25/07/2026)
+
+Auditoría de solo lectura de la rama `sesion-10-estructura` contra `main`.
+No se editó código en este paso.
+
+### Veredicto: ✅ **LISTO PARA MERGE** — sin bloqueantes técnicos
+
+El merge queda a criterio de Francisco. Lo que sigue abierto son **decisiones**
+(D1, D3, D6) y **gates previos al deploy público** (P-39, P-43), ninguno de los
+cuales bloquea fusionar la rama a `main`.
+
+### Qué cambia exactamente si se fusiona
+
+20 archivos: **8 nuevos**, 12 modificados. +1869 / −118 líneas.
+
+| Archivo | | Qué |
+|---|---|---|
+| `web/src/layouts/ProductLayout.astro` | **nuevo** | Plantilla de página de producto |
+| `web/src/components/Pendiente.astro` | **nuevo** | Marcador `[PENDIENTE]` |
+| `web/src/pages/404.astro` | **nuevo** | 404 con identidad de marca (P-42) |
+| `web/src/pages/seguros/vida-termino.astro` | **nuevo** | Página de producto |
+| `web/src/pages/seguros/vida-indexada.astro` | **nuevo** | Página de producto |
+| `web/src/pages/seguros/salud-nacional.astro` | **nuevo** | Página de producto |
+| `web/src/pages/seguros/salud-internacional.astro` | **nuevo** | Página de producto |
+| `web/src/pages/inversion.astro` | **nuevo** | Página de producto |
+| `web/src/pages/seguros/auto.astro` | **nuevo** | Shell sin copy — **pendiente D1** |
+| `web/src/components/Header.astro` | mod | Ancla absoluta + dropdown de Productos |
+| `web/src/components/Footer.astro` | mod | Columna "Navegación" |
+| `web/src/layouts/Layout.astro` | mod | Observer del scroll-reveal compartido |
+| `web/src/pages/index.astro` | mod | Tarjetas enlazan a producto · observer movido · `btn-outline` |
+| `web/src/pages/sobre-mi.astro` | mod | CTA visible · rol de Carolina · eñes |
+| `web/src/pages/privacidad.astro` | mod | 2 eñes |
+| `web/src/styles/global.css` | mod | Regla `.btn-outline` |
+| `docs/*` (4 archivos) | mod/nuevo | Reporte, inventario de tildes, reglas y pendientes |
+
+**El sitio pasa de 4 a 11 páginas.** Ninguna toca infraestructura: `infra/` no
+se modificó en toda la rama.
+
+### Resultados
+
+| # | Chequeo | Resultado |
+|---|---|---|
+| 1 | Build limpio (`dist/` borrado) | ✅ **11/11 páginas**, sin errores |
+| 2 | `href="#productos"` relativo residual | ✅ 0 en las 11 páginas |
+| 3 | Rastro de `co-asesora` (rol viejo de Carolina) | ✅ 0 |
+| 4 | `/seguros/auto` enlazada desde navegación | ✅ 0 — **D1 respetada** |
+| 5 | Observer del scroll-reveal | ✅ exactamente 1 por página, en las 11 |
+| 6 | Dropdown de Productos (desktop + móvil) | ✅ presente en las 11 |
+| 7 | Botones dorados sin color inline (fantasmas) | ✅ 0 |
+| 8 | **CSP — cruce bidireccional** | ✅ 2 hashes en el build, 2 en `nginx.conf`, 0 huérfanos, 0 faltantes, **0 scripts externos** |
+| 9 | `main` intacto | ✅ `27ae9a2` en local **y** en origin |
+
+### Qué NO bloquea el merge pero sí el deploy público
+
+- **P-39** — revisión legal humana. Es **el** gate antes de publicar.
+- **P-43** — `/terminos`, `/cookies`, `/lopdp` siguen dando 404 en el footer,
+  en las 11 páginas. Gate de higiene pre-público, **preexistente**: ya estaba
+  en `main`, la rama no lo empeora (la columna "Navegación" nueva apunta solo
+  a destinos que existen).
+- **D1** — `/seguros/auto` se fusionaría como shell sin copy aprobado.
+  Es accesible por URL directa, pero **no** enlazada desde ninguna navegación.
+  Si prefieres que no exista en `main` hasta decidir, hay que borrarla **antes**
+  del merge.
+
+### Hallazgo de sincronización de documentos
+
+`CLAUDE.md` quedará desactualizado al fusionar y **ya lo estaba antes de esta
+rama**:
+
+| Dice `CLAUDE.md` | Realidad tras el merge |
+|---|---|
+| "41 reglas" / "R-01 a R-41" | **43** reglas (R-01 a R-43) |
+| "40 items pendientes (P-01 a P-40)" | hasta **P-47** (ya estaba en P-44 antes de esta rama) |
+| "Paginas: 4 (home, /sobre-mi, /contacto, /privacidad)" | **11** páginas |
+| "Fase 1 al 100%" | Fase 3 estructural en curso |
+
+No lo toqué: `CLAUDE.md` pide explícitamente actualizar versión y fecha al
+editarlo, y eso es tuyo. **Sugerencia: actualizarlo en el mismo commit del
+merge**, no antes (si no se fusiona, los números de páginas no aplican).
+
+---
+
 ## Estado final
 
 - **`main`:** intacto en `27ae9a2` (Bloque A), pusheado. Working tree limpio.
@@ -405,4 +487,4 @@ Build limpio con `dist/` borrado: **11/11 páginas**, sin errores.
 
 ---
 
-*Última actualización: 25/07/2026 tras los ajustes finales.*
+*Última actualización: 25/07/2026 tras el QA pre-merge (sesión autónoma).*
