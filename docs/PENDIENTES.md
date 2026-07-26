@@ -533,7 +533,7 @@ Lista de decisiones que YA están resueltas pero conviene tener visibles para no
 | Eslogan: "Patrimonio que crece. Capital protegido." + "Arquitectura Financiera" | 25/05/2026 | Sesión 2 |
 | Insurance Trust solo en footer legal y `/sobre-mi`. Prohibido en marketing. | 25/05/2026 | Sesión 2 |
 | Carolina co-asesora con presencia limitada (solo `/sobre-mi`, sin CTA) | 25/05/2026 | Sesión 2 |
-| 6 productos: vida-termino, vida-indexada, salud-nacional, salud-internacional, auto, inversion | 25/05/2026 | Sesión 2 |
+| ~~6 productos: vida-termino, vida-indexada, salud-nacional, salud-internacional, auto, inversion~~ **SUPERADA por D1 (25/07/2026): son 5, sin auto** | 25/05/2026 | Sesión 2 |
 | Postgres del sitio: REVERTIDO. Sin DB propia. Webhook a Aurora. | 25/05/2026 | Sesión 2 |
 | Integración Aurora: webhook directo (NO widget Chatwoot embebido) | 25/05/2026 | Sesión 2 |
 | Graceful degradation: Opción C (mensaje + localStorage + reintentar) | 25/05/2026 | Sesión 2 |
@@ -548,6 +548,8 @@ Lista de decisiones que YA están resueltas pero conviene tener visibles para no
 | DM-05: Email LOPDP gmail confirmado provisional | 02/06/2026 | Sesión 5 |
 | DM-06: Cedula personal NO se publica en `/privacidad` | 02/06/2026 | Sesión 5 |
 | DM-07: "Credencial SCVS personal en tramite" hasta llegue real | 02/06/2026 | Sesión 5 |
+| **D1: `/seguros/auto` se retira.** Barrera Global NO ofrece seguro de auto por ahora. La página existía solo como estructura sin copy aprobado (creada en Sesión 10) y nunca estuvo enlazada desde ninguna navegación. Se elimina `web/src/pages/seguros/auto.astro`. Si Francisco lo aprueba a futuro, **se recrea desde cero con copy propio** sobre `ProductLayout` y se agrega al dropdown del Header. Supera la decisión de Sesión 2 de "6 productos". | 25/07/2026 | Sesión 10 |
+| **D3: pasada completa de tildes y eñes.** Español de Ecuador correcto en todo el sitio (copy visible, navegación, SEO, JSON-LD y `aria-label`). Rutas y slugs quedan ASCII (`/inversion` sigue siendo `/inversion`). Mapa de ejecución: `docs/INVENTARIO-TILDES_2026-07-25.md`. | 25/07/2026 | Sesión 10 |
 
 ---
 
