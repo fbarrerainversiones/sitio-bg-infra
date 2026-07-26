@@ -24,7 +24,7 @@ Cada error tiene la misma estructura:
 - **Como se resolvio.**
 - **Regla operativa para no repetir.**
 
-Al final del documento estan las **reglas consolidadas (R-01 a R-41)** que salen de estos errores.
+Al final del documento estan las **reglas consolidadas (R-01 a R-43)** que salen de estos errores.
 
 ---
 
@@ -444,7 +444,7 @@ El repo `fbarrerainversiones/sitio-bg-infra` seguia PRIVADO en GitHub pese a que
 
 ---
 
-## Reglas operativas consolidadas (R-01 a R-41)
+## Reglas operativas consolidadas (R-01 a R-43)
 
 De los 24 errores y 9 near-miss anteriores, salen estas reglas vivas para no repetir.
 
@@ -524,6 +524,14 @@ De los 24 errores y 9 near-miss anteriores, salen estas reglas vivas para no rep
 
 - **R-41:** `docker network connect` sobre un container con trafico productivo (p.ej. el `caddy` compartido) SIEMPRE con `--gw-priority` explicito y NEGATIVO (p.ej. `--gw-priority=-100`), para no robarle el default gateway a su red original. Inmediatamente despues del connect, `docker exec <container> ip route` y confirmar que la linea `default via ...` NO cambio; si cambio, `docker network disconnect` al instante, ANTES incluso del Gate 0. (Origen: E-24, degradacion parcial de Aurora ~5 min el 19/07.)
 
+### Reglas nuevas (Sesion 10)
+
+- **R-42:** Los prompts a Claude Code en este proyecto se escriben en formato **CoT + XML**: etiquetas explicitas de `<rol>`, `<contexto>`, `<objetivo>`, `<reglas_duras>`, `<razonamiento_inicial>` y `<pasos>` numerados, cada uno con su mensaje de commit. La etiqueta `<razonamiento_inicial>` es obligatoria y exige **diagnostico con numeros de linea reales ANTES de editar**, reportado a Francisco antes de tocar codigo. Regla de oro adoptada el 25/07/2026 tras tres tandas seguidas de correcciones donde el diagnostico previo evito editar el archivo equivocado (p.ej. el boton "fantasma" de `/sobre-mi`: la hipotesis obvia era "falta el texto"; el diagnostico con lineas mostro que era la cascada CSS). Un prompt sin diagnostico previo produce parches a sintomas.
+
+- **R-43:** **Deuda de arquitectura CSS documentada (hallazgo D6).** Las reglas base de `web/src/styles/global.css` (`a { color: var(--gd) }`, `a:hover { ... }`) viven **fuera de toda `@layer`**, mientras las utilidades de Tailwind v4 viven en `@layer utilities`. En CSS una declaracion sin capa gana a cualquier declaracion en capa, **sin importar la especificidad**: por eso toda clase `text-*` aplicada a un `<a>` es **inerte** (los `text-tx-muted` del Header y del Footer no se aplican; esos enlaces se ven dorados). Consecuencia practica: fue la causa de los dos "botones fantasma" del 25/07 (texto dorado sobre fondo dorado en el CTA de `/sobre-mi`, y texto invisible en hover de los botones outline).
+  - **Mitigacion vigente y obligatoria:** en cualquier boton con fondo dorado, el color critico del texto se fija **inline** (`style="color:#08080d"`), nunca con una utilidad de Tailwind. Para estados (`:hover`) se usa una regla propia sin capa y con mayor especificidad (patron `.btn-outline`, ver `global.css`).
+  - **Fix de raiz DIFERIDO:** envolver las reglas base en `@layer base` haria que las utilidades ganen y **cambiaria el color de los enlaces en todo el sitio**. Eso es un rediseno, no un fix, y toca el aspecto que Francisco ya aprobo visualmente. Se difiere a **sesion dedicada post-lanzamiento** (pendiente P-47). Hasta entonces, NO tocar las capas.
+
 ---
 
 ## Estadisticas del historico
@@ -531,7 +539,7 @@ De los 24 errores y 9 near-miss anteriores, salen estas reglas vivas para no rep
 ```
 Errores documentados:    24
 Near-miss documentados:  9
-Reglas operativas:       41
+Reglas operativas:       43
 Rollbacks ejecutados:    1 (B4 v1 -> network disconnect, Sesion 9)
 Incidentes Aurora:       1 (contenido ~5 min, B4 v1 Sesion 9 — sin perdida de datos)
 Danos reales:            ~115 min re-trabajo + 8 min espera reboot + ~5 min degradacion parcial 3 dominios (B4 v1)
@@ -545,7 +553,7 @@ Danos evitados:          incalculables (cualquier near-miss pudo replicar el 522
 Si vos sos Claude leyendo este documento por primera vez en una sesion nueva:
 
 1. **Lee este documento ANTES de proponer cualquier accion tecnica.**
-2. Las 41 reglas (R-01 a R-41) son **inviolables** salvo argumento explicito de Francisco.
+2. Las 43 reglas (R-01 a R-43) son **inviolables** salvo argumento explicito de Francisco.
 3. Si una propuesta tuya contradice una regla, para y discutilo antes.
 4. Cuando detectes un error nuevo, agregalo a este documento con la misma estructura. La memoria del proyecto se construye con historico, no con olvido.
 
