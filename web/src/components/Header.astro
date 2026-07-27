@@ -26,11 +26,11 @@ type NavLink = {
 // el 25/07/2026 (D1). Si algun dia lo aprueba, se recrea con copy propio
 // y se agrega aca. Ver docs/PENDIENTES.md, "Decisiones cerradas".
 const PRODUCT_LINKS = [
-  { href: "/seguros/vida-termino", label: "Vida a termino" },
+  { href: "/seguros/vida-termino", label: "Vida a término" },
   { href: "/seguros/vida-indexada", label: "Vida indexada" },
   { href: "/seguros/salud-nacional", label: "Salud nacional" },
   { href: "/seguros/salud-internacional", label: "Salud internacional" },
-  { href: "/inversion", label: "Inversion" },
+  { href: "/inversion", label: "Inversión" },
   { href: "/#productos", label: "Ver todos →" },
 ];
 
@@ -52,7 +52,7 @@ const WHATSAPP_URL = `https://wa.me/${WHATSAPP_AURORA}?text=${WHATSAPP_MESSAGE}`
 
     <Logo size="md" />
 
-    <nav class="hidden md:flex items-center gap-8" aria-label="Navegacion principal">
+    <nav class="hidden md:flex items-center gap-8" aria-label="Navegación principal">
       {NAV_LINKS.map((link) => link.children ? (
         <div class="relative group">
           <a
@@ -104,7 +104,7 @@ const WHATSAPP_URL = `https://wa.me/${WHATSAPP_AURORA}?text=${WHATSAPP_MESSAGE}`
       <button
         type="button"
         id="mobile-menu-toggle"
-        aria-label="Abrir menu de navegacion"
+        aria-label="Abrir menu de navegación"
         aria-expanded="false"
         aria-controls="mobile-menu"
         class="md:hidden inline-flex items-center justify-center w-10 h-10 rounded-md text-tx hover:text-gd hover:bg-bg-elev-1 transition-colors"
@@ -119,7 +119,7 @@ const WHATSAPP_URL = `https://wa.me/${WHATSAPP_AURORA}?text=${WHATSAPP_MESSAGE}`
   </div>
 
   <div id="mobile-menu" class="md:hidden hidden border-t border-gd-muted bg-bg" aria-hidden="true">
-    <nav class="px-6 py-4 flex flex-col gap-1" aria-label="Navegacion mobile">
+    <nav class="px-6 py-4 flex flex-col gap-1" aria-label="Navegación mobile">
       <p class="font-mono text-[10px] uppercase tracking-widest text-gd mb-2">Barrera Global</p>
       {NAV_LINKS.map((link) => link.children ? (
         <details class="group border-b border-gd-muted">
