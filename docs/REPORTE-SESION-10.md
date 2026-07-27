@@ -475,6 +475,150 @@ merge**, no antes (si no se fusiona, los números de páginas no aplican).
 
 ---
 
+## D1 + D3 + DINAMISMO (25/07/2026)
+
+Francisco tomó las dos decisiones pendientes y encargó además un paquete de
+dinamismo. Todo ejecutado en la rama, sin merge y sin tocar el VPS.
+
+| Commit | Qué |
+|---|---|
+| `96f629c` | **D1** — retirar la página de auto |
+| `282b91e` | **D3** — copy visible, props, navegación, WhatsApp y `aria-label` |
+| `28dada7` | **D3** — titles, descriptions y JSON-LD |
+| `682aa56` | **D3** — diacríticos que el inventario no auditó |
+| `21f0da1` | **D3** — `aria-label` del toggle **+ re-hash CSP** |
+| `4262fa2` | **Dinamismo** sobrio CSS-only |
+
+### D1 — `/seguros/auto` retirada
+
+Se elimina `web/src/pages/seguros/auto.astro`. Nunca estuvo enlazada desde
+ninguna navegación: era accesible solo por URL directa. El comentario de
+`PRODUCT_LINKS` en el Header, que era la última referencia a la ruta en el
+fuente, ahora explica que quedó descartada y cómo recrearla. En
+`PENDIENTES.md` la decisión de Sesión 2 de «6 productos» queda marcada como
+**SUPERADA** por D1 (R-16: deprecar explícitamente la decisión vieja).
+El sitio pasa de 11 a **10 páginas**.
+
+### D3 — 419 correcciones de acentuación
+
+| Bloque | Correcciones | Cómo |
+|---|---:|---|
+| Copy visible, props, labels de nav, WhatsApp, `aria-label` | **343** | Script, con la misma clasificación que generó el inventario |
+| Casos no mecánicos (interrogativos, `más`/`tú`/`estés`) | **27** | A mano, leyendo cada frase |
+| SEO (`title`, `description`, JSON-LD) | **41** | Script |
+| Diacríticos que el inventario no auditó | **3** | A mano |
+| `aria-label` del toggle (`menú de navegación`) | **5** | A mano + re-hash |
+| **Total** | **419** | |
+
+El dry-run del script cuadró **exacto** contra el inventario antes de escribir
+nada: 346 de copy visible + 8 de WhatsApp + 5 de `aria-label` = 359, menos las
+16 de `auto.astro` = **343**. Igual en SEO: 44 − 3 = **41**.
+
+**Rutas y slugs intactos.** Los 10 `canonical` siguen ASCII
+(`/seguros/vida-termino`, `/inversion`…). El slug se queda sin tilde aunque el
+título visible la lleve: es la práctica estándar y evita romper enlaces.
+
+**Casos no mecánicos resueltos** (la tilde depende del sentido):
+
+- Interrogativos: «¿Cómo se calcula la prima?», «¿Qué necesito…?», «¿Quién
+  responde mi mensaje?», «Qué es y para quién», «Cómo funciona», «Quién soy»,
+  «Por qué seguros», «Cómo trabajo», «En qué me especializo», «Con quién
+  opero», «12. Cómo ejercer tus derechos».
+- Indirectos: «explica para **qué** se requieren», «observar **dónde** podía
+  aportar», «aquí tienes por **dónde** seguir», «definimos juntos **qué**
+  cobertura».
+- Diacríticos: **más** en 5 sitios, **tú** escribes, donde **estés**.
+- **No** se tocaron, por ser correctos: «ahí era donde podía aportar»
+  (relativo con antecedente), «para que tomes la mejor decisión» (final, no
+  interrogativa), «Como titular de los datos» (= en calidad de), y los `si`
+  condicionales. **`solo` queda sin tilde**: la RAE ya no la exige.
+
+**Hueco del inventario detectado y corregido:** el mapa del 25/07 auditó
+palabras polisílabas y los monosílabos `mas`/`tu`/`estes`, pero **no** revisó
+`esta` como verbo ni `si` afirmativo. Aparecieron 3 casos reales:
+«Esta política **está** en versión inicial», «y **está** vinculado
+contractualmente», «Y ahí **sí** puedo aportar valor real».
+
+### Veredicto CSP: un hash cambió, el otro no
+
+| Script | Antes | Después |
+|---|---|---|
+| Toggle del menú móvil | `sha256-IpuDn/OD…` | **`sha256-aOPTArMu…` CAMBIÓ** |
+| Scroll-reveal | `sha256-Qra3eTJV…` | `sha256-Qra3eTJV…` sin cambio |
+
+Cambió solo el del toggle, que es exactamente lo esperado: es el único script
+cuyo contenido se tocó (sus dos `aria-label` pasaron a «Abrir/Cerrar **menú**
+de **navegación**»). `infra/nginx.conf` se actualizó **en el mismo commit**, y
+`infra/README-hashes.md` ahora lleva un historial de cambios de hash.
+
+**Cuidado aplicado:** `menu` **no** se reemplazó de forma global. El script
+hace `getElementById("mobile-menu-toggle")` y `getElementById("mobile-menu")`,
+y el markup tiene `id="mobile-menu"`. Una tilde ahí rompe la búsqueda por id y
+el menú deja de abrir. Verificado sobre el HTML generado: el script minificado
+conserva los dos ids intactos.
+
+> ⚠️ **Para el deploy:** `nginx.conf` se hornea en la imagen Docker. Este
+> cambio **exige rebuild de la imagen**. Si se despliega con la imagen vieja,
+> el navegador bloquea el toggle y el menú móvil deja de abrir, en silencio.
+
+### Dinamismo — CSS puro, cero JavaScript
+
+Criterio que queda escrito en `global.css`: **todo lo que mueve algo vive
+dentro de `@media (prefers-reduced-motion: no-preference)`**, así quien pide
+reducir movimiento no recibe la regla en vez de recibirla y tener que
+deshacerla. Lo que no es movimiento (borde, sombra) queda fuera, para que el
+feedback de hover le llegue a todo el mundo. Solo se animan `transform` y
+`opacity`: nada reflowea el layout.
+
+- **Tarjetas:** lift a `translateY(-4px)`, transición unificada a 250 ms. La
+  regla ya existía con −6px y 400/300 ms; **se afinó en su lugar, no se
+  duplicó**.
+- **Cascada:** `transition-delay` de 100 ms por tarjeta vía `nth-child`. El
+  observer las marca `.visible` casi a la vez porque están una al lado de la
+  otra; la cascada la da el delay.
+- **Flechas:** `translateX(2px)` en hover de `.link-underline`. Se mueve el
+  enlace entero porque el «→» es un carácter de texto, no un elemento: CSS no
+  puede seleccionarlo solo.
+- **Scroll suave:** pasa a estar **solo** dentro del guard. Estaba
+  **duplicado y sin guardia** en dos bloques `html` del mismo archivo.
+  Verificado en el CSS compilado: una sola ocurrencia, dentro del `@media`.
+- **Desplegable:** entra deslizando desde arriba en hover **y** en
+  `focus-within`. La opacidad la sigue manejando Tailwind; acá solo el
+  desplazamiento — un mecanismo por propiedad. Se anima el `<ul>` y no el
+  wrapper, porque ese ya lleva `-translate-x-1/2` para centrarse y un
+  `transform` propio lo descentraría.
+- **Extra:** `.cta-lift` y el `scale` de la foto eran hovers **preexistentes
+  sin guardia** de reduced-motion. Ahora la tienen.
+
+### QA de cierre
+
+Build limpio con `dist/` borrado: **10/10 páginas**, sin errores.
+
+| Chequeo | Resultado |
+|---|---|
+| Residuos sin tilde en texto visible (incl. `<title>`) | ✅ **0** sobre las 10 páginas |
+| Referencias a `/seguros/auto` | ✅ 0 |
+| Observer del scroll-reveal | ✅ 1 por página |
+| Dropdown presente | ✅ 10/10 |
+| Destinos del dropdown | ✅ 5 productos + «Ver todos», **sin auto** |
+| CSP cruce bidireccional | ✅ 2 ↔ 2, cero huérfanos, 0 scripts externos |
+| `main` intacto | ✅ `27ae9a2` local y origin |
+
+### Para tu ojo
+
+1. **Voseo rioplatense, sin tocar.** «Escribinos» (`ProductLayout` 57 y 84) y
+   «llegue a **vos**» (`index` 283). No es tilde, es dialecto, y `CLAUDE.md`
+   pide español ecuatoriano sin jerga argentina. En Ecuador serían
+   «Escríbenos» y «llegue a **ti**». Es copy: decisión tuya.
+2. **`aria-label="Navegación mobile"`** mezcla español e inglés. Sería
+   «Navegación móvil». No lo cambié porque es sustitución de palabra, no
+   acento.
+3. **El micro-desplazamiento de `.link-underline`** también alcanza a los
+   enlaces «← Volver al inicio» de `/privacidad`, que se mueven 2px a la
+   derecha. Es sutil; si molesta, se acota con una clase propia.
+
+---
+
 ## Estado final
 
 - **`main`:** intacto en `27ae9a2` (Bloque A), pusheado. Working tree limpio.
@@ -487,4 +631,4 @@ merge**, no antes (si no se fusiona, los números de páginas no aplican).
 
 ---
 
-*Última actualización: 25/07/2026 tras el QA pre-merge (sesión autónoma).*
+*Última actualización: 25/07/2026 tras D1 + D3 + el paquete de dinamismo.*
