@@ -5,14 +5,25 @@
 hashes `sha256-...` que autorizan los **dos únicos `<script type="module">`
 inline** que Astro genera en el build:
 
-| Hash | Script inline | Página |
+| Hash | Script inline | Páginas |
 |---|---|---|
-| `sha256-IpuDn/ODXnvlsW4BOK3Y58F0Qf1lmA9OPQHicTjTPos=` | Toggle del menú móvil (`mobile-menu-toggle`) | `index.html` |
-| `sha256-Qra3eTJV60gng4dzuHtxcR7XY8lE1nLbTAAJ5T7jyto=` | `IntersectionObserver` del scroll-reveal | `index.html` |
+| `sha256-aOPTArMuUPr5ybUMJpH+mtSGicP8zlnwwFwZYYhokv4=` | Toggle del menú móvil (`mobile-menu-toggle`) | las 10 |
+| `sha256-Qra3eTJV60gng4dzuHtxcR7XY8lE1nLbTAAJ5T7jyto=` | `IntersectionObserver` del scroll-reveal | las 10 |
 
-> **Verificado contra el build actual** (HEAD `be4bf28`, commit `feat(deploy)` de
-> esta sesión): los dos hashes computados sobre `web/dist` **coinciden** con los
-> de `nginx.conf`. No requiere cambios.
+> **Verificado contra el build actual** (rama `sesion-10-estructura`, 25/07/2026):
+> los dos hashes computados sobre `web/dist` **coinciden** con los de
+> `nginx.conf`, en cruce bidireccional y sin huérfanos.
+
+### Historial de cambios de hash
+
+| Fecha | Hash | Motivo |
+|---|---|---|
+| 19/07/2026 | `sha256-IpuDn/OD…` (toggle) | Valor inicial del deploy a staging. |
+| 25/07/2026 | `sha256-aOPTArMu…` (toggle) | **D3**: los dos `aria-label` que el script escribe pasaron a «Abrir/Cerrar menú de navegación» (con tildes). Cambió el contenido del script, así que cambió su hash. |
+
+> El hash del **scroll-reveal nunca ha cambiado**: al moverlo de `index.astro` a
+> `Layout.astro` (25/07) el minificador emitió exactamente el mismo output, y D3
+> no toca su contenido.
 
 ## Cuándo hay que regenerarlos
 
