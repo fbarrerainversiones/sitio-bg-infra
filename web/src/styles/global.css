@@ -62,8 +62,8 @@
 /* Aplicar tokens al body desde el primer render */
 
 html {
-  /* Scroll suave en navegacion interna */
-  scroll-behavior: smooth;
+  /* El scroll suave NO va aca: vive en el bloque de dinamismo, dentro de
+     @media (prefers-reduced-motion: no-preference). Ver final del archivo. */
   /* Texto antialiased en MacOS / iOS */
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -156,10 +156,6 @@ a:focus-visible {
 
 /* ===== ANIMATIONS & DYNAMICS ===== */
 
-html {
-  scroll-behavior: smooth;
-}
-
 @keyframes fadeInUp {
   from {
     opacity: 0;
@@ -213,17 +209,16 @@ html {
   opacity: 0;
 }
 
-/* Card hover lift */
+/* Card hover: borde y sombra los recibe todo el mundo (no son movimiento).
+   El lift vertical vive en el bloque de dinamismo del final. */
 .card-product {
-  transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1),
-              border-color 0.3s ease,
-              box-shadow 0.3s ease;
+  transition: border-color 250ms ease,
+              box-shadow 250ms ease;
 }
 
 .card-product:hover {
-  transform: translateY(-6px);
   border-color: var(--gd);
-  box-shadow: 0 16px 48px -12px rgba(201, 168, 76, 0.25);
+  box-shadow: 0 14px 40px -12px rgba(201, 168, 76, 0.28);
 }
 
 /* CTA button lift */
@@ -235,6 +230,17 @@ html {
 .cta-lift:hover {
   transform: translateY(-2px);
   box-shadow: 0 12px 32px -8px rgba(201, 168, 76, 0.4);
+}
+
+/* Boton outline (borde dorado sobre fondo transparente).
+   En hover el fondo pasa a dorado, asi que el texto tiene que oscurecerse
+   o desaparece. La utilidad hover:text-[#08080d] de Tailwind NO alcanza:
+   vive dentro de @layer utilities, y en CSS una declaracion sin capa
+   —como la regla `a:hover` de este mismo archivo— le gana siempre, sin
+   importar la especificidad. Esta regla tambien va sin capa y con mayor
+   especificidad, asi que restituye la intencion original. */
+a.btn-outline:hover {
+  color: #08080d;
 }
 
 /* Underline animado en links dorados */
@@ -321,5 +327,83 @@ html {
     animation: none;
     transition: none;
   }
+  /* Hovers preexistentes que tambien mueven: quedaban sin guardia. */
+  .cta-lift,
+  .photo-frame,
+  .photo-frame img {
+    transition: none;
+  }
+  .cta-lift:hover,
+  .photo-frame:hover img {
+    transform: none;
+  }
   html { scroll-behavior: auto; }
+}
+
+/* ============================================================
+   DINAMISMO (paquete del 25/07/2026) — CSS puro, cero JavaScript
+   ============================================================
+   Regla de la casa: todo lo que MUEVE algo vive dentro de
+   @media (prefers-reduced-motion: no-preference). Quien pide reducir
+   movimiento simplemente no recibe estas reglas, sin tener que
+   deshacerlas despues.
+   Lo que NO es movimiento (color de borde, sombra) queda fuera, para
+   que el feedback de hover le llegue igual a todo el mundo.
+   Solo se animan transform y opacity: ninguna de estas reglas
+   reflowea el layout despues de cargar.
+   ============================================================ */
+
+@media (prefers-reduced-motion: no-preference) {
+
+  /* Scroll suave en las anclas internas (p.ej. /#productos).
+     Fuente unica: antes estaba duplicado y sin guardia en dos bloques
+     `html` de este mismo archivo. */
+  html {
+    scroll-behavior: smooth;
+  }
+
+  /* Lift de las tarjetas de producto en hover */
+  .card-product {
+    transition: transform 250ms cubic-bezier(0.4, 0, 0.2, 1),
+                border-color 250ms ease,
+                box-shadow 250ms ease;
+  }
+
+  .card-product:hover {
+    transform: translateY(-4px);
+  }
+
+  /* Entrada en cascada de las grillas de tarjetas: cada una aparece
+     100ms despues de la anterior. El observer las marca .visible casi
+     a la vez (estan una al lado de la otra), asi que la cascada la da
+     el transition-delay, no el observer. */
+  .card-product.reveal:nth-child(2) { transition-delay: 100ms; }
+  .card-product.reveal:nth-child(3) { transition-delay: 200ms; }
+  .card-product.reveal:nth-child(4) { transition-delay: 300ms; }
+
+  /* Los enlaces con flecha "→" avanzan un pelo en hover.
+     Se mueve el enlace entero porque la flecha es un caracter de texto,
+     no un elemento: no hay forma de seleccionarla sola en CSS. */
+  .link-underline {
+    transition: transform 250ms cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .link-underline:hover {
+    transform: translateX(2px);
+  }
+
+  /* Desplegable de Productos del Header: entra deslizando desde arriba.
+     La opacidad la maneja Tailwind en el wrapper (group-hover /
+     group-focus-within); aca solo el desplazamiento del panel, para no
+     duplicar mecanismos. Se anima el <ul> y no el wrapper porque ese
+     ya lleva -translate-x-1/2 para centrarse. */
+  .nav-dropdown-panel {
+    transform: translateY(-6px);
+    transition: transform 250ms cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .group:hover .nav-dropdown-panel,
+  .group:focus-within .nav-dropdown-panel {
+    transform: translateY(0);
+  }
 }

@@ -9,8 +9,8 @@ const WHATSAPP_MESSAGE = encodeURIComponent(
 );
 const WHATSAPP_URL = `https://wa.me/${WHATSAPP_AURORA}?text=${WHATSAPP_MESSAGE}`;
 
-const TITLE = "Barrera Global · Asesoria en seguros, vida e inversion en Ecuador";
-const DESCRIPTION = "Asesoria especializada en seguros de vida, salud e inversion en Ecuador. Patrimonio que crece. Capital protegido.";
+const TITLE = "Barrera Global · Asesoría en seguros, vida e inversión en Ecuador";
+const DESCRIPTION = "Asesoría especializada en seguros de vida, salud e inversión en Ecuador. Patrimonio que crece. Capital protegido.";
 ---
 
 <Layout title={TITLE} description={DESCRIPTION}>
@@ -27,7 +27,7 @@ const DESCRIPTION = "Asesoria especializada en seguros de vida, salud e inversio
           <div class="md:col-span-7">
 
             <p class="hero-entrance font-mono text-xs text-gd uppercase tracking-widest mb-6">
-              Asesoria Productora de Seguros · Ecuador
+              Asesoría Productora de Seguros · Ecuador
             </p>
 
             <h1 class="hero-entrance-delay-1 text-5xl md:text-7xl font-display font-semibold leading-tight tracking-tight text-tx mb-6">
@@ -37,9 +37,9 @@ const DESCRIPTION = "Asesoria especializada en seguros de vida, salud e inversio
             </h1>
 
             <p class="hero-entrance-delay-2 font-body text-lg md:text-xl text-tx-muted max-w-2xl leading-relaxed mb-10">
-              Asesoria especializada en seguros de vida, salud e inversion.
-              Sin promesas vacias, sin presion, sin compromiso. Solo informacion clara
-              para que tomes la mejor decision para tu familia y tu patrimonio.
+              Asesoría especializada en seguros de vida, salud e inversión.
+              Sin promesas vacías, sin presión, sin compromiso. Solo información clara
+              para que tomes la mejor decisión para tu familia y tu patrimonio.
             </p>
 
             <div class="hero-entrance-delay-3 flex flex-col sm:flex-row gap-4">
@@ -56,8 +56,8 @@ const DESCRIPTION = "Asesoria especializada en seguros de vida, salud e inversio
                 <span>Conversar por WhatsApp</span>
               </a>
               <a
-                href="#productos"
-                class="inline-flex items-center justify-center gap-2 border border-gd text-gd px-7 py-4 rounded-md font-body font-medium text-base hover:bg-gd-light hover:border-gd-light hover:text-[#08080d] transition-colors"
+                href="/#productos"
+                class="btn-outline inline-flex items-center justify-center gap-2 border border-gd text-gd px-7 py-4 rounded-md font-body font-medium text-base hover:bg-gd-light hover:border-gd-light transition-colors"
               >
                 Ver productos
               </a>
@@ -96,15 +96,15 @@ const DESCRIPTION = "Asesoria especializada en seguros de vida, salud e inversio
             <span class="text-gd">Una estrategia.</span>
           </h2>
           <p class="font-body text-base md:text-lg text-tx-muted max-w-2xl leading-relaxed mb-16">
-            Coberturas seleccionadas con disciplina tecnica. Sin productos
-            empujados por comision. Cada solucion responde a un caso concreto
-            de proteccion patrimonial.
+            Coberturas seleccionadas con disciplina técnica. Sin productos
+            empujados por comisión. Cada solución responde a un caso concreto
+            de protección patrimonial.
           </p>
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
 
-          <article class="card-product reveal border border-gd-muted rounded-lg p-8 bg-bg-elev-1">
+          <article class="card-product reveal border border-gd-muted rounded-lg p-8 bg-bg-elev-1 flex flex-col">
             <div class="w-12 h-12 rounded-full bg-gd-muted flex items-center justify-center mb-6">
               <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="text-gd" aria-hidden="true">
                 <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
@@ -112,30 +112,46 @@ const DESCRIPTION = "Asesoria especializada en seguros de vida, salud e inversio
             </div>
             <h3 class="text-2xl font-display font-semibold text-tx mb-3">Vida</h3>
             <p class="font-body text-sm text-tx-muted leading-relaxed mb-5">
-              Proteccion economica para los tuyos si algo te pasa. Capital
+              Protección económica para los tuyos si algo te pasa. Capital
               para tu familia o para construir patrimonio a largo plazo.
             </p>
             <ul class="font-body text-sm text-tx-muted space-y-2 mb-6">
               <li class="flex items-start gap-2">
                 <span class="text-gd mt-1">·</span>
-                <span>Vida a termino: cobertura por un plazo definido</span>
+                <span>Vida a término: cobertura por un plazo definido</span>
               </li>
               <li class="flex items-start gap-2">
                 <span class="text-gd mt-1">·</span>
-                <span>Vida indexada: proteccion + acumulacion vinculada a indices</span>
+                <span>Vida indexada: protección + acumulación vinculada a índices</span>
               </li>
             </ul>
-            <a
-              href={WHATSAPP_URL}
-              target="_blank"
-              rel="noopener noreferrer"
-              class="link-underline inline-flex items-center gap-1 text-sm font-body text-gd hover:text-gd-light transition-colors"
-            >
-              Cotizar vida →
-            </a>
+            <div class="mt-auto flex flex-col gap-4">
+              <div class="flex flex-col gap-2">
+                <a
+                  href="/seguros/vida-termino"
+                  class="link-underline inline-flex items-center gap-1 text-sm font-body font-medium text-gd hover:text-gd-light transition-colors"
+                >
+                  Conocer vida a término →
+                </a>
+                <a
+                  href="/seguros/vida-indexada"
+                  class="link-underline inline-flex items-center gap-1 text-sm font-body font-medium text-gd hover:text-gd-light transition-colors"
+                >
+                  Conocer vida indexada →
+                </a>
+              </div>
+              <a
+                href={WHATSAPP_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                class="inline-flex items-center gap-1 text-sm font-body text-tx-muted hover:text-gd transition-colors"
+              >
+                o cotizar por WhatsApp →
+              </a>
+            </div>
           </article>
 
-          <article class="card-product reveal border border-gd-muted rounded-lg p-8 bg-bg-elev-1">
+          <article class="card-product reveal border border-gd-muted rounded-lg p-8 bg-bg-elev-1 flex flex-col">
             <div class="w-12 h-12 rounded-full bg-gd-muted flex items-center justify-center mb-6">
               <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="text-gd" aria-hidden="true">
                 <path d="M22 12h-4l-3 9L9 3l-3 9H2" />
@@ -143,66 +159,90 @@ const DESCRIPTION = "Asesoria especializada en seguros de vida, salud e inversio
             </div>
             <h3 class="text-2xl font-display font-semibold text-tx mb-3">Salud</h3>
             <p class="font-body text-sm text-tx-muted leading-relaxed mb-5">
-              Atencion medica oportuna y de calidad cuando mas importa,
-              sin que el bolsillo sea el limite.
+              Atención médica oportuna y de calidad cuando más importa,
+              sin que el bolsillo sea el límite.
             </p>
             <ul class="font-body text-sm text-tx-muted space-y-2 mb-6">
               <li class="flex items-start gap-2">
                 <span class="text-gd mt-1">·</span>
-                <span>Salud nacional: red de clinicas y hospitales en Ecuador</span>
+                <span>Salud nacional: red de clínicas y hospitales en Ecuador</span>
               </li>
               <li class="flex items-start gap-2">
                 <span class="text-gd mt-1">·</span>
                 <span>Salud internacional: cobertura global con USA opcional</span>
               </li>
             </ul>
-            <a
-              href={WHATSAPP_URL}
-              target="_blank"
-              rel="noopener noreferrer"
-              class="link-underline inline-flex items-center gap-1 text-sm font-body text-gd hover:text-gd-light transition-colors"
-            >
-              Cotizar salud →
-            </a>
+            <div class="mt-auto flex flex-col gap-4">
+              <div class="flex flex-col gap-2">
+                <a
+                  href="/seguros/salud-nacional"
+                  class="link-underline inline-flex items-center gap-1 text-sm font-body font-medium text-gd hover:text-gd-light transition-colors"
+                >
+                  Conocer salud nacional →
+                </a>
+                <a
+                  href="/seguros/salud-internacional"
+                  class="link-underline inline-flex items-center gap-1 text-sm font-body font-medium text-gd hover:text-gd-light transition-colors"
+                >
+                  Conocer salud internacional →
+                </a>
+              </div>
+              <a
+                href={WHATSAPP_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                class="inline-flex items-center gap-1 text-sm font-body text-tx-muted hover:text-gd transition-colors"
+              >
+                o cotizar por WhatsApp →
+              </a>
+            </div>
           </article>
 
-          <article class="card-product reveal border border-gd-muted rounded-lg p-8 bg-bg-elev-1">
+          <article class="card-product reveal border border-gd-muted rounded-lg p-8 bg-bg-elev-1 flex flex-col">
             <div class="w-12 h-12 rounded-full bg-gd-muted flex items-center justify-center mb-6">
               <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="text-gd" aria-hidden="true">
                 <polyline points="22 7 13.5 15.5 8.5 10.5 2 17" />
                 <polyline points="16 7 22 7 22 13" />
               </svg>
             </div>
-            <h3 class="text-2xl font-display font-semibold text-tx mb-3">Inversion</h3>
+            <h3 class="text-2xl font-display font-semibold text-tx mb-3">Inversión</h3>
             <p class="font-body text-sm text-tx-muted leading-relaxed mb-5">
-              Patrimonio que trabaja con disciplina. Vehiculos de
-              acumulacion estructurados para largo plazo.
+              Patrimonio que trabaja con disciplina. Vehículos de
+              acumulación estructurados para largo plazo.
             </p>
             <ul class="font-body text-sm text-tx-muted space-y-2 mb-6">
               <li class="flex items-start gap-2">
                 <span class="text-gd mt-1">·</span>
-                <span>Vehiculos offshore con carriers regulados</span>
+                <span>Vehículos offshore con carriers regulados</span>
               </li>
               <li class="flex items-start gap-2">
                 <span class="text-gd mt-1">·</span>
-                <span>Estrategia personalizada segun perfil y horizonte</span>
+                <span>Estrategia personalizada según perfil y horizonte</span>
               </li>
             </ul>
-            <a
-              href={WHATSAPP_URL}
-              target="_blank"
-              rel="noopener noreferrer"
-              class="link-underline inline-flex items-center gap-1 text-sm font-body text-gd hover:text-gd-light transition-colors"
-            >
-              Conversar de inversion →
-            </a>
+            <div class="mt-auto flex flex-col gap-4">
+              <a
+                href="/inversion"
+                class="link-underline inline-flex items-center gap-1 text-sm font-body font-medium text-gd hover:text-gd-light transition-colors"
+              >
+                Conocer inversión →
+              </a>
+              <a
+                href={WHATSAPP_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                class="inline-flex items-center gap-1 text-sm font-body text-tx-muted hover:text-gd transition-colors"
+              >
+                o conversar por WhatsApp →
+              </a>
+            </div>
           </article>
 
         </div>
 
         <p class="reveal font-mono text-xs text-tx-disabled mt-12 max-w-3xl">
           Cotizaciones sin compromiso. Las primas se calculan caso por caso
-          segun perfil del asegurado. No publicamos precios genericos
+          según perfil del asegurado. No publicamos precios genéricos
           conforme al Art. 11.6 SCVS.
         </p>
 
@@ -227,25 +267,25 @@ const DESCRIPTION = "Asesoria especializada en seguros de vida, salud e inversio
         <div class="reveal space-y-6 font-body text-base md:text-lg text-tx-muted leading-relaxed max-w-3xl">
           <p>
             Mi nombre es Francisco Barrera. Soy ingeniero de sistemas de
-            profesion y Asesor Productor de Seguros por conviccion. Opero
+            profesión y Asesor Productor de Seguros por convicción. Opero
             bajo <span class="text-tx font-medium">Insurance Trust</span>
-            (credencial SCVS personal en tramite) y vivo en Ambato.
+            (credencial SCVS personal en trámite) y vivo en Ambato.
           </p>
           <p>
             Pase del lado del software al lado del cliente porque en seguros
-            e inversion el problema no es la falta de productos, es la falta
-            de claridad. Y ahi si puedo aportar valor real.
+            e inversión el problema no es la falta de productos, es la falta
+            de claridad. Y ahí sí puedo aportar valor real.
           </p>
           <p>
-            En Barrera Global combino dos cosas: la disciplina tecnica de
+            En Barrera Global combino dos cosas: la disciplina técnica de
             un ingeniero para analizar coberturas, comparar productos y
-            dimensionar proteccion correctamente. Y la automatizacion con
-            IA para que esa informacion llegue a vos sin filtros comerciales,
+            dimensionar protección correctamente. Y la automatización con
+            IA para que esa información llegue a vos sin filtros comerciales,
             con respuestas reales en horarios que te convienen.
           </p>
           <p class="text-tx font-medium pt-2">
             No vendo seguros. Diseño arquitectura financiera. Sin promesas,
-            sin presion, sin compromiso.
+            sin presión, sin compromiso.
           </p>
         </div>
 
@@ -275,7 +315,7 @@ const DESCRIPTION = "Asesoria especializada en seguros de vida, salud e inversio
             Hablemos.
           </h2>
           <p class="font-body text-base md:text-lg text-tx-muted leading-relaxed mb-10 max-w-xl mx-auto">
-            La conversacion empieza por WhatsApp. Sin presion. Te respondemos
+            La conversación empieza por WhatsApp. Sin presión. Te respondemos
             en horario laboral Ecuador.
           </p>
 
@@ -299,20 +339,6 @@ const DESCRIPTION = "Asesoria especializada en seguros de vida, salud e inversio
   </main>
 
   <Footer />
-
-  <!-- Scroll reveal vanilla JS -->
-  <script>
-    const observer = new IntersectionObserver((entries) => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting) {
-          entry.target.classList.add('visible');
-          observer.unobserve(entry.target);
-        }
-      });
-    }, { threshold: 0.15, rootMargin: '0px 0px -50px 0px' });
-
-    document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
-  </script>
 
 </Layout>
 

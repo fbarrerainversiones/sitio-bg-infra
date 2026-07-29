@@ -1,8 +1,41 @@
 ---
 import Logo from "./Logo.astro";
 
-const NAV_LINKS = [
-  { href: "#productos", label: "Productos" },
+/**
+ * Despliegue de "Productos" — CSS puro, cero JavaScript nuevo.
+ * El unico script de este componente (toggle del menu movil) NO se toca,
+ * asi que los hashes CSP de infra/nginx.conf siguen validos.
+ *
+ * Desktop: se oculta con opacity + pointer-events, NO con hidden/invisible.
+ * Un elemento con visibility:hidden no puede recibir foco, asi que
+ * group-focus-within nunca dispararia y el menu quedaria inaccesible por
+ * teclado. Con opacity los enlaces siguen en el orden de tabulacion y el
+ * panel aparece tanto en hover como al tabular hacia el.
+ *
+ * Movil: <details>/<summary> nativo, sin JS. El script que cierra el menu
+ * al hacer click solo escucha <a>, asi que abrir el submenu no lo cierra.
+ */
+type NavLink = {
+  href: string;
+  label: string;
+  children?: { href: string; label: string }[];
+};
+
+// Paginas de producto que cuelgan de "Productos".
+// Son 5: el seguro de auto quedo descartado por decision de Francisco
+// el 25/07/2026 (D1). Si algun dia lo aprueba, se recrea con copy propio
+// y se agrega aca. Ver docs/PENDIENTES.md, "Decisiones cerradas".
+const PRODUCT_LINKS = [
+  { href: "/seguros/vida-termino", label: "Vida a término" },
+  { href: "/seguros/vida-indexada", label: "Vida indexada" },
+  { href: "/seguros/salud-nacional", label: "Salud nacional" },
+  { href: "/seguros/salud-internacional", label: "Salud internacional" },
+  { href: "/inversion", label: "Inversión" },
+  { href: "/#productos", label: "Ver todos →" },
+];
+
+const NAV_LINKS: NavLink[] = [
+  { href: "/#productos", label: "Productos", children: PRODUCT_LINKS },
   { href: "/sobre-mi", label: "Sobre mi" },
   { href: "/contacto", label: "Contacto" },
 ];
@@ -19,8 +52,31 @@ const WHATSAPP_URL = `https://wa.me/${WHATSAPP_AURORA}?text=${WHATSAPP_MESSAGE}`
 
     <Logo size="md" />
 
-    <nav class="hidden md:flex items-center gap-8" aria-label="Navegacion principal">
-      {NAV_LINKS.map((link) => (
+    <nav class="hidden md:flex items-center gap-8" aria-label="Navegación principal">
+      {NAV_LINKS.map((link) => link.children ? (
+        <div class="relative group">
+          <a
+            href={link.href}
+            class="font-body text-sm text-tx-muted hover:text-gd transition-colors"
+          >
+            {link.label}
+          </a>
+          <div class="absolute left-1/2 -translate-x-1/2 top-full pt-4 opacity-0 pointer-events-none transition-opacity duration-200 group-hover:opacity-100 group-hover:pointer-events-auto group-focus-within:opacity-100 group-focus-within:pointer-events-auto">
+            <ul class="nav-dropdown-panel min-w-56 border border-gd-muted rounded-md bg-bg-elev-1 py-2 shadow-lg">
+              {link.children.map((item) => (
+                <li>
+                  <a
+                    href={item.href}
+                    class="block px-5 py-2.5 font-body text-sm text-tx-muted hover:text-gd hover:bg-bg-elev-2 transition-colors whitespace-nowrap"
+                  >
+                    {item.label}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      ) : (
         <a
           href={link.href}
           class="font-body text-sm text-tx-muted hover:text-gd transition-colors"
@@ -48,7 +104,7 @@ const WHATSAPP_URL = `https://wa.me/${WHATSAPP_AURORA}?text=${WHATSAPP_MESSAGE}`
       <button
         type="button"
         id="mobile-menu-toggle"
-        aria-label="Abrir menu de navegacion"
+        aria-label="Abrir menú de navegación"
         aria-expanded="false"
         aria-controls="mobile-menu"
         class="md:hidden inline-flex items-center justify-center w-10 h-10 rounded-md text-tx hover:text-gd hover:bg-bg-elev-1 transition-colors"
@@ -63,9 +119,30 @@ const WHATSAPP_URL = `https://wa.me/${WHATSAPP_AURORA}?text=${WHATSAPP_MESSAGE}`
   </div>
 
   <div id="mobile-menu" class="md:hidden hidden border-t border-gd-muted bg-bg" aria-hidden="true">
-    <nav class="px-6 py-4 flex flex-col gap-1" aria-label="Navegacion mobile">
+    <nav class="px-6 py-4 flex flex-col gap-1" aria-label="Navegación mobile">
       <p class="font-mono text-[10px] uppercase tracking-widest text-gd mb-2">Barrera Global</p>
-      {NAV_LINKS.map((link) => (
+      {NAV_LINKS.map((link) => link.children ? (
+        <details class="group border-b border-gd-muted">
+          <summary class="flex items-center justify-between py-3 font-body text-base text-tx hover:text-gd transition-colors cursor-pointer list-none [&::-webkit-details-marker]:hidden">
+            <span>{link.label}</span>
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-gd transition-transform duration-200 group-open:rotate-180" aria-hidden="true">
+              <polyline points="6 9 12 15 18 9"></polyline>
+            </svg>
+          </summary>
+          <ul class="pb-3 pl-4 flex flex-col">
+            {link.children.map((item) => (
+              <li>
+                <a
+                  href={item.href}
+                  class="block py-2 font-body text-sm text-tx-muted hover:text-gd transition-colors"
+                >
+                  {item.label}
+                </a>
+              </li>
+            ))}
+          </ul>
+        </details>
+      ) : (
         <a
           href={link.href}
           class="block py-3 font-body text-base text-tx hover:text-gd transition-colors border-b border-gd-muted last:border-b-0"
@@ -98,12 +175,12 @@ const WHATSAPP_URL = `https://wa.me/${WHATSAPP_AURORA}?text=${WHATSAPP_MESSAGE}`
       menu?.classList.add("hidden");
       menu?.setAttribute("aria-hidden", "true");
       toggle.setAttribute("aria-expanded", "false");
-      toggle.setAttribute("aria-label", "Abrir menu de navegacion");
+      toggle.setAttribute("aria-label", "Abrir menú de navegación");
     } else {
       menu?.classList.remove("hidden");
       menu?.setAttribute("aria-hidden", "false");
       toggle.setAttribute("aria-expanded", "true");
-      toggle.setAttribute("aria-label", "Cerrar menu de navegacion");
+      toggle.setAttribute("aria-label", "Cerrar menú de navegación");
     }
   });
 

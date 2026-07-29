@@ -2,7 +2,7 @@
 
 > **Lista viva única.** Todos los cabos sueltos del proyecto en un solo archivo. Se actualiza con cada sesión que cierre un item o detecte uno nuevo.
 
-**Última actualización:** 02 de junio de 2026
+**Última actualización:** 25 de julio de 2026 (alta de P-45, P-46 y P-47; P-44 pasa a parcial)
 **Documento maestro de referencia:** [`PLAN-MAESTRO-v2.md`](PLAN-MAESTRO-v2.md)
 
 ---
@@ -480,12 +480,39 @@ Cuando un item se cierra, se mueve a la sección **Resueltos** al final con la f
 
 ### P-44 — Optimizar foto `francisco-barrera.jpg` (551 KB)
 
-- **Estado:** 🔵 BACKLOG (performance pre-deploy)
+- **Estado:** 🟡 EN CURSO — **parcialmente resuelto el 22/07/2026** (commit `dd46b82`, Sesión 10 Bloque A): recompresión mozjpeg q82, **551,4 KB → 54,8 KB (−90,1 %)**, mismo nombre y ruta. **Queda abierto el alcance restante: variantes WebP/AVIF con fallback + `srcset` responsivo.** El original venía casi sin comprimir; de ahí el −90 %.
 - **Criticidad:** media (performance / LCP; el hero del home carga esta imagen).
 - **Bloquea a:** nada funcional. Mejora Lighthouse Performance y LCP antes/después del deploy.
 - **Owner:** Claude (optimiza) + Francisco (aprueba resultado visual).
 - **Detalle:** `web/public/images/francisco-barrera.jpg` pesa 551 KB y se muestra en el hero del home y en `/sobre-mi`. 551 KB es alto para una imagen above-the-fold. Optimización: convertir a WebP/AVIF con fallback, redimensionar a los tamaños realmente usados y servir `srcset` responsivo. DISTINTO de **P-23** (que trata de reemplazar la foto IA por una sesión fotográfica profesional para E-E-A-T): aquí solo es optimización técnica del archivo actual, sin cambiar la imagen. **Trazabilidad:** referenciado en bitácora Sesión 8 como P-47 (numeración de notas, no oficial).
 - **Próximo paso:** Claude genera variantes WebP/AVIF + tamaños responsivos, actualiza el `<img>`/`<picture>` en home y `/sobre-mi`, y re-mide Lighthouse. Objetivo: bajar el peso del hero manteniendo calidad visual.
+
+### P-45 — Informe Aurora actualizado (correr cuestionario + ensamblar)
+
+- **Estado:** ⚪ POR DECIDIR (falta el insumo; la acción vive en el proyecto Aurora)
+- **Criticidad:** media (sin el informe no hay foto actualizada del estado de Aurora, que es el activo del que depende todo lo demás por R-23).
+- **Bloquea a:** nada en este repo. Bloquea la planificación informada de cualquier trabajo sobre Aurora.
+- **Owner:** Francisco (corre el cuestionario en el proyecto Aurora) + Claude (ensambla el informe).
+- **Detalle:** pedido en la instrucción de Sesión 10 y registrado verbatim en el snapshot de continuidad, pero nunca formalizado como pendiente numerado. Falta **correr el cuestionario dentro del proyecto Aurora** (`/opt/stack/`, contexto separado de este repo) y con esas respuestas **ensamblar el informe actualizado**. No se puede hacer desde este repo: el conocimiento operativo de Aurora no vive acá y R-34 prohíbe tocar sus containers desde este proyecto. **Trazabilidad:** listado como decisión **D5** en `docs/REPORTE-SESION-10.md`; se formaliza acá el 25/07/2026 para que deje de ser un cabo suelto en un reporte de sesión.
+- **Próximo paso:** Francisco confirma el alcance del cuestionario y lo corre en el proyecto Aurora; después se ensambla el informe.
+
+### P-46 — Hooks caídos en el entorno Claude Code de Aurora (control de seguridad fallando en silencio)
+
+- **Estado:** 🔴 BLOQUEADO (la acción vive en el proyecto Aurora, no en este repo)
+- **Criticidad:** **alta** — es un control de seguridad que **falla en silencio**: si el hook no existe, no bloquea nada y nadie se entera.
+- **Bloquea a:** nada de este repo. Afecta la seguridad operativa del entorno donde se trabaja Aurora.
+- **Owner:** Francisco (coordina con quien mantiene Aurora). Corrección técnica: proyecto Aurora.
+- **Detalle:** en el entorno Claude Code del proyecto Aurora hay hooks configurados que apuntan a scripts **no encontrados**: `escaner-secretos.sh` y `guard-comandos.sh`. Un hook que apunta a un script inexistente no protege: el comando pasa igual. Son justamente los dos controles que evitarían (a) filtrar secretos y (b) ejecutar comandos peligrosos — el tipo de comando que R-31 a R-35 prohíben en un VPS compartido con Aurora viva. Detectado durante Sesión 10 y registrado verbatim en el snapshot de continuidad; **la corrección NO se ejecuta desde este repo** (R-34: no se modifica el entorno de Aurora desde el proyecto del sitio). **Trazabilidad:** parte de la decisión **D5** en `docs/REPORTE-SESION-10.md`.
+- **Próximo paso:** en el proyecto Aurora, verificar la configuración de hooks (`settings.json`), y o bien restaurar los dos scripts en la ruta que esperan, o bien corregir las rutas, o bien quitar los hooks muertos. Verificar después que un hook fallido produzca error visible y no un paso silencioso.
+
+### P-47 — D6: fix de raíz de las capas CSS (`@layer`) — diferido post-lanzamiento
+
+- **Estado:** 🔵 BACKLOG (deuda de arquitectura consciente, diferida a propósito)
+- **Criticidad:** baja hoy (mitigación vigente y funcionando) / media a futuro (cada botón nuevo puede repetir el bug).
+- **Bloquea a:** nada. Es limpieza de arquitectura, no un fix funcional.
+- **Owner:** Claude (implementa) + Francisco (aprueba el cambio visual, porque lo hay).
+- **Detalle:** ver **R-43** en `docs/ERRORES-Y-APRENDIZAJES.md` para el diagnóstico completo. Resumen: las reglas base de enlaces de `web/src/styles/global.css` van fuera de toda `@layer` y por eso anulan cualquier utilidad `text-*` de Tailwind sobre un `<a>`, sin importar la especificidad. Fue la causa de los dos botones con texto invisible corregidos el 25/07. La mitigación vigente (color inline en los CTAs dorados + regla propia `.btn-outline` para el hover) funciona y está documentada. El fix de raíz —envolver las reglas base en `@layer base`— haría que las utilidades ganen y **cambiaría el color de todos los enlaces del sitio** (los `text-tx-muted` del Header y del Footer, hoy anulados, pasarían a verse gris apagado en vez de dorado). Eso es un rediseño y toca el aspecto ya aprobado visualmente. **Trazabilidad:** decisión **D6** en `docs/REPORTE-SESION-10.md`.
+- **Próximo paso:** sesión dedicada **después del lanzamiento**. Envolver el bloque base en `@layer base`, revisar página por página el cambio de color de enlaces, y recién ahí decidir si se conserva el aspecto actual con reglas explícitas o se adopta el nuevo. Hasta entonces **NO tocar las capas** y respetar la mitigación de R-43.
 
 ---
 ## 9. Decisiones cerradas (referencia rápida)
@@ -506,7 +533,7 @@ Lista de decisiones que YA están resueltas pero conviene tener visibles para no
 | Eslogan: "Patrimonio que crece. Capital protegido." + "Arquitectura Financiera" | 25/05/2026 | Sesión 2 |
 | Insurance Trust solo en footer legal y `/sobre-mi`. Prohibido en marketing. | 25/05/2026 | Sesión 2 |
 | Carolina co-asesora con presencia limitada (solo `/sobre-mi`, sin CTA) | 25/05/2026 | Sesión 2 |
-| 6 productos: vida-termino, vida-indexada, salud-nacional, salud-internacional, auto, inversion | 25/05/2026 | Sesión 2 |
+| ~~6 productos: vida-termino, vida-indexada, salud-nacional, salud-internacional, auto, inversion~~ **SUPERADA por D1 (25/07/2026): son 5, sin auto** | 25/05/2026 | Sesión 2 |
 | Postgres del sitio: REVERTIDO. Sin DB propia. Webhook a Aurora. | 25/05/2026 | Sesión 2 |
 | Integración Aurora: webhook directo (NO widget Chatwoot embebido) | 25/05/2026 | Sesión 2 |
 | Graceful degradation: Opción C (mensaje + localStorage + reintentar) | 25/05/2026 | Sesión 2 |
@@ -521,6 +548,8 @@ Lista de decisiones que YA están resueltas pero conviene tener visibles para no
 | DM-05: Email LOPDP gmail confirmado provisional | 02/06/2026 | Sesión 5 |
 | DM-06: Cedula personal NO se publica en `/privacidad` | 02/06/2026 | Sesión 5 |
 | DM-07: "Credencial SCVS personal en tramite" hasta llegue real | 02/06/2026 | Sesión 5 |
+| **D1: `/seguros/auto` se retira.** Barrera Global NO ofrece seguro de auto por ahora. La página existía solo como estructura sin copy aprobado (creada en Sesión 10) y nunca estuvo enlazada desde ninguna navegación. Se elimina `web/src/pages/seguros/auto.astro`. Si Francisco lo aprueba a futuro, **se recrea desde cero con copy propio** sobre `ProductLayout` y se agrega al dropdown del Header. Supera la decisión de Sesión 2 de "6 productos". | 25/07/2026 | Sesión 10 |
+| **D3: pasada completa de tildes y eñes.** Español de Ecuador correcto en todo el sitio (copy visible, navegación, SEO, JSON-LD y `aria-label`). Rutas y slugs quedan ASCII (`/inversion` sigue siendo `/inversion`). Mapa de ejecución: `docs/INVENTARIO-TILDES_2026-07-25.md`. | 25/07/2026 | Sesión 10 |
 
 ---
 
