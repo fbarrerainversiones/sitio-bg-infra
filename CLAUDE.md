@@ -4,9 +4,9 @@
 > Tambien sirve como referencia rapida para cualquier sesion de chat (Claude.ai).
 > NO editar sin actualizar la version y la fecha al final.
 
-**Version:** 2.1
-**Ultima actualizacion:** domingo 19 de julio de 2026 (Sesion 9)
-**Cubre el estado del proyecto hasta:** Sesion 9 cerrada (19/07/2026 — deploy a staging)
+**Version:** 2.2
+**Ultima actualizacion:** martes 28 de julio de 2026 (merge de la rama `sesion-10-estructura` a `main`)
+**Cubre el estado del proyecto hasta:** Sesiones 10 y 11 cerradas (22/07 estructura, 25/07 revision + espanol Ecuador + dinamismo, 28/07 merge a main). Sitio de 4 a 10 paginas en `main`.
 
 ---
 
@@ -14,11 +14,12 @@
 
 Antes de proponer cualquier accion tecnica, Claude Code debe leer estos archivos en este orden:
 
-1. **`docs/ERRORES-Y-APRENDIZAJES.md`** — 24 errores + 9 near-miss + 41 reglas operativas. NO repetir errores ya documentados.
-2. **`docs/PLAN-MAESTRO-v2.md`** — documento maestro con decisiones tecnicas firmes, bitacora de 6 sesiones, hallazgos legales.
-3. **`docs/PENDIENTES.md`** — 40 items pendientes vivos (P-01 a P-40) + 14 resueltos historicos (R-01 a R-14).
+1. **`docs/ERRORES-Y-APRENDIZAJES.md`** — 24 errores (E-01 a E-24) + 9 near-miss (NM-01 a NM-09) + 43 reglas operativas (R-01 a R-43). NO repetir errores ya documentados.
+2. **`docs/PLAN-MAESTRO-v2.md`** — documento maestro con decisiones tecnicas firmes (D-01 a D-28), bitacora de sesiones, hallazgos legales.
+3. **`docs/PENDIENTES.md`** — 47 items (P-01 a P-47) + 14 resueltos historicos (R-01 a R-14).
 4. **`docs/ESTADO-GENERAL-PROYECTO.md`** — estado consolidado del proyecto al cierre de Sesion 5.
 5. **`docs/DIAGRAMA-FLUJO-PROYECTO.md`** — visualizacion completa de fases y dependencias.
+6. **`docs/REPORTE-SESION-10.md`** — bitacora de la jornada estructural (Bloques A-B) + decisiones D1 a D6 + QA pre-merge.
 
 Si una propuesta tuya contradice algo de estos documentos, PARAR y discutirlo con Francisco con cita exacta del documento contradicho.
 
@@ -34,7 +35,7 @@ Si una propuesta tuya contradice algo de estos documentos, PARAR y discutirlo co
 - **Carpeta local:** `C:\Users\panch\projects\sitio-bg-infra\`
 - **Carpeta VPS:** `/opt/sitio-bg/` (creada en HITO 01)
 - **Repo GitHub:** `fbarrerainversiones/sitio-bg-infra` (publico, D-21)
-- **Fase actual:** Fase 1 al 100% (Sitio Web Base cerrado) + **STAGING DESPLEGADO** (staging.barreraglobal.com vivo con basicauth + noindex, Sesion 9). Sitio aun NO publico.
+- **Fase actual:** Fase 1 al 100% + **Fase 3 estructural fusionada en `main`** (10 paginas). **STAGING DESPLEGADO** (staging.barreraglobal.com vivo con basicauth + noindex, Sesion 9) pero **sirviendo todavia la version de 4 paginas**: falta redeploy con `main` post-merge. Sitio aun NO publico.
 
 ---
 
@@ -77,17 +78,26 @@ Si una propuesta tuya contradice algo de estos documentos, PARAR y discutirlo co
 
 Home muestra 3 grupos: Vida, Salud, Inversion.
 
-Paginas individuales (futuras, Fase 3):
+Paginas de producto YA CREADAS (estructura, en `main` desde el merge del 28/07):
 1. `/seguros/vida-termino`
 2. `/seguros/vida-indexada`
 3. `/seguros/salud-nacional`
 4. `/seguros/salud-internacional`
 5. `/inversion`
-6. `/aprende` (blog)
+
+Las 5 usan `ProductLayout.astro`. Son **estructura, no contenido final**: los
+bloques que dependen de una decision de Francisco se marcan con el componente
+`Pendiente.astro`, que renderiza un `[PENDIENTE: ...]` **visible en la pagina**.
+Retirar todos esos marcadores es gate obligatorio ANTES del pase a PUBLICO.
+
+- `/seguros/auto` fue **retirada** (decision **D1**, 25/07, commit `96f629c`).
+  La decision de Sesion 2 de "6 productos" queda SUPERADA. Nunca estuvo
+  enlazada; solo era accesible por URL directa.
+- `/aprende` (blog) sigue **pendiente**, sin pagina creada.
 
 ---
 
-## REGLAS DURAS INVIOLABLES (resumen de las 41 reglas)
+## REGLAS DURAS INVIOLABLES (resumen de las 43 reglas)
 
 ### Herramientas
 - **R-01:** SIEMPRE pwsh 7 en Windows. NUNCA Windows PowerShell 5.1 ni ISE.
@@ -142,19 +152,31 @@ Paginas individuales (futuras, Fase 3):
 ### Compliance (Sesion 5)
 - **R-38:** Cruzar analisis legal con fuentes independientes antes de cerrar compliance. Cualquier afirmacion regulatoria importante (atribucion de credenciales, base legal LOPDP, decisiones SCVS) debe validarse con al menos 2 fuentes: documentacion oficial del organismo + analisis legal IA o humano externo.
 
-**Lista completa de las 41 reglas:** ver `docs/ERRORES-Y-APRENDIZAJES.md` seccion "Reglas operativas consolidadas".
+### Metodo de trabajo y frontend (Sesion 10)
+- **R-42:** Los prompts a Claude Code en este proyecto se escriben en **CoT + XML** (`<rol>`, `<contexto>`, `<objetivo>`, `<reglas_duras>`, `<razonamiento_inicial>`, `<pasos>` numerados con su mensaje de commit). El `<razonamiento_inicial>` es OBLIGATORIO: diagnostico con numeros de linea reales reportado a Francisco ANTES de editar. Un prompt sin diagnostico previo produce parches a sintomas.
+- **R-43:** **Deuda de capas CSS (hallazgo D6).** Las reglas base de enlaces de `web/src/styles/global.css` viven FUERA de toda `@layer`, asi que ganan a cualquier utilidad `text-*` de Tailwind v4 sobre un `<a>`, sin importar la especificidad. Mitigacion vigente y obligatoria: en botones con fondo dorado el color del texto va **inline** (`style="color:#08080d"`), nunca con utilidad Tailwind; para `:hover` se usa regla propia sin capa (patron `.btn-outline`). El fix de raiz esta DIFERIDO a sesion post-lanzamiento (P-47): **NO tocar las capas** hasta entonces.
+
+**Lista completa de las 43 reglas:** ver `docs/ERRORES-Y-APRENDIZAJES.md` seccion "Reglas operativas consolidadas".
+
+### CSP (hashes horneados en la imagen)
+`infra/nginx.conf` autoriza por hash los **2 unicos `<script>` inline** del build
+(toggle del menu movil + scroll-reveal). Si se toca el contenido de cualquiera de
+los dos, hay que **regenerar el hash** siguiendo `infra/README-hashes.md` y
+reconstruir la imagen Docker. Si el hash no cuadra, el navegador bloquea el script
+y la interaccion se rompe **en silencio**.
 
 ---
 
 ## Hallazgos criticos pendientes (H-01 a H-05)
 
-Detectados en analisis legal IA externo de Sesion 5. Requieren accion en Sesiones 6-10:
+Detectados en analisis legal IA externo de Sesion 5. Cuatro de los cinco siguen
+abiertos y son gate del pase a PUBLICO (no del staging protegido):
 
-- **H-01:** Politica de privacidad tiene 7 huecos LOPDP (corregir en Sesion 8)
-- **H-02:** DPD no registrado ante SPDP (bloqueado hasta SCVS personal Francisco)
-- **H-03:** Sitio antiguo con Meta Pixel (decidir en Sesion 9)
-- **H-04:** Aurora no declarada como decision automatizada (corregir en Sesion 8)
-- **H-05:** ✅ RESUELTO — credencial 572619 removida del sitio (E-23)
+- **H-01:** 7 huecos LOPDP en la politica de privacidad — auto-correccion tecnica hecha en Sesion 8 (`/privacidad` v2); falta la **revision legal humana** (P-07 + P-39). ABIERTO.
+- **H-02:** DPD no registrado ante SPDP (bloqueado hasta SCVS personal de Francisco, P-06). ABIERTO.
+- **H-03:** Sitio antiguo con Meta Pixel — decision aun no tomada (P-38, 3 opciones sobre la mesa). ABIERTO.
+- **H-04:** Aurora no declarada como decision automatizada (Art. 12.4 LOPDP) — cubierto por el alcance de P-35. Verificar en el texto vigente antes del pase a publico.
+- **H-05:** ✅ RESUELTO — credencial 572619 removida del sitio (E-23).
 
 ---
 
@@ -166,35 +188,48 @@ sitio-bg-infra/
 ├── .gitignore (endurecido con *.bak.*)
 ├── docs/
 │   ├── PLAN-MAESTRO-v2.md          ← doc maestro (LEER PRIMERO)
-│   ├── PENDIENTES.md                ← 40 items pendientes
-│   ├── ERRORES-Y-APRENDIZAJES.md    ← 24 errores + 9 NM + 41 reglas
+│   ├── PENDIENTES.md                ← 47 items (P-01 a P-47) + 14 resueltos
+│   ├── ERRORES-Y-APRENDIZAJES.md    ← 24 errores + 9 NM + 43 reglas
 │   ├── ESTADO-GENERAL-PROYECTO.md   ← estado consolidado Sesion 5
 │   ├── DIAGRAMA-FLUJO-PROYECTO.md   ← visualizacion completa
 │   ├── IDENTIDAD-MARCA.md           ← Brand Book extraido
-│   └── HITO-01-runbook-vps.md       ← historico HITO 01
-├── infra/                            (pendiente Fase 2)
-└── web/                              (Astro 6 con home + privacidad)
+│   ├── REPORTE-SESION-10.md         ← bitacora Sesion 10-11 + D1..D6 + QA
+│   ├── INVENTARIO-TILDES_2026-07-25.md ← auditoria D3 (419 correcciones)
+│   ├── DEPLOY-STAGING-runbook.md    ← runbook del deploy a staging
+│   ├── continuidad/ hitos/ prompts/ ← snapshots e historicos
+│   └── hitos/HITO-01-runbook-vps.md ← historico HITO 01
+├── infra/                            (paquete de deploy, horneado en la imagen)
+│   ├── Dockerfile + docker-compose.yml
+│   ├── nginx.conf                   ← CSP con los 2 hashes sha256
+│   ├── README-hashes.md             ← como regenerar los hashes CSP
+│   └── caddyfile-snippet.txt
+└── web/                              (Astro 6 — 10 paginas)
     ├── package.json
     ├── astro.config.mjs
-    ├── public/images/francisco-barrera.jpg (foto IA D-24)
+    ├── public/images/francisco-barrera.jpg (foto IA D-24, 54.8 KB tras P-44)
     └── src/
-        ├── styles/ (tokens.css, global.css con animations)
-        ├── layouts/Layout.astro (con SEO + 3 JSON-LD)
-        ├── components/ (Logo, Header sticky, Footer)
-        └── pages/ (index.astro, privacidad.astro)
+        ├── styles/ (tokens.css, global.css con animations + dinamismo)
+        ├── layouts/ (Layout.astro con SEO + 3 JSON-LD, ProductLayout.astro)
+        ├── components/ (Logo, Header sticky con dropdown, Footer, Pendiente)
+        └── pages/ (index, sobre-mi, contacto, privacidad, inversion, 404,
+                    seguros/{vida-termino, vida-indexada,
+                             salud-nacional, salud-internacional})
 ```
 
 ---
 
-## Estado actual (al cierre de Sesion 9, 19/07/2026 — deploy a staging)
+## Estado actual (28/07/2026 — merge de Fase 3 estructural a `main`)
 
-- **HEAD:** cierre de Sesion 9 (commit `docs(claude-md)` de este cierre; ver `git log`). Base previa: `b09b10e`.
-- **Deploy:** STAGING vivo en `https://staging.barreraglobal.com` (basicauth + `X-Robots-Tag: noindex`). Runbook 8/8. Sitio aun NO publico.
-- **VPS:** `caddy` en dos redes (stack_net con default gateway + sitio_bg_net con `--gw-priority=-100`); `sitio-bg-web` healthy en 172.22.10.10; Caddyfile 5562 -> 5776 bytes.
-- **Paginas:** 4 (home, /sobre-mi, /contacto, /privacidad v2).
-- **Incidente Sesion 9:** 1 contenido (~5 min, B4 v1, degradacion parcial de 3 dominios Aurora) — E-24, primer rollback del proyecto. Cero perdida de datos.
+- **HEAD de `main`:** merge commit `4981b93` (`--no-ff` de `sesion-10-estructura`) + el commit de este CLAUDE.md v2.2. Base previa: `27ae9a2` (intacto desde el 22/07).
+- **Lo que entro en el merge:** 25 commits, 22 archivos, +2368 / -330 lineas. Rama `sesion-10-estructura` **conservada** (se borra cuando staging quede verificado).
+- **Paginas: 10** — `/`, `/sobre-mi`, `/contacto`, `/privacidad`, `/inversion`, `/seguros/vida-termino`, `/seguros/vida-indexada`, `/seguros/salud-nacional`, `/seguros/salud-internacional` y `/404`. Build local verificado: 10/10 sin errores.
+- **CSP:** los 2 hashes de `infra/nginx.conf` coinciden con los 2 scripts inline del build en las 10 paginas (cruce bidireccional, sin huerfanos). El hash del toggle cambio en D3 (`sha256-IpuDn/OD…` -> `sha256-aOPTArMu…`); el del scroll-reveal (`sha256-Qra3eTJV…`) no cambio.
+- **Deploy:** STAGING vivo en `https://staging.barreraglobal.com` (basicauth + `X-Robots-Tag: noindex`), pero **sirviendo la version de 4 paginas** de Sesion 9. Falta redeploy con `main` post-merge para que refleje las 10.
+- **VPS:** sin tocar desde Sesion 9. `caddy` en dos redes (stack_net con default gateway + sitio_bg_net con `--gw-priority=-100`); `sitio-bg-web` healthy en 172.22.10.10.
+- **Contenido:** 5 paginas de producto llevan marcadores `[PENDIENTE: ...]` visibles (decisiones de contenido de Francisco). Retirarlos es gate pre-PUBLICO.
+- **Incidentes:** 1 en total (Sesion 9, ~5 min, degradacion parcial de 3 dominios Aurora) — E-24, primer rollback del proyecto. Cero perdida de datos. Sesiones 10-11: cero incidentes, VPS no tocado.
 - **Aurora downtime real acumulado:** ~5 minutos (unico incidente, contenido).
-- **Proximo gate:** P-39 revision legal humana ANTES del pase a PUBLICO.
+- **Proximos gates:** (1) redeploy de staging con las 10 paginas; (2) P-43 links legales del footer que dan 404; (3) retirar los `[PENDIENTE: ...]`; (4) **P-39 revision legal humana ANTES del pase a PUBLICO**.
 
 ---
 
@@ -272,7 +307,7 @@ Si Claude detecta desincronizacion entre estos 3 lugares, ALERTAR a Francisco an
 ## Checklist al iniciar cada sesion
 
 ```
-[ ] Leer ERRORES-Y-APRENDIZAJES.md (al menos las reglas R-01 a R-41)
+[ ] Leer ERRORES-Y-APRENDIZAJES.md (al menos las reglas R-01 a R-43)
 [ ] Leer ESTADO-GENERAL-PROYECTO.md (saber donde estamos)
 [ ] Confirmar pwsh 7 activo ($PSVersionTable.PSVersion)
 [ ] cd al repo + git pull origin main
