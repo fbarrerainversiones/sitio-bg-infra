@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  sitemap.xml — barreraglobal.com
+
+  11 URLs = las 12 paginas del build menos /404, que no se lista (es noindex).
+  Cada <loc> replica EXACTAMENTE la etiqueta <link rel="canonical"> que emite
+  su pagina: sin barra final, salvo la raiz.
+
+  Sin <changefreq> ni <priority>: Google los ignora desde hace anos y solo
+  agregan senales falsas. <lastmod> es la fecha de esta publicacion; el cambio
+  de footer y de canonical toca el HTML de las 11.
+
+  MANTENIMIENTO: es estatico y a mano. Si se agrega o se retira una pagina, hay
+  que actualizarlo aca. Alternativa post-lanzamiento: la integracion oficial
+  @astrojs/sitemap, que lo genera en cada build.
+-->
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+
+  <url>
+    <loc>https://barreraglobal.com/</loc>
+    <lastmod>2026-08-03</lastmod>
+  </url>
+
+  <url>
+    <loc>https://barreraglobal.com/sobre-mi</loc>
+    <lastmod>2026-08-03</lastmod>
+  </url>
+
+  <url>
+    <loc>https://barreraglobal.com/contacto</loc>
+    <lastmod>2026-08-03</lastmod>
+  </url>
+
+  <url>
+    <loc>https://barreraglobal.com/seguros/vida-termino</loc>
+    <lastmod>2026-08-03</lastmod>
+  </url>
+
+  <url>
+    <loc>https://barreraglobal.com/seguros/vida-indexada</loc>
+    <lastmod>2026-08-03</lastmod>
+  </url>
+
+  <url>
+    <loc>https://barreraglobal.com/seguros/salud-nacional</loc>
+    <lastmod>2026-08-03</lastmod>
+  </url>
+
+  <url>
+    <loc>https://barreraglobal.com/seguros/salud-internacional</loc>
+    <lastmod>2026-08-03</lastmod>
+  </url>
+
+  <url>
+    <loc>https://barreraglobal.com/inversion</loc>
+    <lastmod>2026-08-03</lastmod>
+  </url>
+
+  <url>
+    <loc>https://barreraglobal.com/privacidad</loc>
+    <lastmod>2026-08-03</lastmod>
+  </url>
+
+  <url>
+    <loc>https://barreraglobal.com/terminos</loc>
+    <lastmod>2026-08-03</lastmod>
+  </url>
+
+  <url>
+    <loc>https://barreraglobal.com/cookies</loc>
+    <lastmod>2026-08-03</lastmod>
+  </url>
+
+</urlset>
