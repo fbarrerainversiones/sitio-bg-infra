@@ -84,7 +84,11 @@ const REDES = [
             </a>
           </li>
           <li>
-            <a href="/lopdp" class="font-body text-sm text-tx-muted hover:text-gd transition-colors">
+            {/* P-43: /lopdp nunca tuvo pagina y daba 404. Se repunta a
+                /privacidad, que ya cubre los 17 items del Art. 12 LOPDP,
+                siguiendo la recomendacion registrada en PENDIENTES.md.
+                La ruta /lopdp queda reservada para cuando haya contenido propio. */}
+            <a href="/privacidad" class="font-body text-sm text-tx-muted hover:text-gd transition-colors">
               Cumplimiento LOPDP
             </a>
           </li>
