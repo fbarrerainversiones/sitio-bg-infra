@@ -10,7 +10,12 @@ const FECHA_ACTUALIZACION = "1 de junio de 2026";
 const VERSION = "1.0";
 ---
 
-<Layout title={TITLE} description={DESCRIPTION} noindex={true}>
+{/* Indexable desde el pase a publico: /privacidad entra en el sitemap junto a
+    /terminos y /cookies, y una URL enviada en el sitemap con "noindex, nofollow"
+    es una contradiccion que Search Console marca como error. El bloqueo de
+    indexacion del entorno de staging NO depende de esto: lo da la cabecera
+    X-Robots-Tag del proxy, no la pagina. */}
+<Layout title={TITLE} description={DESCRIPTION}>
 
   <Header />
 
