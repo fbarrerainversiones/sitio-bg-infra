@@ -26,7 +26,13 @@ const {
 } = Astro.props;
 
 const SITE_URL = "https://barreraglobal.com";
-const canonicalURL = canonical ?? new URL(Astro.url.pathname, SITE_URL).toString();
+// Sin barra final, salvo la raiz. Las 5 paginas de producto ya pasan su
+// canonical a mano SIN barra ("/inversion", "/seguros/vida-termino"); el
+// fallback la agregaba ("/contacto/", "/sobre-mi/", "/privacidad/") y el
+// sitio quedaba con dos formas de canonical. El sitemap solo puede declarar
+// una: se normaliza a la forma que ya usaban las paginas de producto.
+const pathname = Astro.url.pathname.replace(/(.+)\/$/, "$1");
+const canonicalURL = canonical ?? new URL(pathname, SITE_URL).toString();
 const ogImageURL = new URL(ogImage, SITE_URL).toString();
 
 // Schema.org JSON-LD (insertado en todas las paginas)
