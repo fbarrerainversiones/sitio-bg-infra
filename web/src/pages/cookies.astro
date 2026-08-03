@@ -1,0 +1,234 @@
+---
+import Layout from "../layouts/Layout.astro";
+import Header from "../components/Header.astro";
+import Footer from "../components/Footer.astro";
+
+/**
+ * Política de Cookies v1 (P-36 / P-43).
+ *
+ * Escrita sobre VERIFICACION, no sobre supuestos. Sweep del 02/08/2026 sobre
+ * `web/` (fuente) y `web/dist` (build):
+ *   - 0 cookies propias, 0 localStorage / sessionStorage / indexedDB
+ *   - 0 analitica, 0 pixeles, 0 etiquetas de terceros
+ *   - 0 <script src> externos, 0 preconnect / dns-prefetch
+ *   - tipografias self-hosted (65 archivos woff/woff2 servidos del propio dominio)
+ *   - la CSP de infra/nginx.conf refuerza esto: default-src 'none', connect-src
+ *     'none', img-src 'self', script-src 'self' + 2 hashes inline
+ *
+ * Lo unico que NO se puede afirmar desde el codigo es el comportamiento del
+ * proxy Cloudflare (el dominio esta proxied), que puede fijar cookies tecnicas
+ * de seguridad. Por eso se declara de forma explicita en vez de prometer
+ * "cero cookies" en absoluto. Coherente con la seccion 15 de /privacidad.
+ *
+ * Pendiente de validación legal humana: P-39 (marcado en docs/PENDIENTES.md).
+ */
+
+const TITLE = "Política de Cookies - Barrera Global";
+const DESCRIPTION = "Política de cookies de barreraglobal.com. Este sitio no instala cookies de rastreo, analítica ni publicidad, y no utiliza almacenamiento local del navegador.";
+
+const FECHA_ACTUALIZACION = "2 de agosto de 2026";
+const VERSION = "1.0";
+---
+
+<Layout title={TITLE} description={DESCRIPTION}>
+
+  <Header />
+
+  <main class="border-t border-gd-muted">
+
+    <section class="py-16 md:py-24">
+      <div class="max-w-3xl mx-auto px-6">
+
+        <a href="/" class="link-underline inline-flex items-center gap-2 text-sm font-mono text-gd hover:text-gd-light transition-colors mb-12">
+          ← Volver al inicio
+        </a>
+
+        <p class="font-mono text-xs text-gd uppercase tracking-widest mb-4">
+          Política de Cookies
+        </p>
+
+        <h1 class="text-4xl md:text-5xl font-display font-semibold text-tx mb-6 leading-tight">
+          Este sitio no
+          <span class="text-gd">te rastrea.</span>
+        </h1>
+
+        <div class="flex flex-wrap gap-x-6 gap-y-2 font-mono text-xs text-tx-muted mb-12 pb-8 border-b border-gd-muted">
+          <span>Versión {VERSION}</span>
+          <span>Actualizada: {FECHA_ACTUALIZACION}</span>
+          <span class="text-gd">Sin analítica · Sin publicidad</span>
+        </div>
+
+        <div class="font-body text-base text-tx-muted leading-relaxed space-y-12">
+
+          <section>
+            <h2 class="text-xl md:text-2xl font-display font-semibold text-tx mb-4">
+              1. Qué es una cookie
+            </h2>
+            <p>
+              Una cookie es un archivo pequeño que un sitio guarda en tu navegador para
+              recordar información entre visitas. Se usan para cosas legítimas, como mantener
+              una sesión abierta, y también para seguir tu comportamiento entre sitios con
+              fines publicitarios.
+            </p>
+          </section>
+
+          <section>
+            <h2 class="text-xl md:text-2xl font-display font-semibold text-tx mb-4">
+              2. Qué hace este sitio hoy
+            </h2>
+            <p>
+              <span class="text-tx">barreraglobal.com no instala cookies de rastreo, de
+              analítica ni de publicidad.</span> A la fecha de esta versión, el sitio tampoco
+              utiliza almacenamiento local del navegador.
+            </p>
+            <p class="mt-4">
+              En concreto, este sitio no incorpora:
+            </p>
+            <ul class="mt-4 space-y-2">
+              <li><span class="text-gd">·</span> Herramientas de analítica web (Google Analytics o equivalentes)</li>
+              <li><span class="text-gd">·</span> Píxeles ni etiquetas publicitarias (Meta Pixel, Google Ads u otros)</li>
+              <li><span class="text-gd">·</span> Botones sociales que carguen contenido de terceros dentro de la página</li>
+              <li><span class="text-gd">·</span> Almacenamiento local del navegador (<span class="font-mono text-xs">localStorage</span>, <span class="font-mono text-xs">sessionStorage</span>)</li>
+              <li><span class="text-gd">·</span> Técnicas de identificación por huella digital del dispositivo</li>
+            </ul>
+            <p class="mt-4">
+              Las tipografías se sirven desde nuestro propio dominio y no desde un proveedor
+              externo, precisamente para que tu visita no genere peticiones a terceros.
+            </p>
+          </section>
+
+          <section>
+            <h2 class="text-xl md:text-2xl font-display font-semibold text-tx mb-4">
+              3. Elementos técnicos de operación
+            </h2>
+            <p>
+              Para que un sitio funcione y se mantenga en pie hay elementos técnicos
+              inevitables. Estos son los que aplican aquí:
+            </p>
+            <ul class="mt-4 space-y-2">
+              <li>
+                <span class="text-gd">·</span> <span class="text-tx">Caché del navegador:</span>
+                tu navegador guarda copias de archivos estáticos (hojas de estilo, tipografías,
+                imágenes) para que el sitio cargue más rápido. No son cookies y no nos
+                devuelven información sobre ti.
+              </li>
+              <li>
+                <span class="text-gd">·</span> <span class="text-tx">Registros del servidor:</span>
+                el servidor deja constancia técnica de las solicitudes que recibe (fecha,
+                recurso solicitado, dirección IP, tipo de navegador), con fines de seguridad,
+                diagnóstico y continuidad del servicio.
+              </li>
+              <li>
+                <span class="text-gd">·</span> <span class="text-tx">Red de distribución y
+                seguridad:</span> el sitio se sirve a través de Cloudflare, que actúa como capa
+                de protección frente a tráfico malicioso. Ese proveedor puede establecer
+                cookies estrictamente necesarias de seguridad, por ejemplo para distinguir a
+                una persona de un bot automatizado. No se utilizan para perfilarte ni para
+                publicidad.
+              </li>
+            </ul>
+          </section>
+
+          <section>
+            <h2 class="text-xl md:text-2xl font-display font-semibold text-tx mb-4">
+              4. Por qué no ves un banner de consentimiento
+            </h2>
+            <p>
+              El banner de cookies existe para pedir permiso antes de instalar cookies que
+              <span class="text-tx">no</span> son necesarias: analítica, marketing,
+              personalización publicitaria. Como este sitio no instala ninguna de esas, no hay
+              nada que consentir todavía, y preferimos no mostrarte una ventana que no
+              corresponde.
+            </p>
+          </section>
+
+          <section>
+            <h2 class="text-xl md:text-2xl font-display font-semibold text-tx mb-4">
+              5. Enlaces que te llevan fuera del sitio
+            </h2>
+            <p>
+              Los botones de WhatsApp y los enlaces a redes sociales te llevan a plataformas de
+              terceros. Esas plataformas tienen sus propias cookies y sus propias políticas,
+              que no controlamos y que aplican desde el momento en que sales de
+              barreraglobal.com. Nada de eso se carga dentro de esta página.
+            </p>
+          </section>
+
+          <section>
+            <h2 class="text-xl md:text-2xl font-display font-semibold text-tx mb-4">
+              6. Si esto cambia
+            </h2>
+            <p>
+              Si en el futuro incorporamos analítica, remarketing o cualquier tecnología que
+              instale cookies no esenciales, haremos dos cosas antes de activarlas:
+              <span class="text-tx">actualizar esta política</span> con el detalle de cada
+              cookie (nombre, finalidad, duración y proveedor) y
+              <span class="text-tx">solicitar tu consentimiento previo</span> mediante un
+              banner que te permita aceptar o rechazar por categoría.
+            </p>
+            <p class="mt-4">
+              Mientras eso no ocurra, lo que dice esta página es lo que hace el sitio.
+            </p>
+          </section>
+
+          <section>
+            <h2 class="text-xl md:text-2xl font-display font-semibold text-tx mb-4">
+              7. Cómo controlar las cookies desde tu navegador
+            </h2>
+            <p>
+              Con independencia de lo anterior, tu navegador te permite ver, bloquear y
+              eliminar cookies en cualquier momento, y navegar en modo privado. Encontrarás
+              esas opciones en la configuración de privacidad y seguridad de Chrome, Safari,
+              Firefox o Edge. Bloquear cookies no afecta el funcionamiento de este sitio.
+            </p>
+          </section>
+
+          <section>
+            <h2 class="text-xl md:text-2xl font-display font-semibold text-tx mb-4">
+              8. Relación con las demás políticas
+            </h2>
+            <p>
+              El tratamiento de tus datos personales, incluidos los que compartes al escribir
+              por WhatsApp, se describe en la
+              <a href="/privacidad" class="link-underline text-gd hover:text-gd-light transition-colors">Política
+              de Privacidad</a>, conforme a la Ley Orgánica de Protección de Datos Personales
+              (LOPDP) del Ecuador. Las condiciones de uso del sitio están en los
+              <a href="/terminos" class="link-underline text-gd hover:text-gd-light transition-colors">Términos
+              y Condiciones</a>.
+            </p>
+          </section>
+
+          <section>
+            <h2 class="text-xl md:text-2xl font-display font-semibold text-tx mb-4">
+              9. Contacto
+            </h2>
+            <p>
+              Para consultas sobre esta política de cookies, escríbenos a:
+            </p>
+            <div class="mt-4 p-4 border border-gd-muted rounded-md bg-bg-elev-1">
+              <p class="font-mono text-sm text-gd">fbarrera.inversiones@gmail.com</p>
+              <p class="font-mono text-xs text-tx-muted mt-2">
+                Ambato, Tungurahua, Ecuador · WhatsApp +593 99 802 7819
+              </p>
+            </div>
+          </section>
+
+          <div class="mt-12 pt-8 border-t border-gd-muted">
+            <a
+              href="/"
+              class="link-underline inline-flex items-center gap-2 text-base font-body text-gd hover:text-gd-light transition-colors"
+            >
+              ← Volver al inicio
+            </a>
+          </div>
+
+        </div>
+
+      </div>
+    </section>
+
+  </main>
+
+  <Footer />
+
+</Layout>
