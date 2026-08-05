@@ -2,7 +2,7 @@
 
 > **Lista viva única.** Todos los cabos sueltos del proyecto en un solo archivo. Se actualiza con cada sesión que cierre un item o detecte uno nuevo.
 
-**Última actualización:** 25 de julio de 2026 (alta de P-45, P-46 y P-47; P-44 pasa a parcial)
+**Última actualización:** 4 de agosto de 2026 (rama `publicacion-v1`: **política de privacidad v3** publicada con el dictamen verbal del abogado; **P-48 CERRADO** (R-16); P-39 pasa a esperar el visto bueno **escrito**; alta de **P-51**. El 03/08: P-43 cerrado como R-15, P-37 entregado v1, P-36 parcial, alta de P-48, P-49 y P-50)
 **Documento maestro de referencia:** [`PLAN-MAESTRO-v2.md`](PLAN-MAESTRO-v2.md)
 
 ---
@@ -96,7 +96,7 @@ Cuando un item se cierra, se mueve a la sección **Resueltos** al final con la f
 
 ### P-07 — Revisión legal de la política de privacidad LOPDP
 
-- **Estado:** 🟡 EN CURSO (auto-corrección Sesión 8, revisión humana Sesión 11)
+- **Estado:** 🟡 EN CURSO — **superado en su mayor parte por la v3** (04/08/2026): el dictamen verbal del abogado humano ya está incorporado. Lo que resta es el **visto bueno escrito**, que se sigue en **P-39**.
 - **Criticidad:** alta
 - **Bloquea a:** lanzamiento público (Fase 2 → producción).
 - **Owner:** Francisco (decide abogado) + Claude (corrección técnica).
@@ -396,30 +396,30 @@ Cuando un item se cierra, se mueve a la sección **Resueltos** al final con la f
 
 ### P-35 — Reescritura de política de privacidad v2 (cerrar 7 huecos LOPDP)
 
-- **Estado:** 🟡 EN CURSO (planificada para Sesión 8)
+- **Estado:** 🟢 LISTO — **cubierto y superado por la v3** (04/08/2026, commit `65b3dd4`). Los 7 huecos se cerraron primero en la v2 (Sesión 8) y la v3 los reemplaza con el texto del abogado. Se cierra junto con **P-39**, cuando llegue el visto bueno escrito.
 - **Criticidad:** alta
-- **Bloquea a:** Fase 2 (lanzamiento a producción).
+- **Bloquea a:** Fase 2 (lanzamiento a producción), solo a través de P-39.
 - **Owner:** Claude (corrección técnica) + Francisco (aprobación).
 - **Detalle:** ver detalle completo en P-07. Los 7 huecos detectados en H-01 deben cerrarse antes del deploy. Cambios principales: base legal datos sensibles → consentimiento expreso separado (Art. 4 LOPDP); declarar Aurora como decisión automatizada (Art. 12.4); agregar derechos faltantes; completar datos contacto del responsable; anclar transferencias internacionales en Resolución SPDP-SPD-2026-0004-R.
 - **Próximo paso:** Sesión 8 reescribe `/privacidad` con los 7 huecos cerrados. Output: `src/pages/privacidad.astro` v2 + commit + push.
 
 ### P-36 — Política de cookies + Consent Mode v2
 
-- **Estado:** 🟡 EN CURSO (planificada para Sesión 9)
-- **Criticidad:** alta
-- **Bloquea a:** Fase 2 (lanzamiento a producción).
+- **Estado:** 🟡 EN CURSO — **página `/cookies` v1 ENTREGADA** el 03/08/2026 en la rama `publicacion-v1` (commit `6b106e0`). **Queda abierto solo el banner + Consent Mode v2**, que hoy NO aplica: no hay una sola cookie no esencial que consentir (verificado, ver R-15). El banner entra el día que se agregue analítica o remarketing.
+- **Criticidad:** alta → **baja mientras el sitio no instale cookies no esenciales**
+- **Bloquea a:** ya NO bloquea el lanzamiento (el gate era el 404 del footer, cerrado en P-43/R-15).
 - **Owner:** Claude + Francisco.
-- **Detalle:** el sitio actual NO tiene banner de cookies ni página `/cookies` porque hoy no usa analytics. Cuando agreguemos Google Analytics, Meta Pixel u otros trackers, banner es obligatorio (LOPDP + GDPR adaptable). Implementación: CookieYes (free hasta 25k visitas/mes, ver P-16) con Consent Mode v2. Cookies necesarias (sitio funciona) cargan siempre. Cookies opcionales (analytics, marketing) requieren consentimiento expreso.
-- **Próximo paso:** Sesión 9 decide CookieYes vs Cookiebot definitivo (P-16) + implementa banner + crea página `/cookies` + tipifica cookies usadas.
+- **Detalle:** el sitio actual NO tiene banner de cookies porque hoy no usa analytics. La página `/cookies` ya existe y declara exactamente eso, sobre verificación del fuente y del build. Cuando agreguemos Google Analytics, Meta Pixel u otros trackers, banner es obligatorio (LOPDP + GDPR adaptable). Implementación: CookieYes (free hasta 25k visitas/mes, ver P-16) con Consent Mode v2. Cookies necesarias (sitio funciona) cargan siempre. Cookies opcionales (analytics, marketing) requieren consentimiento expreso.
+- **Próximo paso:** NO implementar banner ahora (sería pedir consentimiento para nada). Cuando se decida agregar analítica: elegir CookieYes vs Cookiebot (P-16), implementar Consent Mode v2, tipificar cada cookie (nombre, finalidad, duración, proveedor) y actualizar `/cookies`, que ya se compromete por escrito a hacerlo antes de activarlas.
 
 ### P-37 — Términos y Condiciones del sitio
 
-- **Estado:** 🟡 EN CURSO (planificada para Sesión 10)
+- **Estado:** 🟢 LISTO — **`/terminos` v1 ENTREGADA** el 03/08/2026 en la rama `publicacion-v1` (commit `cd501fd`). Falta únicamente la validación legal humana, que vive en **P-39**. No se cierra hasta que P-39 se ejecute.
 - **Criticidad:** alta
-- **Bloquea a:** Fase 2 (lanzamiento a producción).
+- **Bloquea a:** Fase 2 (lanzamiento a producción) solo a través de P-39.
 - **Owner:** Claude (draft) + Francisco (aprobación) + abogado humano (validación final, ver P-39).
 - **Detalle:** documento protectivo que debe incluir: (1) disclaimer de cotizaciones (referenciales, no vinculantes, sujetas a evaluación de carrier), (2) limitación responsabilidad sobre Aurora (es asistencia automatizada, no asesoría profesional individualizada con efectos jurídicos), (3) emisión de póliza siempre por aseguradora (no por el sitio ni por Francisco/Insurance Trust), (4) disclaimers SCVS Art. 11.6 (reserva de cotización) y Art. 12.12 (prohibición de promesas), (5) jurisdicción y ley aplicable (Ecuador, Art. 17 LOPDP).
-- **Próximo paso:** Sesión 10 crea `src/pages/terminos.astro` con draft completo + commit. Validación humana en Sesión 11 (P-39).
+- **Próximo paso:** llevar el texto v1 a P-39. Cobertura entregada: naturaleza informativa del sitio (sin venta en línea, sin pagos, sin cuentas de usuario, sin formularios), cotizaciones referenciales no vinculantes (Art. 11.6 SCVS), sin promesas (Art. 12.12 SCVS), póliza emitida por la aseguradora y prevaleciente sobre el sitio, Aurora como asistente automatizado orientativo, propiedad intelectual, limitación de responsabilidad y ley aplicable Ecuador. **NO se declaró jurisdicción de una ciudad concreta** — es una decisión legal que debe confirmar el abogado.
 
 ### P-38 — Decisión sobre sitio web antiguo con Meta Pixel
 
@@ -435,12 +435,23 @@ Cuando un item se cierra, se mueve a la sección **Resueltos** al final con la f
 
 ### P-39 — Reunión con abogado humano para validación legal
 
-- **Estado:** ⚪ POR DECIDIR (planificada Sesión 11)
+- **Estado:** 🟡 EN CURSO — **dictamen verbal del abogado ya incorporado** en la política de privacidad **v3** (04/08/2026, rama `publicacion-v1`). **PENDIENTE el visto bueno ESCRITO**, que es lo que falta para publicar. El abogado revisará **las páginas renderizadas en staging**, no el markdown.
 - **Criticidad:** alta
-- **Bloquea a:** Fase 2 (deploy a producción con respaldo legal).
+- **Bloquea a:** Fase 2 (deploy a producción con respaldo legal). **Sigue siendo EL gate.**
 - **Owner:** Francisco (agendar) + abogado especializado en LOPDP/SCVS Ecuador.
-- **Detalle:** después de Sesión 8-10 tendremos 3 documentos listos: `/privacidad` v2 + `/cookies` + `/terminos`. Antes del deploy, llevarlos a abogado humano REAL (no más análisis IA) para validación vinculante. Preguntas a llevar: (1) `/privacidad` cumple Art. 12 LOPDP completo, (2) qué docs faltan según experto local, (3) registro SPDP DPD - timing y procedimiento, (4) restricciones SCVS para sitio propio bajo paraguas Insurance Trust, (5) marca SENADI - costos y proceso, (6) figura legal: persona natural vs jurídica para escalar, (7) tarifas razonables.
-- **Próximo paso:** Sesión 11 - reunión presencial o virtual con abogado. Llevar los 3 documentos impresos o PDF. Costo estimado: $80-150 USD por revisión (no redacción desde cero).
+- **Pregunta abierta que dejó esta implementación:** el §9 de la v3 dice que «al ingresar por primera vez, el sitio muestra un aviso informativo». Se implementó como **línea permanente al pie** en las 12 páginas, no como banner de primera visita: un banner exigiría JavaScript y almacenamiento para recordar el descarte, que es justo lo que el mismo §9 declara que el sitio no usa. **¿El abogado da por cumplido el principio de transparencia con la línea permanente?** Si exige el banner de primera visita, hay que revisar también el texto del §9 y de `/cookies`.
+- **Alcance actualizado (03/08/2026):** los **tres** documentos ya existen y son los que el abogado valida:
+
+  | Documento | Versión | Entregado en |
+  |---|---|---|
+  | `/privacidad` | **v3 (03/08/2026, dictamen verbal incorporado)** | rama `publicacion-v1`, commit `65b3dd4` · fuente: `docs/legal/POLITICA-PRIVACIDAD-V3-2026-08-03.md` (`398b039`) |
+  | `/terminos` | **v1 (1.0, 02/08/2026)** | rama `publicacion-v1`, commit `cd501fd` |
+  | `/cookies` | **v1 (1.0, 02/08/2026)** | rama `publicacion-v1`, commit `6b106e0` |
+
+  Los tres textos son **v1 PENDIENTE DE VALIDACIÓN LEGAL HUMANA**. Esa marca vive **en este documento, no en las páginas**: `/terminos` y `/cookies` se publican sin ningún cartel de borrador, porque un disclaimer de "esto todavía no lo revisa un abogado" en un sitio público resta más de lo que protege. (Excepción heredada: `/privacidad` **sí** muestra hoy un recuadro "DISCLAIMER OPERATIVO" desde Sesión 8 — ver pregunta 9.)
+
+- **Detalle:** llevar los tres a abogado humano REAL (no más análisis IA) para validación vinculante. Preguntas a llevar: (1) `/privacidad` cumple Art. 12 LOPDP completo, (2) qué docs faltan según experto local, (3) registro SPDP DPD - timing y procedimiento, (4) restricciones SCVS para sitio propio bajo paraguas Insurance Trust, (5) marca SENADI - costos y proceso, (6) figura legal: persona natural vs jurídica para escalar, (7) tarifas razonables, **(8)** si las cookies técnicas que pueda fijar el proxy Cloudflare exigen algo más que la mención que ya hace `/cookies` (hoy el sitio no instala ninguna cookie propia), **(9)** si el recuadro "DISCLAIMER OPERATIVO" de `/privacidad` debe seguir visible una vez el sitio sea público o se retira al validar, **(10)** si conviene declarar jurisdicción de una ciudad concreta en `/terminos` — la v1 dice solo "jueces y tribunales competentes del Ecuador".
+- **Próximo paso:** reunión presencial o virtual con abogado antes del pase a PÚBLICO. Llevar los tres documentos impresos o PDF. Costo estimado: $80-150 USD por revisión (no redacción desde cero). **Sigue siendo EL gate del lanzamiento.**
 
 ### P-40 — Registro de marca "Barrera Global" ante SENADI
 
@@ -471,12 +482,12 @@ Cuando un item se cierra, se mueve a la sección **Resueltos** al final con la f
 
 ### P-43 — Links legales del footer que dan 404 (`/terminos`, `/cookies`, `/lopdp`)
 
-- **Estado:** 🟡 EN CURSO (dos de tres cubiertas por P-36 y P-37; `/lopdp` sin página planificada)
+- **Estado:** ✅ **CERRADO el 03/08/2026** — ver **R-15** en Resueltos. Las tres rutas quedan resueltas en la rama `publicacion-v1`: `/terminos` y `/cookies` creadas, y `/lopdp` repuntado a `/privacidad` (opción **b**, la que este mismo ítem recomendaba). Verificado sobre el build: **0** enlaces internos rotos en las 12 páginas.
 - **Criticidad:** alta (no se debe hacer deploy PÚBLICO con links del footer que devuelven 404).
-- **Bloquea a:** deploy público (Fase 2). Es un gate de higiene pre-deploy.
+- **Bloquea a:** ~~deploy público (Fase 2)~~ — ya no bloquea.
 - **Owner:** Claude (implementa/repunta) + Francisco (decide destino de `/lopdp`).
 - **Detalle:** el Footer (`web/src/components/Footer.astro`) tiene 4 links legales: `/privacidad` (L44, existe ✓), `/terminos` (L49), `/cookies` (L54) y `/lopdp` (L59). Hoy solo existe `/privacidad`; los otros tres devuelven 404. Cobertura actual: la página `/cookies` la crea **P-36** (Sesión 9) y `/terminos` la crea **P-37** (Sesión 10). `/lopdp` ("Cumplimiento LOPDP") NO tiene pendiente que la cree — hay que decidir: (a) crear página `/lopdp`, (b) repuntar el link a `/privacidad` (que ya cubre los 17 ítems Art. 12 LOPDP), o (c) quitar el link. Regla dura: antes del deploy PÚBLICO ningún link del footer puede dar 404. **Trazabilidad:** referenciado en bitácora Sesión 8 como P-46 (numeración de notas, no oficial).
-- **Próximo paso:** (1) resolver `/lopdp` (recomendación: repuntar a `/privacidad` y reservar `/lopdp` para cuando haya contenido propio); (2) confirmar que P-36 y P-37 entreguen `/cookies` y `/terminos` antes del deploy; (3) en cualquier STAGING protegido previo, no exponer los links rotos.
+- **Próximo paso:** ninguno. Queda **una decisión abierta de Francisco, cosmética**: el footer muestra ahora "Política de Privacidad" y "Cumplimiento LOPDP" apuntando ambos a `/privacidad`. Si prefiere no duplicar destino, se quita el segundo ítem (opción **c**): es un cambio de una línea en `Footer.astro`.
 
 ### P-44 — Optimizar foto `francisco-barrera.jpg` (551 KB)
 
@@ -513,6 +524,42 @@ Cuando un item se cierra, se mueve a la sección **Resueltos** al final con la f
 - **Owner:** Claude (implementa) + Francisco (aprueba el cambio visual, porque lo hay).
 - **Detalle:** ver **R-43** en `docs/ERRORES-Y-APRENDIZAJES.md` para el diagnóstico completo. Resumen: las reglas base de enlaces de `web/src/styles/global.css` van fuera de toda `@layer` y por eso anulan cualquier utilidad `text-*` de Tailwind sobre un `<a>`, sin importar la especificidad. Fue la causa de los dos botones con texto invisible corregidos el 25/07. La mitigación vigente (color inline en los CTAs dorados + regla propia `.btn-outline` para el hover) funciona y está documentada. El fix de raíz —envolver las reglas base en `@layer base`— haría que las utilidades ganen y **cambiaría el color de todos los enlaces del sitio** (los `text-tx-muted` del Header y del Footer, hoy anulados, pasarían a verse gris apagado en vez de dorado). Eso es un rediseño y toca el aspecto ya aprobado visualmente. **Trazabilidad:** decisión **D6** en `docs/REPORTE-SESION-10.md`.
 - **Próximo paso:** sesión dedicada **después del lanzamiento**. Envolver el bloque base en `@layer base`, revisar página por página el cambio de color de enlaces, y recién ahí decidir si se conserva el aspecto actual con reglas explícitas o se adopta el nuevo. Hasta entonces **NO tocar las capas** y respetar la mitigación de R-43.
+
+### P-48 — `og-default.png` no existe: la vista previa al compartir sale rota
+
+- **Estado:** ✅ **CERRADO el 04/08/2026** (commit `f64d53c`) — ver **R-16** en Resueltos. Falta únicamente que **Francisco apruebe la pieza visualmente**; el defecto técnico (etiqueta apuntando a un archivo inexistente) ya no existe.
+- **Criticidad:** **alta para el lanzamiento**, aunque no rompa ninguna página.
+- **Bloquea a:** nada técnico. Afecta directo al canal principal del negocio.
+- **Owner:** Francisco (aprueba la imagen) + Claude (la conecta).
+- **Detalle:** `Layout.astro` declara `ogImage = "/og-default.png"` y emite `og:image` + `twitter:image` apuntando a `https://barreraglobal.com/og-default.png` **en las 12 páginas**. Ese archivo **no existe** en `web/public/` ni en el build (verificado). Consecuencia: cada vez que alguien comparta un enlace del sitio por WhatsApp, Facebook o LinkedIn, la tarjeta de vista previa sale **sin imagen**. Para un negocio cuyo canal de entrada es justamente WhatsApp, es la primera impresión del sitio y hoy está rota. Es **preexistente**, no lo introdujo esta rama.
+- **Próximo paso:** una vez el sitio esté en línea, verificar con el depurador de enlaces de Facebook y compartiendo el enlace a un WhatsApp propio. **Nota de tipografía:** la pieza se generó con **Garamond** del sistema, no con Cormorant Garamond: Fontsource entrega la fuente en `.woff/.woff2` y GDI+ solo carga `.ttf/.otf`. Es la misma familia histórica y el resultado es coherente con el logo tipográfico, que también es provisional (D-23). Si Francisco quiere la Cormorant exacta, hay que rehacer la pieza en una herramienta de diseño.
+
+### P-49 — Runtime de React (193 KB) que se hornea en la imagen y nadie usa
+
+- **Estado:** 🔵 BACKLOG (hallazgo del 03/08/2026, rama `publicacion-v1`)
+- **Criticidad:** baja (no lo descarga ningún visitante).
+- **Bloquea a:** nada.
+- **Owner:** Claude.
+- **Detalle:** el build emite `dist/_astro/client.*.js`, **193 KB** de runtime de React que produce la integración `@astrojs/react`. Verificado: **0 páginas lo referencian**, porque el sitio no tiene ni una isla React. No afecta la performance del visitante (nunca se pide), pero viaja dentro de la imagen Docker y ensucia la lectura del build. Retirar la integración toca `astro.config.mjs` y `package.json`; no se hace en esta rama para no mover dependencias a tres días del lanzamiento.
+- **Próximo paso:** post-lanzamiento, decidir si el sitio va a usar islas React. Si no, quitar `@astrojs/react` + `react` + `react-dom` y rebuildear. Si sí, dejarlo como está.
+
+### P-50 — `sitemap.xml` estático: se mantiene a mano
+
+- **Estado:** 🔵 BACKLOG (alta del 03/08/2026, rama `publicacion-v1`)
+- **Criticidad:** baja hoy / media apenas se agreguen páginas (`/aprende`, `/aseguradoras`).
+- **Bloquea a:** nada.
+- **Owner:** Claude.
+- **Detalle:** `web/public/sitemap.xml` se escribió a mano con las 11 URLs públicas. Funciona y es exacto hoy, pero **no se actualiza solo**: cualquier página nueva que no se agregue a mano queda fuera del sitemap, y cualquier página retirada queda listada apuntando a un 404. El riesgo es que se olvide, no que falle.
+- **Próximo paso:** post-lanzamiento, evaluar la integración oficial `@astrojs/sitemap`, que lo genera en cada build a partir de las rutas reales. Ojo: genera `sitemap-index.xml` + `sitemap-0.xml`, así que hay que actualizar la referencia de `robots.txt`. Mientras tanto, **regla operativa: página nueva = entrada nueva en `sitemap.xml` en el mismo commit.**
+
+### P-51 — `privacidad@barreraglobal.com` no existe: configurar y PROBAR recepción
+
+- **Estado:** 🔴 BLOQUEADO por tarea manual de Francisco (alta del 04/08/2026, rama `publicacion-v1`)
+- **Criticidad:** **alta — PRE-REQUISITO del switch a público.**
+- **Bloquea a:** el pase a PÚBLICO. No bloquea staging.
+- **Owner:** **Francisco** (es tarea manual en Cloudflare; no se puede hacer desde este repo).
+- **Detalle:** la política de privacidad **v3** publica `privacidad@barreraglobal.com` como canal para ejercer derechos LOPDP, y lo hace **cuatro veces** (§1 contacto del responsable, §8 detalle de transferencias, §10 ejercicio de derechos con plazo de 15 días, §13 reclamos). **Esa casilla todavía no existe.** Publicar un canal de derechos que no recibe correo es peor que no publicarlo: se promete por escrito un plazo de respuesta de 15 días sobre una dirección que rebota. Hasta ahora el sitio usaba `fbarrera.inversiones@gmail.com` (D-20 / DM-05, ver **P-04**), que sigue siendo el contacto en `/terminos`, `/cookies` y el footer — con la v3 el sitio queda con **dos** direcciones distintas según la página.
+- **Próximo paso:** (1) Francisco configura **Cloudflare Email Routing** en `barreraglobal.com` con la regla `privacidad@` → su bandeja real; (2) **enviar un correo de prueba desde fuera y confirmar que llega** — configurar sin probar no cuenta; (3) recién entonces el switch a público. Aprovechar el mismo paso para decidir si `/terminos`, `/cookies` y el footer se unifican a una dirección del dominio propio y cerrar **P-04**.
 
 ---
 ## 9. Decisiones cerradas (referencia rápida)
@@ -660,6 +707,22 @@ Lista de items que fueron cerrados, con fecha. Sirve de memoria del proyecto.
 - **Estado al cerrar:** 🟢 RESUELTO
 - **Resumen:** análisis legal IA externo en Sesión 5 reveló que la credencial 572619 que aparecía en Footer/index/privacidad como personal de Francisco es en realidad la credencial corporativa de Insurance Trust. Atribuirla al APS individual sería regulatoriamente incorrecto. Acción: removida de los 3 archivos, reemplazada por "credencial SCVS personal en tramite" (DM-07). Generó error documentado E-23.
 - **Commits relacionados:** `451121f` (fix de seguridad) + `3f77744` (corrección por backup commiteado por error + endurecimiento .gitignore + regla R-39 nueva).
+
+### R-15 — Links legales del footer que daban 404 (cierre de P-43)
+
+- **Cerrado:** 3 de agosto de 2026
+- **Estado al cerrar:** 🟢 RESUELTO
+- **Resumen:** las tres rutas legales que el footer enlazaba sin destino quedaron resueltas en la rama `publicacion-v1`. `/terminos` v1 creada (commit `cd501fd`), `/cookies` v1 creada (commit `6b106e0`) y `/lopdp` repuntado a `/privacidad` (commit `faa00cf`), que es la opción (b) recomendada por el propio P-43. Verificación sobre el build, no sobre el fuente: **369 referencias internas, 13 rutas distintas, 0 rotas** en las 12 páginas; **0** apariciones residuales de `href="/lopdp"`.
+- **Nota de alcance:** cierra el **gate de higiene**, no el gate legal. Los textos de `/terminos` y `/cookies` son v1 y siguen pendientes de validación humana en **P-39**.
+- **Commits relacionados:** `cd501fd`, `6b106e0`, `faa00cf`.
+
+### R-16 — `og-default.png` inexistente (cierre de P-48)
+
+- **Cerrado:** 4 de agosto de 2026
+- **Estado al cerrar:** 🟢 RESUELTO
+- **Resumen:** las 12 páginas declaraban `og:image` y `twitter:image` hacia un archivo que no existía, así que toda tarjeta de vista previa compartida por WhatsApp salía sin imagen. Se generó la pieza 1200 × 630 con identidad de marca (fondo `#08080d`, "Barrera Global" en serif dorado `#c9a84c`, eyebrow "ARQUITECTURA FINANCIERA" espaciado, filete, tagline y dominio al pie), **26,3 KB**. Verificado sobre el build: el archivo llega a `dist/` y las **24** etiquetas (`og:image` + `twitter:image` de las 12 páginas) resuelven a URL absoluta.
+- **Nota de alcance:** cierra el defecto técnico. La **aprobación visual de Francisco** sigue pendiente, igual que la verificación en vivo con el depurador de Facebook una vez publicado el sitio.
+- **Commits relacionados:** `f64d53c`.
 
 ---
 **Fin del documento PENDIENTES.md.**

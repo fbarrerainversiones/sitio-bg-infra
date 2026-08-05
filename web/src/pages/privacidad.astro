@@ -3,14 +3,30 @@ import Layout from "../layouts/Layout.astro";
 import Header from "../components/Header.astro";
 import Footer from "../components/Footer.astro";
 
-const TITLE = "Política de Privacidad - Barrera Global";
-const DESCRIPTION = "Política de tratamiento de datos personales conforme a la Ley Orgánica de Protección de Datos Personales (LOPDP) del Ecuador. Cumplimiento Art. 12.";
+/**
+ * Política de Privacidad v3.
+ *
+ * El cuerpo de esta página es una TRANSCRIPCION VERBATIM de
+ * `docs/legal/POLITICA-PRIVACIDAD-V3-2026-08-03.md`, el texto que Francisco
+ * trajo del abogado con el dictamen verbal incorporado. NO se redacta ni se
+ * "mejora" nada acá: cualquier cambio de fondo se hace primero en el archivo
+ * fuente y después se transcribe.
+ *
+ * La sección final "NOTAS — DELTA" del archivo fuente es interna (checklist de
+ * validación para el abogado) y NO se publica.
+ *
+ * El recuadro DISCLAIMER OPERATIVO se conserva: falta el visto bueno ESCRITO.
+ */
 
-const FECHA_ACTUALIZACION = "1 de junio de 2026";
-const VERSION = "1.0";
+const TITLE = "Política de Privacidad - Barrera Global";
+const DESCRIPTION = "Política de privacidad y tratamiento de datos personales de Barrera Global, conforme a la Ley Orgánica de Protección de Datos Personales (LOPDP) del Ecuador.";
+
+// Línea de versión de la página (el archivo fuente trae el placeholder
+// "[fecha de publicación]", que obviamente no se publica literal).
+const LINEA_VERSION = "Versión 3 — 3 de agosto de 2026 (reemplaza a la v2 del 15 de julio de 2026)";
 ---
 
-<Layout title={TITLE} description={DESCRIPTION} noindex={true}>
+<Layout title={TITLE} description={DESCRIPTION}>
 
   <Header />
 
@@ -32,315 +48,240 @@ const VERSION = "1.0";
           <span class="text-gd">resguardo técnico.</span>
         </h1>
 
+        <p class="font-body text-base md:text-lg text-tx mb-6 leading-relaxed">
+          Política de Privacidad y Tratamiento de Datos Personales
+        </p>
+
         <div class="flex flex-wrap gap-x-6 gap-y-2 font-mono text-xs text-tx-muted mb-12 pb-8 border-b border-gd-muted">
-          <span>Versión {VERSION}</span>
-          <span>Actualizada: {FECHA_ACTUALIZACION}</span>
-          <span class="text-gd">Conforme Art. 12 LOPDP Ecuador</span>
+          <span>{LINEA_VERSION}</span>
+          <span class="text-gd">Ley Orgánica de Protección de Datos Personales · Ecuador</span>
         </div>
 
         <div class="font-body text-base text-tx-muted leading-relaxed space-y-12">
 
+          <section>
+            <h2 class="text-xl md:text-2xl font-display font-semibold text-tx mb-4">
+              1. Responsable del Tratamiento de Datos
+            </h2>
+            <p>
+              Barrera Global es la marca comercial de Francisco Javier Barrera Bonilla,
+              quien opera como asesor vinculado a Insurance Trust S.A., agencia asesora
+              productora de seguros registrada ante la Superintendencia de Compañías,
+              Valores y Seguros del Ecuador (SCVS) con credencial 572619. La credencial
+              personal de asesor productor de Francisco Javier Barrera Bonilla se encuentra
+              en trámite ante la SCVS.
+            </p>
+            <p class="mt-4">
+              Datos de contacto del responsable:<br />
+              Francisco Javier Barrera Bonilla · Ambato, Tungurahua, Ecuador<br />
+              Email para asuntos de privacidad: privacidad@barreraglobal.com<br />
+              Sitio web: www.barreraglobal.com
+            </p>
+          </section>
+
+          <section>
+            <h2 class="text-xl md:text-2xl font-display font-semibold text-tx mb-4">
+              2. Marco Legal Aplicable
+            </h2>
+            <p>
+              Esta política se rige por la Ley Orgánica de Protección de Datos Personales
+              del Ecuador (Registro Oficial Quinto Suplemento N° 459, 26 de mayo de 2021),
+              su normativa concordante de la Superintendencia de Protección de Datos
+              Personales (SPDP) — incluidas la Resolución SPDP-SPD-2026-0009-R sobre
+              tratamiento con inteligencia artificial y la Resolución SPDP-SPD-2026-0004-R
+              sobre transferencias internacionales — y la normativa de la SCVS aplicable a
+              la actividad de asesoría de seguros.
+            </p>
+          </section>
+
+          <section>
+            <h2 class="text-xl md:text-2xl font-display font-semibold text-tx mb-4">
+              3. Datos que Recopilamos
+            </h2>
+            <p>
+              Recopilamos únicamente los datos necesarios para brindarle asesoría en
+              seguros. Según el producto consultado, pueden incluir:
+            </p>
+            <ul class="mt-4 space-y-2">
+              <li><span class="text-gd">·</span> Para todos los servicios: nombre completo, teléfono o WhatsApp, correo electrónico, ciudad de residencia.</li>
+              <li><span class="text-gd">·</span> Para seguros de vida: edad, sexo, condición de fumador.</li>
+              <li><span class="text-gd">·</span> Para seguros de salud individual: edad del titular e información médica básica relevante.</li>
+              <li><span class="text-gd">·</span> Para seguros de salud familiar: edad y nombre de cada miembro, composición familiar.</li>
+              <li><span class="text-gd">·</span> Para seguros de auto: nombre completo del titular, cédula, placa, marca, modelo, año y ciudad — estos datos se solicitan únicamente después de que usted autoriza expresamente la preparación de cotizaciones formales.</li>
+              <li><span class="text-gd">·</span> Para productos de inversión: edad e información general sobre condiciones especiales.</li>
+            </ul>
+            <p class="mt-4">
+              NO recopilamos datos bancarios, claves ni información financiera detallada
+              durante la conversación con nuestro asistente virtual.
+            </p>
+          </section>
+
+          <section>
+            <h2 class="text-xl md:text-2xl font-display font-semibold text-tx mb-4">
+              4. Bases de Licitud del Tratamiento
+            </h2>
+            <p>
+              Cada finalidad se sustenta en una base legal conforme a la LOPDP:
+            </p>
+            <ul class="mt-4 space-y-2">
+              <li><span class="text-gd">·</span> Asesoría comercial inicial e información sobre productos: interés legítimo del titular que consulta y del responsable en atender su consulta.</li>
+              <li><span class="text-gd">·</span> Preparación de cotizaciones formales (que requiere cédula y placa en auto): consentimiento expreso del titular, solicitado antes de recabar los datos.</li>
+              <li><span class="text-gd">·</span> Emisión y gestión de pólizas: ejecución de la relación contractual.</li>
+              <li><span class="text-gd">·</span> Seguimiento comercial posterior a una consulta: interés legítimo, con derecho de oposición inmediato en cualquier momento y por el mismo canal.</li>
+              <li><span class="text-gd">·</span> Reportes y deberes ante SCVS, SPDP y SRI: cumplimiento de obligación legal.</li>
+            </ul>
+          </section>
+
+          <section>
+            <h2 class="text-xl md:text-2xl font-display font-semibold text-tx mb-4">
+              5. Uso de Asistente Virtual (Aurora) y Decisiones Automatizadas
+            </h2>
+            <p>
+              Para la atención inicial utilizamos a Aurora, un asistente virtual basado en
+              inteligencia artificial que se identifica como tal desde el primer mensaje.
+              Su función es brindar información preliminar, comparar productos, coordinar
+              la preparación de cotizaciones con nuestro equipo humano y agendar citas con
+              el asesor.
+            </p>
+            <p class="mt-4">
+              Usted tiene derecho, en cualquier momento y sin expresar motivo, a solicitar
+              la intervención de una persona: basta con pedirlo en la misma conversación
+              (por ejemplo, escribiendo "quiero hablar con un asesor humano") y su caso
+              será atendido por Francisco Barrera. Las decisiones con efectos jurídicos o
+              significativos para usted — como la emisión de una póliza o la evaluación de
+              una solicitud — no se toman de forma exclusivamente automatizada: siempre
+              intervienen el asesor humano y la compañía aseguradora correspondiente. Las
+              cotizaciones que Aurora le presenta son preparadas por nuestra área humana de
+              cotización directamente con las aseguradoras.
+            </p>
+            <p class="mt-4">
+              Las conversaciones con Aurora se procesan y almacenan en nuestros sistemas
+              conforme a esta política.
+            </p>
+          </section>
+
+          <section>
+            <h2 class="text-xl md:text-2xl font-display font-semibold text-tx mb-4">
+              6. Finalidades del Tratamiento
+            </h2>
+            <p>
+              Brindar asesoría comercial sobre seguros y productos de inversión · preparar
+              cotizaciones y gestionar la emisión de pólizas · realizar seguimiento
+              comercial sobre consultas previas · cumplir obligaciones regulatorias (SCVS)
+              y tributarias (SRI) · mejorar la calidad del servicio de atención.
+            </p>
+          </section>
+
+          <section>
+            <h2 class="text-xl md:text-2xl font-display font-semibold text-tx mb-4">
+              7. Plazos de Conservación
+            </h2>
+            <ul class="mt-4 space-y-2">
+              <li><span class="text-gd">·</span> Consultas que no se concretaron en póliza (con o sin escalamiento a asesor humano): 120 días desde el cierre de la conversación.</li>
+              <li><span class="text-gd">·</span> Clientes con póliza emitida: durante la vigencia de la relación y 5 años posteriores al cese, conforme a obligaciones regulatorias.</li>
+              <li><span class="text-gd">·</span> Si usted solicita no ser contactado, conservamos únicamente el dato mínimo indispensable (número, fecha y motivo) en nuestra lista de supresión, con la única finalidad de garantizar que su voluntad de no contacto se respete de forma permanente.</li>
+            </ul>
+            <p class="mt-4">
+              Al vencer estos plazos, los datos se eliminan de nuestros sistemas mediante
+              procesos automáticos, salvo obligación legal específica de conservación
+              adicional.
+            </p>
+          </section>
+
+          <section>
+            <h2 class="text-xl md:text-2xl font-display font-semibold text-tx mb-4">
+              8. Transferencias de Datos a Terceros
+            </h2>
+            <p>
+              Para prestar el servicio, sus datos pueden ser comunicados a: las compañías
+              aseguradoras que cotizan o emiten su póliza (Chubb, Generali, Sweaden, BMI,
+              Ecuasanitas, BUPA, American Fidelity, RedBridge, Investors Trust, Dominion,
+              entre otras según el producto) · Insurance Trust S.A. como agencia vinculada
+              · autoridades cuando la ley lo requiera (SCVS, SPDP, SRI, ACESS) ·
+              proveedores tecnológicos de infraestructura y mensajería necesarios para el
+              funcionamiento del servicio.
+            </p>
+            <p class="mt-4">
+              Algunos destinatarios están ubicados fuera del Ecuador. Esas transferencias
+              internacionales se realizan conforme a la Resolución SPDP-SPD-2026-0004-R,
+              amparadas — según el destinatario — en la ejecución del servicio que usted
+              solicita (cotización o emisión con aseguradoras internacionales), en su
+              consentimiento informado, o en los instrumentos contractuales de protección
+              de datos suscritos con los proveedores tecnológicos. Puede solicitar detalle
+              del mecanismo aplicable a su caso en privacidad@barreraglobal.com.
+            </p>
+          </section>
+
+          <section>
+            <h2 class="text-xl md:text-2xl font-display font-semibold text-tx mb-4">
+              9. Cookies
+            </h2>
+            <p>
+              Este sitio web no instala cookies propias, ni de analítica, ni de publicidad,
+              ni rastreadores de ningún tipo. Únicamente el proveedor de seguridad e
+              infraestructura del sitio (Cloudflare) puede fijar cookies estrictamente
+              técnicas, necesarias para la protección del sitio y de sus visitantes. Al
+              tratarse exclusivamente de cookies técnicas necesarias, su uso no requiere
+              consentimiento; al ingresar por primera vez, el sitio muestra un aviso
+              informativo de su existencia en cumplimiento del principio de transparencia.
+            </p>
+          </section>
+
+          <section>
+            <h2 class="text-xl md:text-2xl font-display font-semibold text-tx mb-4">
+              10. Sus Derechos como Titular de Datos
+            </h2>
+            <p>
+              Conforme a la LOPDP usted tiene derecho a: acceso · rectificación ·
+              eliminación (cancelación) · oposición · portabilidad · suspensión del
+              tratamiento en los casos previstos por la ley · y a no ser objeto de
+              decisiones basadas única y exclusivamente en tratamientos automatizados que
+              produzcan efectos jurídicos sobre usted, así como a obtener intervención
+              humana conforme a la sección 5.
+            </p>
+            <p class="mt-4">
+              Para ejercerlos, escriba a privacidad@barreraglobal.com. Responderemos dentro
+              de los 15 días conforme a la ley. Si usted es cliente con póliza vigente,
+              algunos datos pueden estar sujetos a conservación obligatoria; en ese caso le
+              explicaremos el motivo y el plazo aplicable.
+            </p>
+          </section>
+
+          <section>
+            <h2 class="text-xl md:text-2xl font-display font-semibold text-tx mb-4">
+              11. Medidas de Seguridad
+            </h2>
+            <p>
+              Adoptamos medidas técnicas y organizativas razonables: cifrado en el
+              almacenamiento, control de accesos, minimización de datos en los sistemas de
+              procesamiento y respaldos periódicos.
+            </p>
+          </section>
+
+          <section>
+            <h2 class="text-xl md:text-2xl font-display font-semibold text-tx mb-4">
+              12. Cambios en esta Política
+            </h2>
+            <p>
+              La versión vigente está siempre publicada en barreraglobal.com/privacidad con
+              su fecha de actualización.
+            </p>
+          </section>
+
+          <section>
+            <h2 class="text-xl md:text-2xl font-display font-semibold text-tx mb-4">
+              13. Reclamos y Contacto
+            </h2>
+            <p>
+              Puede contactarnos en privacidad@barreraglobal.com o presentar reclamo ante
+              la Superintendencia de Protección de Datos Personales del Ecuador.
+            </p>
+          </section>
+
           <p class="text-tx-disabled font-mono text-xs p-4 border border-gd-muted rounded-md">
-            DISCLAIMER OPERATIVO: Esta política está en versión inicial y sujeta a
-            revisión por abogado especializado en LOPDP Ecuador antes del lanzamiento
-            público definitivo del sitio. Pendiente: P-07 en bitácora interna.
+            DISCLAIMER OPERATIVO: Documento con dictamen verbal del abogado incorporado;
+            pendiente de visto bueno escrito antes de la publicación definitiva.
           </p>
-
-          <section>
-            <h2 class="text-xl md:text-2xl font-display font-semibold text-tx mb-4">
-              1. Identidad del responsable del tratamiento
-            </h2>
-            <p>
-              El responsable del tratamiento de tus datos personales es <span class="text-tx font-medium">BARRERA
-              BONILLA FRANCISCO JAVIER</span> (razón social registrada en el Servicio de Rentas Internas
-              del Ecuador), quien opera bajo la marca comercial <span class="text-tx font-medium">Barrera
-              Global</span> y está vinculado contractualmente al broker <span class="text-tx font-medium">Insurance
-              Trust</span> (credencial SCVS personal en trámite).
-            </p>
-            <ul class="mt-4 space-y-2">
-              <li><span class="text-gd">·</span> Domicilio: Ambato, Tungurahua, Ecuador</li>
-              <li><span class="text-gd">·</span> Email de contacto: fbarrera.inversiones@gmail.com</li>
-              <li><span class="text-gd">·</span> WhatsApp: +593 99 802 7819</li>
-            </ul>
-          </section>
-
-          <section>
-            <h2 class="text-xl md:text-2xl font-display font-semibold text-tx mb-4">
-              2. Finalidad del tratamiento
-            </h2>
-            <p>
-              Tratamos tus datos personales únicamente para los siguientes fines:
-            </p>
-            <ul class="mt-4 space-y-2">
-              <li><span class="text-gd">·</span> Brindar asesoría personalizada en seguros de vida, salud e inversión</li>
-              <li><span class="text-gd">·</span> Elaborar cotizaciones y propuestas comerciales sin compromiso</li>
-              <li><span class="text-gd">·</span> Gestionar la contratación de pólizas con las aseguradoras autorizadas</li>
-              <li><span class="text-gd">·</span> Realizar seguimiento postventa de las pólizas contratadas</li>
-              <li><span class="text-gd">·</span> Comunicar información relevante sobre tus pólizas o sobre el mercado</li>
-            </ul>
-          </section>
-
-          <section>
-            <h2 class="text-xl md:text-2xl font-display font-semibold text-tx mb-4">
-              3. Tipos de datos tratados
-            </h2>
-            <p class="mb-4">
-              Los datos que podemos tratar incluyen:
-            </p>
-            <h3 class="text-base font-medium text-tx mt-6 mb-2">Datos identificativos y de contacto</h3>
-            <ul class="space-y-2">
-              <li><span class="text-gd">·</span> Nombres y apellidos</li>
-              <li><span class="text-gd">·</span> Número de cédula o pasaporte</li>
-              <li><span class="text-gd">·</span> Fecha de nacimiento</li>
-              <li><span class="text-gd">·</span> Dirección, teléfono, email</li>
-              <li><span class="text-gd">·</span> Ocupación y datos profesionales</li>
-            </ul>
-
-            <h3 class="text-base font-medium text-tx mt-6 mb-2">
-              Datos sensibles (Art. 4 LOPDP) - consentimiento separado obligatorio
-            </h3>
-            <p>
-              Para cotizaciones de vida o salud, podemos requerir datos sensibles relacionados
-              con tu condición de salud (condiciones preexistentes, fumador o no fumador, ocupación
-              de riesgo). Estos datos requieren consentimiento explícito y separado conforme al
-              Art. 4 de la LOPDP. No se solicitan al inicio de la conversación y siempre se
-              explica para qué se requieren.
-            </p>
-          </section>
-
-          <section>
-            <h2 class="text-xl md:text-2xl font-display font-semibold text-tx mb-4">
-              4. Base legal del tratamiento
-            </h2>
-            <p>
-              El tratamiento de tus datos se fundamenta en:
-            </p>
-            <ul class="mt-4 space-y-2">
-              <li><span class="text-gd">·</span> Tu <span class="text-tx">consentimiento expreso</span> otorgado de forma libre, específica e informada</li>
-              <li><span class="text-gd">·</span> La <span class="text-tx">ejecución de medidas precontractuales</span> que solicitas (cotizaciones, propuestas)</li>
-              <li><span class="text-gd">·</span> El <span class="text-tx">cumplimiento de obligaciones legales</span> del sector asegurador en Ecuador</li>
-            </ul>
-          </section>
-
-          <section>
-            <h2 class="text-xl md:text-2xl font-display font-semibold text-tx mb-4">
-              5. Tiempo de conservación
-            </h2>
-            <p>
-              Conservamos tus datos por los siguientes plazos:
-            </p>
-            <ul class="mt-4 space-y-2">
-              <li><span class="text-gd">·</span> Datos de prospecto sin contrato: hasta <span class="text-tx">24 meses</span> desde el último contacto</li>
-              <li><span class="text-gd">·</span> Datos de cliente con póliza activa: durante la <span class="text-tx">vigencia</span> de la póliza</li>
-              <li><span class="text-gd">·</span> Datos de cliente sin póliza activa: <span class="text-tx">5 años</span> adicionales por obligaciones tributarias</li>
-              <li><span class="text-gd">·</span> Después de los plazos: borrado seguro o anonimización definitiva</li>
-            </ul>
-          </section>
-
-          <section>
-            <h2 class="text-xl md:text-2xl font-display font-semibold text-tx mb-4">
-              6. Transferencias a terceros
-            </h2>
-            <p>
-              Podemos compartir tus datos únicamente con los siguientes terceros, en la medida
-              estrictamente necesaria para los fines descritos:
-            </p>
-            <ul class="mt-4 space-y-2">
-              <li><span class="text-gd">·</span> <span class="text-tx">Insurance Trust</span> (broker paraguas, supervisor de la operación)</li>
-              <li><span class="text-gd">·</span> <span class="text-tx">Compañías aseguradoras</span> con las que el broker tiene contrato vigente</li>
-              <li><span class="text-gd">·</span> Proveedores tecnológicos: <span class="text-tx">hosting (Hostinger Ecuador)</span>, asistente de mensajería</li>
-              <li><span class="text-gd">·</span> Autoridades competentes cuando la ley así lo requiera</li>
-            </ul>
-            <p class="mt-4">
-              Todos los terceros están obligados contractualmente a tratar tus datos
-              con el mismo nivel de protección descrito en esta política.
-            </p>
-          </section>
-
-          <section>
-            <h2 class="text-xl md:text-2xl font-display font-semibold text-tx mb-4">
-              7. Transferencias internacionales
-            </h2>
-            <p>
-              Barrera Global utiliza proveedores tecnológicos cuyos servidores se encuentran
-              ubicados en el exterior, principalmente en <span class="text-tx">Estados Unidos</span>.
-              Estos proveedores son: <span class="text-tx">Anthropic</span>, <span class="text-tx">OpenAI</span>,
-              <span class="text-tx">Meta</span>, <span class="text-tx">Cloudflare</span> y
-              <span class="text-tx">Backblaze</span>. El uso de estos proveedores constituye una
-              transferencia internacional de tus datos personales.
-            </p>
-            <p class="mt-4">
-              La base legal de esta transferencia es tu <span class="text-tx">consentimiento expreso</span>,
-              otorgado al aceptar la presente política de privacidad. Estas transferencias se realizan
-              conforme a la <span class="text-tx">Resolución SPDP-SPD-2026-0004-R sobre transferencias
-              internacionales de datos</span> de la Superintendencia de Protección de Datos Personales
-              del Ecuador.
-            </p>
-          </section>
-
-          <section>
-            <h2 class="text-xl md:text-2xl font-display font-semibold text-tx mb-4">
-              8. Tus derechos como titular de los datos
-            </h2>
-            <p>
-              Como titular de los datos tienes los siguientes derechos, que puedes ejercer en
-              cualquier momento:
-            </p>
-            <ul class="mt-4 space-y-2">
-              <li><span class="text-gd">·</span> <span class="text-tx">Acceso:</span> saber que datos tuyos tenemos y como los usamos</li>
-              <li><span class="text-gd">·</span> <span class="text-tx">Rectificación:</span> corregir datos inexactos o incompletos</li>
-              <li><span class="text-gd">·</span> <span class="text-tx">Eliminación:</span> solicitar el borrado de tus datos</li>
-              <li><span class="text-gd">·</span> <span class="text-tx">Oposición:</span> oponerte a un tratamiento específico</li>
-              <li><span class="text-gd">·</span> <span class="text-tx">Portabilidad:</span> recibir tus datos en formato estructurado para llevarlos a otro responsable</li>
-              <li><span class="text-gd">·</span> <span class="text-tx">Limitación del tratamiento:</span> pedir que se restrinja el uso de tus datos mientras se resuelve una solicitud o controversia</li>
-              <li><span class="text-gd">·</span> <span class="text-tx">A no ser objeto de decisiones automatizadas:</span> no quedar sujeto a decisiones basadas únicamente en tratamiento automatizado, incluido el asistente virtual Aurora, y solicitar intervención humana</li>
-              <li><span class="text-gd">·</span> <span class="text-tx">Revocación del consentimiento:</span> retirar tu consentimiento en cualquier momento, sin que ello afecte la legalidad del tratamiento previo</li>
-            </ul>
-          </section>
-
-          <section>
-            <h2 class="text-xl md:text-2xl font-display font-semibold text-tx mb-4">
-              9. Revocación del consentimiento
-            </h2>
-            <p>
-              Puedes revocar tu consentimiento en cualquier momento, sin afectar la
-              legalidad del tratamiento realizado hasta ese momento. La revocación se
-              tramita por el mismo canal por el que se otorgó el consentimiento
-              o mediante solicitud al email indicado en la sección 12.
-            </p>
-          </section>
-
-          <section>
-            <h2 class="text-xl md:text-2xl font-display font-semibold text-tx mb-4">
-              10. Decisiones automatizadas y asistente virtual Aurora
-            </h2>
-            <p>
-              Barrera Global utiliza un asistente virtual llamado <span class="text-tx font-medium">Aurora</span>,
-              un agente conversacional de WhatsApp basado en inteligencia artificial. Aurora es un
-              sistema RAG (generación aumentada por recuperación) que se apoya en dos proveedores
-              tecnológicos: <span class="text-tx">Anthropic</span> (modelo Claude, para la conversación)
-              y <span class="text-tx">OpenAI</span> (para el componente de recuperación de información).
-            </p>
-            <p class="mt-4">
-              Aurora realiza tratamiento automatizado de tus datos: responde consultas, clasifica y
-              perfila al prospecto según su interés, y enruta o deriva la conversación a un asesor
-              humano. Este tratamiento se realiza conforme a la <span class="text-tx">Resolución
-              SPDP-SPD-2026-0009-R sobre inteligencia artificial</span> (suscrita el 12 de febrero de
-              2026), y Aurora se identifica como un asistente de inteligencia artificial ante ti.
-            </p>
-            <p class="mt-4">
-              Tienes derecho a no ser objeto de decisiones basadas únicamente en tratamiento
-              automatizado y puedes solicitar la intervención de un asesor humano en cualquier
-              momento, escribiendo al email de contacto o solicitándolo en la misma conversación de
-              WhatsApp.
-            </p>
-          </section>
-
-          <section>
-            <h2 class="text-xl md:text-2xl font-display font-semibold text-tx mb-4">
-              11. Autoridad de protección de datos
-            </h2>
-            <p>
-              Si consideras que el tratamiento de tus datos no cumple con la LOPDP, puedes
-              presentar un reclamo ante la Superintendencia de Protección de Datos Personales
-              del Ecuador:
-            </p>
-            <ul class="mt-4 space-y-2">
-              <li><span class="text-gd">·</span> Sitio web: <span class="text-tx">spdp.gob.ec</span></li>
-            </ul>
-          </section>
-
-          <section>
-            <h2 class="text-xl md:text-2xl font-display font-semibold text-tx mb-4">
-              12. Cómo ejercer tus derechos
-            </h2>
-            <p>
-              Para ejercer cualquiera de los derechos descritos, escríbenos a:
-            </p>
-            <div class="mt-4 p-4 border border-gd-muted rounded-md bg-bg-elev-1">
-              <p class="font-mono text-sm text-gd">fbarrera.inversiones@gmail.com</p>
-              <p class="font-mono text-xs text-tx-muted mt-2">
-                Plazo de respuesta: hasta 15 días hábiles desde la recepción de la solicitud.
-              </p>
-            </div>
-            <p class="mt-4 text-sm text-tx-disabled">
-              Para validar tu identidad podemos solicitar copia de tu documento de identidad.
-              Esta validación es necesaria para proteger tus datos de solicitudes no autorizadas.
-            </p>
-          </section>
-
-          <section>
-            <h2 class="text-xl md:text-2xl font-display font-semibold text-tx mb-4">
-              13. Medidas de seguridad
-            </h2>
-            <p>
-              Implementamos medidas técnicas y organizativas razonables para proteger tus datos:
-            </p>
-            <ul class="mt-4 space-y-2">
-              <li><span class="text-gd">·</span> Cifrado de comunicaciones (HTTPS / TLS)</li>
-              <li><span class="text-gd">·</span> Accesos restringidos a personas autorizadas</li>
-              <li><span class="text-gd">·</span> Backups cifrados y planes de continuidad</li>
-              <li><span class="text-gd">·</span> Revisiones periódicas de seguridad</li>
-              <li><span class="text-gd">·</span> Contratos de confidencialidad con proveedores tecnológicos</li>
-            </ul>
-          </section>
-
-          <section>
-            <h2 class="text-xl md:text-2xl font-display font-semibold text-tx mb-4">
-              14. Delegado de Protección de Datos (DPD)
-            </h2>
-            <p>
-              La designación del <span class="text-tx">Delegado de Protección de Datos (DPD)</span> de
-              Barrera Global se encuentra actualmente en proceso de formalización. Una vez formalizada,
-              publicaremos sus datos de contacto en esta misma política.
-            </p>
-            <p class="mt-4">
-              Mientras tanto, puedes ejercer tus derechos en materia de protección de datos a través
-              del canal de contacto de privacidad indicado en esta política.
-            </p>
-          </section>
-
-          <section>
-            <h2 class="text-xl md:text-2xl font-display font-semibold text-tx mb-4">
-              15. Cookies y tecnologías similares
-            </h2>
-            <p>
-              Este sitio utiliza únicamente las cookies estrictamente necesarias para su
-              funcionamiento. En próximas versiones se implementará un banner de consentimiento
-              de cookies con Consent Mode v2 que te permitirá aceptar o rechazar cookies de
-              analitica y marketing por separado.
-            </p>
-            <p class="mt-4 text-sm text-tx-disabled">
-              Más detalle estará disponible en la página dedicada de Política de Cookies.
-            </p>
-          </section>
-
-          <section>
-            <h2 class="text-xl md:text-2xl font-display font-semibold text-tx mb-4">
-              16. Notificación de brechas de seguridad
-            </h2>
-            <p>
-              En caso de detectar una brecha de seguridad que afecte tus datos personales con
-              riesgo para tus derechos, te notificaremos en un plazo razonable (no mayor a 72
-              horas desde el conocimiento del incidente), e informaremos a la Superintendencia
-              de Protección de Datos Personales conforme al Art. 45 de la LOPDP.
-            </p>
-          </section>
-
-          <section>
-            <h2 class="text-xl md:text-2xl font-display font-semibold text-tx mb-4">
-              17. Cambios a esta política
-            </h2>
-            <p>
-              Esta política puede actualizarse periódicamente para reflejar cambios en la
-              normativa, en las prácticas de tratamiento o en los productos ofrecidos. Cualquier
-              cambio sustancial se comunicará con anticipación razonable y se reflejará en la
-              versión y fecha indicadas al inicio del documento.
-            </p>
-            <p class="mt-4">
-              Te recomendamos revisar esta página periódicamente para mantenerte informado.
-            </p>
-          </section>
 
           <div class="mt-12 pt-8 border-t border-gd-muted">
             <a
@@ -361,4 +302,3 @@ const VERSION = "1.0";
   <Footer />
 
 </Layout>
-

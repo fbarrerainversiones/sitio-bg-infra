@@ -68,9 +68,14 @@ const REDES = [
           Legal
         </h3>
         <ul class="space-y-2">
+          {/* P-43: eran 4 items y dos apuntaban al mismo destino. El enlace
+              /lopdp nunca tuvo pagina y daba 404; se repunto a /privacidad,
+              que ya cubre los 17 items del Art. 12 LOPDP. Ahora los dos se
+              fusionan en uno solo, con un rotulo que nombra las dos cosas.
+              La ruta /lopdp queda reservada para cuando haya contenido propio. */}
           <li>
             <a href="/privacidad" class="font-body text-sm text-tx-muted hover:text-gd transition-colors">
-              Política de Privacidad
+              Privacidad y protección de datos
             </a>
           </li>
           <li>
@@ -81,11 +86,6 @@ const REDES = [
           <li>
             <a href="/cookies" class="font-body text-sm text-tx-muted hover:text-gd transition-colors">
               Política de Cookies
-            </a>
-          </li>
-          <li>
-            <a href="/lopdp" class="font-body text-sm text-tx-muted hover:text-gd transition-colors">
-              Cumplimiento LOPDP
             </a>
           </li>
         </ul>
@@ -134,6 +134,18 @@ const REDES = [
           <p class="font-body text-xs text-tx-muted">
             Operando bajo <span class="text-tx">Insurance Trust</span> ·
             Credencial SCVS personal en trámite
+          </p>
+          {/* Aviso informativo de cookies tecnicas (dictamen legal, §9 de la
+              politica v3). Es una linea permanente al pie, NO un banner: el
+              sitio no instala cookies propias ni almacenamiento, asi que no hay
+              nada que consentir y no se justifica pedir permiso. Cero
+              JavaScript y cero storage: los hashes CSP no se tocan.
+              El color del enlace lo pone la regla base `a` de global.css (sin
+              capa): sale dorado. NO se le agrega una utilidad text-* porque
+              seria inerte — ver R-43. */}
+          <p class="font-body text-xs text-tx-disabled">
+            Este sitio solo utiliza cookies técnicas de seguridad ·
+            <a href="/cookies">Política de cookies</a>
           </p>
           <p class="font-body text-xs text-tx-disabled">
             © {CURRENT_YEAR} Barrera Global · Todos los derechos reservados

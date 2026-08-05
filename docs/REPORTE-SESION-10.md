@@ -631,4 +631,302 @@ Build limpio con `dist/` borrado: **10/10 páginas**, sin errores.
 
 ---
 
-*Última actualización: 25/07/2026 tras D1 + D3 + el paquete de dinamismo.*
+*Última actualización: 04/08/2026 tras incorporar la política de privacidad v3.*
+
+---
+
+## LISTA PARA PÚBLICO (rama `publicacion-v1`)
+
+**Fecha:** 3 de agosto de 2026 · **Rama:** `publicacion-v1`, cortada de `main` en
+`ffcf293` · **Sin merge** · **VPS y SSH no se tocaron.**
+
+El objetivo de la jornada fue dejar el sitio en condiciones de publicarse en
+`barreraglobal.com`, sin publicarlo. Todo vive en una rama; `main` queda intacto.
+
+### Commits
+
+| # | Commit | Qué |
+|---|---|---|
+| 1 | `b485140` | Ocultar los 10 marcadores `[PENDIENTE]` de las 5 páginas de producto |
+| 2 | `cd501fd` | `/terminos` v1 (P-37 / P-43) |
+| 3 | `6b106e0` | `/cookies` v1 (P-36 / P-43) |
+| 4 | `faa00cf` | Repuntar el enlace `/lopdp` del footer, que daba 404 (P-43) |
+| 5 | `daab630` | `/privacidad` indexable |
+| 6 | `3e5fa8c` | Unificar la forma del canonical (sin barra final) |
+| 7 | `6cf7758` | `robots.txt` + `sitemap.xml` |
+| 8 | este | Documentación: `PENDIENTES.md` + este reporte |
+
+Los commits 4, 5 y 6 **no estaban en el encargo**: salieron del diagnóstico y
+sin ellos los otros quedaban a medias. Están explicados abajo.
+
+### 1. Marcadores `[PENDIENTE]` ocultos, no borrados
+
+10 bloques, 2 por página, en las 5 páginas de producto. Cada página queda
+coherente: hero + copy semilla aprobado + «Cómo funciona» + FAQ de proceso +
+CTAs. `Pendiente.astro` se conserva intacto: vuelve con el contenido real.
+
+**Hallazgo que cambió la implementación.** El encargo pedía comentar los bloques
+con `<!-- -->`. Se verificó antes de aplicarlo: **los comentarios HTML sobreviven
+al build** y llegan tal cual al navegador (`dist/seguros/vida-termino/index.html`
+conserva `<!-- HERO PRODUCTO -->`, `<!-- CTA FINAL -->`, etc.). El texto de esos
+bloques son **notas internas para Francisco** — «profundidad del producto…
+sin cifras ni carriers hasta tu visto bueno». Publicarlas en el código fuente de
+un sitio público es filtrarlas: cualquiera las lee con Ctrl+U.
+
+Se usó el comentario de expresión de Astro (llaves) en su lugar, que el
+compilador descarta. Se conserva el marcador `RESTAURAR-CON-CONTENIDO-REAL`
+pedido, y restaurar sigue siendo borrar dos delimitadores. **Verificado sobre
+el build: 0 apariciones de `[PENDIENTE`, 0 de `RESTAURAR-CON`, 0 de «decisión
+Francisco» y 0 de «visto bueno» en las 12 páginas.**
+
+### 2 y 3. `/terminos` y `/cookies` v1
+
+Ambas con el Layout, Header, Footer y design system de `/privacidad`. Español de
+Ecuador, fecha real, versión 1.0.
+
+`/terminos` solo afirma lo que el código demuestra: sitio informativo, sin venta
+en línea, sin pagos, sin cuentas de usuario y sin formularios (0 elementos
+`form` en el fuente); contacto por WhatsApp y correo. Identidad y credencial
+copiadas **exactamente** de `Footer.astro` y `/privacidad` — marca Barrera
+Global, vínculo con Insurance Trust, credencial SCVS personal en trámite. **No
+se publicó la 572619 del broker** (E-23). Reutiliza el texto Art. 11.6 SCVS ya
+aprobado y agrega que las cotizaciones son referenciales y no vinculantes.
+
+`/cookies` se escribió **sobre verificación, no sobre supuestos**. Barrido del
+fuente y del build:
+
+| Qué se buscó | Resultado |
+|---|---|
+| Cookies propias, `localStorage`, `sessionStorage`, `indexedDB` | **0** |
+| Analítica, píxeles, etiquetas de terceros (`gtag`, `dataLayer`, `fbq`, hotjar, clarity, plausible, matomo, mixpanel, doubleclick) | **0** |
+| `<script src=...>` externos | **0** |
+| `preconnect` / `dns-prefetch` | **0** |
+| Tipografías | **65 archivos** woff/woff2 servidos del propio dominio |
+| URLs externas en el HTML | solo enlaces salientes (wa.me, redes) y namespaces (schema.org, w3.org) — ninguna petición automática |
+
+La CSP de `infra/nginx.conf` refuerza lo mismo desde el servidor:
+`default-src 'none'`, `connect-src 'none'`, `img-src 'self'`.
+
+**Un matiz honesto:** el código no puede demostrar el comportamiento del proxy
+**Cloudflare**, que puede fijar cookies técnicas de seguridad (distinguir persona
+de bot). En vez de prometer «cero cookies» en absoluto, la página lo declara
+como estrictamente necesario y sin perfilado. Es coherente con la sección 15 de
+`/privacidad`, que ya anunciaba esta página. Queda como pregunta 8 para el
+abogado en P-39.
+
+### 4. El tercer enlace roto: `/lopdp`
+
+P-43 lista **tres** rutas rotas, no dos: `/terminos`, `/cookies` y **`/lopdp`**.
+Crear las dos primeras dejaba el gate igual de abierto. Se aplicó la opción (b)
+que el propio P-43 recomendaba: repuntar «Cumplimiento LOPDP» a `/privacidad`,
+que ya cubre los 17 ítems del Art. 12 LOPDP, y reservar `/lopdp` para cuando
+haya contenido propio.
+
+**Decisión cosmética abierta para Francisco:** el footer muestra ahora dos ítems
+apuntando al mismo destino. Si prefieres no duplicar, se quita el segundo
+(opción **c** de P-43): una línea en `Footer.astro`.
+
+### 5 y 6. Dos incoherencias de SEO que el sitemap habría dejado por escrito
+
+- **`/privacidad` se renderizaba con `noindex, nofollow`.** Meterla en el
+  sitemap y a la vez pedirle a Google que no la indexe es una contradicción que
+  Search Console reporta como error. Las tres páginas legales quedan ahora con
+  el mismo criterio. La 404 conserva su `noindex` y no entra en el sitemap.
+  Esto **no** afecta la protección de staging: ahí el bloqueo lo dan el
+  basicauth y la cabecera `X-Robots-Tag` del proxy, no la meta de la página.
+
+- **El sitio emitía dos formas de canonical a la vez.** Las 5 páginas de
+  producto lo pasan a mano **sin** barra final (`/inversion`); el resto caía en
+  el fallback del Layout, que la agregaba (`/contacto/`, `/sobre-mi/`,
+  `/privacidad/`). El sitemap solo puede declarar una forma, y si declara la que
+  no coincide con la etiqueta de la página, Google indexa la otra. Se normalizó
+  el fallback a la forma que ya usaban las páginas de producto. No cambia
+  ninguna URL servida: nginx resuelve las dos con `try_files $uri $uri/`.
+
+### 7. `robots.txt` y `sitemap.xml`
+
+`robots.txt`: `Allow: /` para todo agente + referencia al sitemap. **No** lleva
+un `Disallow` global «por si acaso»: rompería producción. La protección de
+staging la siguen dando el basicauth y el `X-Robots-Tag` del proxy.
+
+`sitemap.xml`: **11 URLs**, no 12. El build son 12 páginas, pero las «10
+páginas» de `CLAUDE.md` ya **incluyen** la `/404`. Entonces 12 − 1 (`/404`,
+noindex) = **11 URLs públicas**. No se inventó una URL para llegar a 12.
+
+```
+/                                /seguros/salud-nacional
+/sobre-mi                        /seguros/salud-internacional
+/contacto                        /inversion
+/seguros/vida-termino            /privacidad
+/seguros/vida-indexada           /terminos
+                                 /cookies
+```
+
+Cada `<loc>` replica exactamente el `<link rel="canonical">` de su página.
+Cruce bidireccional verificado: 11 `loc` con página existente, 11 canonicals
+listados, **0 huérfanos y 0 faltantes**; el único canonical fuera del sitemap es
+`/404`, a propósito. Se mantiene a mano — ver **P-50**.
+
+### QA final (build limpio, `dist/` borrado)
+
+| # | Chequeo | Resultado |
+|---|---|---|
+| 1 | Build | ✅ **12/12 páginas**, sin errores |
+| 2 | Fuga de marcadores internos en el HTML | ✅ **0** de `[PENDIENTE`, `RESTAURAR-CON`, «decisión Francisco», «visto bueno», `TODO:`, `FIXME` |
+| 3 | Enlaces internos | ✅ 369 referencias, 13 rutas distintas, **0 rotas** |
+| 4 | Enlaces legales del footer (P-43) | ✅ los 4 resuelven · `href="/lopdp"` residual: **0** |
+| 5 | `/terminos` y `/cookies` con el design system | ✅ header, footer, eyebrow mono y h1 display presentes en las dos |
+| 6 | Sitemap ↔ canonicals | ✅ cruce bidireccional, 0 huérfanos, 0 faltantes |
+| 7 | **CSP — cruce bidireccional** | ✅ **2 hashes en la directiva, 2 en el build, presentes en las 12 páginas, 0 huérfanos, 0 faltantes, 0 scripts externos** |
+| 8 | `main` intacto | ✅ `ffcf293` en local y en origin |
+
+**CSP: no hubo re-hash y no debía haberlo.** Ningún script inline se tocó: las
+dos páginas nuevas usan el mismo `Layout` y el mismo `Header` que las demás. Los
+valores siguen siendo `sha256-aOPTArMu…` (toggle del menú móvil) y
+`sha256-Qra3eTJV…` (scroll-reveal).
+
+> Nota para quien repita la verificación: el script de `infra/README-hashes.md`
+> agrupa por **nombre** de archivo, y como casi todas las páginas se llaman
+> `index.html`, informa «2 páginas» cuando en realidad son 12. Agrupar por ruta
+> completa da el número real. Además, un regex ingenuo sobre `nginx.conf`
+> encuentra **tres** `sha256-`: el tercero es el literal `'sha256-...'` del
+> comentario, no un hash. Hay que leer solo la directiva `add_header`.
+
+### Lo que NO se hizo, y por qué
+
+- **`main` no se tocó.** Ni merge ni rebase. La rama va a origin y la decisión
+  de fusionar es de Francisco.
+- **VPS, SSH y staging: intactos.** Staging sigue sirviendo las 4 páginas de
+  Sesión 9. Redesplegarlo con estas 12 **exige rebuild de la imagen**, porque
+  `nginx.conf` va horneado.
+- **El recuadro «DISCLAIMER OPERATIVO» de `/privacidad` sigue visible.**
+  Retirar de una página pública un cartel que dice «esto todavía no lo revisó un
+  abogado» es una decisión de postura legal, no una tarea de maquetado. Queda
+  como pregunta 9 para P-39.
+- **`og-default.png` no se creó.** Es una pieza de diseño 1200 × 630 que aprueba
+  Francisco. Ver **P-48**: hoy la vista previa al compartir por WhatsApp sale
+  sin imagen, y WhatsApp es el canal del negocio.
+
+### Estado final
+
+- **Rama `publicacion-v1`:** 8 commits, pusheada a origin. Working tree limpio.
+- **`main`:** intacto en `ffcf293`, local y remoto. Sin merge.
+- **Pendientes movidos:** P-43 **cerrado** (R-15 en el histórico) · P-37
+  entregado v1 · P-36 entregado parcial · alcance de P-39 ampliado a los tres
+  textos legales · alta de **P-48**, **P-49** y **P-50**.
+- **Gate que sigue abierto:** **P-39**, revisión legal humana. Es el único que
+  bloquea el pase a público.
+
+---
+
+## POLÍTICA DE PRIVACIDAD v3 — DICTAMEN VERBAL (rama `publicacion-v1`)
+
+**Fecha:** 4 de agosto de 2026 · misma rama, **sin merge**, **VPS y SSH
+intactos**. `main` sigue en `ffcf293`.
+
+Francisco trajo del abogado el texto de la política con el dictamen verbal ya
+incorporado. Esta jornada lo implementa **verbatim** y cierra los dos restos
+que quedaban de la jornada anterior.
+
+### Commits
+
+| # | Commit | Qué |
+|---|---|---|
+| 9 | `f64d53c` | `og-default.png` 1200 × 630 (cierra P-48) |
+| 10 | `4cee453` | Fusionar los dos enlaces del footer que iban a `/privacidad` |
+| 11 | `398b039` | Fuente legal versionada antes de transcribirla |
+| 12 | `65b3dd4` | **Política de privacidad v3** |
+| 13 | `4ec2cac` | Retirar las dos frases observadas en el dictamen |
+| 14 | `dc72ec8` | Aviso de cookies técnicas al pie |
+| 15 | este | Documentación |
+
+### La v3 se transcribió, no se redactó
+
+El cuerpo de `/privacidad` es una transcripción palabra por palabra de
+`docs/legal/POLITICA-PRIVACIDAD-V3-2026-08-03.md`, que se commiteó **antes**
+(`398b039`) justamente para que quede trazable de dónde salió cada frase.
+
+La verificación no fue a ojo: un comparador normaliza el fuente y el HTML
+renderizado y contrasta fragmento por fragmento. **64 fragmentos comparados,
+64 presentes.** La sección interna **NOTAS — DELTA** no se publica: 0
+apariciones de `NOTAS`, `DELTA`, `VALIDAR`, «PARA EL ABOGADO», «el cambio
+sensible», «se propone retirar», «retirada preventivamente» y «No publicar
+hasta».
+
+El **DISCLAIMER OPERATIVO se conserva**, ahora al final del documento y con el
+texto ajustado: dictamen verbal incorporado, pendiente el visto bueno
+**escrito**.
+
+**Lo que cambia de fondo con la v3, y conviene tener presente:**
+
+- **Reaparece la credencial 572619**, esta vez atribuida a **Insurance Trust
+  S.A. como agencia**, no a Francisco. Es exactamente la corrección que exigía
+  **E-23**, y es el propio dictamen quien la pide así. No contradice R-27.
+- **El canal de derechos pasa a `privacidad@barreraglobal.com`**, que **no
+  existe todavía**. Ver **P-51**: es prerrequisito del switch.
+- **Se nombran aseguradoras** destinatarias de datos (Chubb, Generali, Sweaden,
+  BMI, Ecuasanitas, BUPA, American Fidelity, RedBridge, Investors Trust,
+  Dominion). Declararlas es obligación LOPDP, no marketing. De paso aporta la
+  lista que **P-01/P-02** llevaban bloqueada.
+- **Se declara tratamiento de datos de seguros de auto**, aunque el sitio no
+  tenga página de auto (**D1**): la política cubre toda la operación, incluido
+  lo que se converse por WhatsApp, no solo lo que el sitio publica.
+
+Dos apuntes de transcripción: el fuente trae el placeholder «*Última
+actualización: [fecha de publicación]*», que no se publica literal — su función
+la cumple la línea de versión pedida. Y esa línea dice «reemplaza a la v2 del
+15 de julio de 2026», mientras que la página que estaba publicada declaraba
+«Versión 1.0 · 1 de junio de 2026»: **tres fechas que no concuerdan entre sí**,
+conviene que el abogado fije cuál es la buena.
+
+### Frases retiradas por el dictamen
+
+4 apariciones en 3 archivos, con corte limpio y sin inventar reemplazos:
+
+| Archivo | Frase |
+|---|---|
+| `index.astro` (tarjeta Salud) | «sin que el bolsillo sea el límite» |
+| `index.astro` (bullet Inversión) | «Vehículos offshore con carriers regulados» — se retira el bullet entero |
+| `seguros/salud-nacional.astro` | «sin que el bolsillo sea el límite» |
+| `inversion.astro` | «offshore» dentro de la frase |
+
+La oración de salud termina ahora en «cuando más importa.». **0 apariciones de
+`bolsillo` y `offshore`** en `web/src` y en las 12 páginas del build.
+
+### Aviso de cookies: línea permanente, no banner
+
+El §9 de la v3 dice que «al ingresar por primera vez, el sitio muestra un aviso
+informativo». Se implementó como **línea fija al pie en las 12 páginas**:
+
+> Este sitio solo utiliza cookies técnicas de seguridad · **Política de cookies**
+
+**Un banner de primera visita exigiría JavaScript y almacenamiento** para
+recordar que ya se descartó — justo lo que el mismo §9 y `/cookies` declaran
+que el sitio no usa. La línea permanente cumple transparencia sin contradecir
+el texto. **Queda como pregunta abierta para el visto bueno escrito** (anotada
+en P-39).
+
+Cero JavaScript nuevo, cero storage: **los hashes CSP no se tocaron**. El color
+del enlace lo pone la regla base `a` de `global.css`; no se le puso utilidad
+`text-*` porque sería inerte (**R-43**), y **no se tocaron las capas**.
+
+### QA final (build limpio)
+
+| # | Chequeo | Resultado |
+|---|---|---|
+| 1 | Build | ✅ **12/12 páginas** |
+| 2 | Transcripción verbatim de la v3 | ✅ 64/64 fragmentos |
+| 3 | Fuga de la sección interna NOTAS — DELTA | ✅ **0** |
+| 4 | Frases del dictamen | ✅ 0 `bolsillo` · 0 `offshore` (fuente y build) |
+| 5 | Aviso de cookies | ✅ presente en **12/12** páginas |
+| 6 | `og:image` / `twitter:image` | ✅ 24 etiquetas a URL absoluta, archivo en `dist/` |
+| 7 | Enlaces internos | ✅ 0 rotos |
+| 8 | **CSP — cruce bidireccional** | ✅ 2 ↔ 2, 0 huérfanos, 0 faltantes, 0 scripts externos |
+| 9 | `main` intacto | ✅ `ffcf293` local y origin |
+
+### Lo que sigue bloqueando el pase a público
+
+1. **P-39** — visto bueno **escrito** del abogado, que revisará las páginas
+   renderizadas en staging.
+2. **P-51** — `privacidad@barreraglobal.com` configurado **y probado**. La v3
+   lo publica 4 veces como canal de derechos con plazo de 15 días.

@@ -1,0 +1,12 @@
+# robots.txt — barreraglobal.com
+# Sitio publico: rastreo permitido en todo el contenido.
+#
+# NOTA OPERATIVA: este archivo tambien se sirve en staging.barreraglobal.com,
+# porque es la misma imagen. La proteccion de staging NO depende de aca: la dan
+# el basicauth y la cabecera X-Robots-Tag: noindex del proxy. No agregar un
+# Disallow global "por si acaso": bloquearia tambien produccion.
+
+User-agent: *
+Allow: /
+
+Sitemap: https://barreraglobal.com/sitemap.xml
