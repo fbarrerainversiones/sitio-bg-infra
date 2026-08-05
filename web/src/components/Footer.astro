@@ -135,6 +135,18 @@ const REDES = [
             Operando bajo <span class="text-tx">Insurance Trust</span> ·
             Credencial SCVS personal en trámite
           </p>
+          {/* Aviso informativo de cookies tecnicas (dictamen legal, §9 de la
+              politica v3). Es una linea permanente al pie, NO un banner: el
+              sitio no instala cookies propias ni almacenamiento, asi que no hay
+              nada que consentir y no se justifica pedir permiso. Cero
+              JavaScript y cero storage: los hashes CSP no se tocan.
+              El color del enlace lo pone la regla base `a` de global.css (sin
+              capa): sale dorado. NO se le agrega una utilidad text-* porque
+              seria inerte — ver R-43. */}
+          <p class="font-body text-xs text-tx-disabled">
+            Este sitio solo utiliza cookies técnicas de seguridad ·
+            <a href="/cookies">Política de cookies</a>
+          </p>
           <p class="font-body text-xs text-tx-disabled">
             © {CURRENT_YEAR} Barrera Global · Todos los derechos reservados
           </p>
