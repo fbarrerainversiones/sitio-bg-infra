@@ -68,9 +68,14 @@ const REDES = [
           Legal
         </h3>
         <ul class="space-y-2">
+          {/* P-43: eran 4 items y dos apuntaban al mismo destino. El enlace
+              /lopdp nunca tuvo pagina y daba 404; se repunto a /privacidad,
+              que ya cubre los 17 items del Art. 12 LOPDP. Ahora los dos se
+              fusionan en uno solo, con un rotulo que nombra las dos cosas.
+              La ruta /lopdp queda reservada para cuando haya contenido propio. */}
           <li>
             <a href="/privacidad" class="font-body text-sm text-tx-muted hover:text-gd transition-colors">
-              Política de Privacidad
+              Privacidad y protección de datos
             </a>
           </li>
           <li>
@@ -81,15 +86,6 @@ const REDES = [
           <li>
             <a href="/cookies" class="font-body text-sm text-tx-muted hover:text-gd transition-colors">
               Política de Cookies
-            </a>
-          </li>
-          <li>
-            {/* P-43: /lopdp nunca tuvo pagina y daba 404. Se repunta a
-                /privacidad, que ya cubre los 17 items del Art. 12 LOPDP,
-                siguiendo la recomendacion registrada en PENDIENTES.md.
-                La ruta /lopdp queda reservada para cuando haya contenido propio. */}
-            <a href="/privacidad" class="font-body text-sm text-tx-muted hover:text-gd transition-colors">
-              Cumplimiento LOPDP
             </a>
           </li>
         </ul>
