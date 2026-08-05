@@ -2,7 +2,7 @@
 
 > **Lista viva única.** Todos los cabos sueltos del proyecto en un solo archivo. Se actualiza con cada sesión que cierre un item o detecte uno nuevo.
 
-**Última actualización:** 3 de agosto de 2026 (rama `publicacion-v1`: **P-43 CERRADO** y movido a Resueltos como R-15; P-37 entregado v1; P-36 entregado parcial; alcance de P-39 ampliado a los tres textos legales; alta de P-48, P-49 y P-50)
+**Última actualización:** 4 de agosto de 2026 (rama `publicacion-v1`: **política de privacidad v3** publicada con el dictamen verbal del abogado; **P-48 CERRADO** (R-16); P-39 pasa a esperar el visto bueno **escrito**; alta de **P-51**. El 03/08: P-43 cerrado como R-15, P-37 entregado v1, P-36 parcial, alta de P-48, P-49 y P-50)
 **Documento maestro de referencia:** [`PLAN-MAESTRO-v2.md`](PLAN-MAESTRO-v2.md)
 
 ---
@@ -96,7 +96,7 @@ Cuando un item se cierra, se mueve a la sección **Resueltos** al final con la f
 
 ### P-07 — Revisión legal de la política de privacidad LOPDP
 
-- **Estado:** 🟡 EN CURSO (auto-corrección Sesión 8, revisión humana Sesión 11)
+- **Estado:** 🟡 EN CURSO — **superado en su mayor parte por la v3** (04/08/2026): el dictamen verbal del abogado humano ya está incorporado. Lo que resta es el **visto bueno escrito**, que se sigue en **P-39**.
 - **Criticidad:** alta
 - **Bloquea a:** lanzamiento público (Fase 2 → producción).
 - **Owner:** Francisco (decide abogado) + Claude (corrección técnica).
@@ -396,9 +396,9 @@ Cuando un item se cierra, se mueve a la sección **Resueltos** al final con la f
 
 ### P-35 — Reescritura de política de privacidad v2 (cerrar 7 huecos LOPDP)
 
-- **Estado:** 🟡 EN CURSO (planificada para Sesión 8)
+- **Estado:** 🟢 LISTO — **cubierto y superado por la v3** (04/08/2026, commit `65b3dd4`). Los 7 huecos se cerraron primero en la v2 (Sesión 8) y la v3 los reemplaza con el texto del abogado. Se cierra junto con **P-39**, cuando llegue el visto bueno escrito.
 - **Criticidad:** alta
-- **Bloquea a:** Fase 2 (lanzamiento a producción).
+- **Bloquea a:** Fase 2 (lanzamiento a producción), solo a través de P-39.
 - **Owner:** Claude (corrección técnica) + Francisco (aprobación).
 - **Detalle:** ver detalle completo en P-07. Los 7 huecos detectados en H-01 deben cerrarse antes del deploy. Cambios principales: base legal datos sensibles → consentimiento expreso separado (Art. 4 LOPDP); declarar Aurora como decisión automatizada (Art. 12.4); agregar derechos faltantes; completar datos contacto del responsable; anclar transferencias internacionales en Resolución SPDP-SPD-2026-0004-R.
 - **Próximo paso:** Sesión 8 reescribe `/privacidad` con los 7 huecos cerrados. Output: `src/pages/privacidad.astro` v2 + commit + push.
@@ -435,15 +435,16 @@ Cuando un item se cierra, se mueve a la sección **Resueltos** al final con la f
 
 ### P-39 — Reunión con abogado humano para validación legal
 
-- **Estado:** ⚪ POR DECIDIR (planificada Sesión 11)
+- **Estado:** 🟡 EN CURSO — **dictamen verbal del abogado ya incorporado** en la política de privacidad **v3** (04/08/2026, rama `publicacion-v1`). **PENDIENTE el visto bueno ESCRITO**, que es lo que falta para publicar. El abogado revisará **las páginas renderizadas en staging**, no el markdown.
 - **Criticidad:** alta
-- **Bloquea a:** Fase 2 (deploy a producción con respaldo legal).
+- **Bloquea a:** Fase 2 (deploy a producción con respaldo legal). **Sigue siendo EL gate.**
 - **Owner:** Francisco (agendar) + abogado especializado en LOPDP/SCVS Ecuador.
+- **Pregunta abierta que dejó esta implementación:** el §9 de la v3 dice que «al ingresar por primera vez, el sitio muestra un aviso informativo». Se implementó como **línea permanente al pie** en las 12 páginas, no como banner de primera visita: un banner exigiría JavaScript y almacenamiento para recordar el descarte, que es justo lo que el mismo §9 declara que el sitio no usa. **¿El abogado da por cumplido el principio de transparencia con la línea permanente?** Si exige el banner de primera visita, hay que revisar también el texto del §9 y de `/cookies`.
 - **Alcance actualizado (03/08/2026):** los **tres** documentos ya existen y son los que el abogado valida:
 
   | Documento | Versión | Entregado en |
   |---|---|---|
-  | `/privacidad` | v2 (1.0, 01/06/2026) | Sesión 8 |
+  | `/privacidad` | **v3 (03/08/2026, dictamen verbal incorporado)** | rama `publicacion-v1`, commit `65b3dd4` · fuente: `docs/legal/POLITICA-PRIVACIDAD-V3-2026-08-03.md` (`398b039`) |
   | `/terminos` | **v1 (1.0, 02/08/2026)** | rama `publicacion-v1`, commit `cd501fd` |
   | `/cookies` | **v1 (1.0, 02/08/2026)** | rama `publicacion-v1`, commit `6b106e0` |
 
@@ -526,12 +527,12 @@ Cuando un item se cierra, se mueve a la sección **Resueltos** al final con la f
 
 ### P-48 — `og-default.png` no existe: la vista previa al compartir sale rota
 
-- **Estado:** 🟡 EN CURSO (hallazgo del 03/08/2026, rama `publicacion-v1`)
+- **Estado:** ✅ **CERRADO el 04/08/2026** (commit `f64d53c`) — ver **R-16** en Resueltos. Falta únicamente que **Francisco apruebe la pieza visualmente**; el defecto técnico (etiqueta apuntando a un archivo inexistente) ya no existe.
 - **Criticidad:** **alta para el lanzamiento**, aunque no rompa ninguna página.
 - **Bloquea a:** nada técnico. Afecta directo al canal principal del negocio.
 - **Owner:** Francisco (aprueba la imagen) + Claude (la conecta).
 - **Detalle:** `Layout.astro` declara `ogImage = "/og-default.png"` y emite `og:image` + `twitter:image` apuntando a `https://barreraglobal.com/og-default.png` **en las 12 páginas**. Ese archivo **no existe** en `web/public/` ni en el build (verificado). Consecuencia: cada vez que alguien comparta un enlace del sitio por WhatsApp, Facebook o LinkedIn, la tarjeta de vista previa sale **sin imagen**. Para un negocio cuyo canal de entrada es justamente WhatsApp, es la primera impresión del sitio y hoy está rota. Es **preexistente**, no lo introdujo esta rama.
-- **Próximo paso:** producir un PNG de **1200 × 630** con identidad de marca (fondo `#08080d`, logotipo Cormorant, tagline "Patrimonio que crece. Capital protegido.") y dejarlo en `web/public/og-default.png`. Es una pieza de diseño: la aprueba Francisco. Verificar después con el depurador de enlaces de Facebook y compartiendo el enlace a un WhatsApp propio.
+- **Próximo paso:** una vez el sitio esté en línea, verificar con el depurador de enlaces de Facebook y compartiendo el enlace a un WhatsApp propio. **Nota de tipografía:** la pieza se generó con **Garamond** del sistema, no con Cormorant Garamond: Fontsource entrega la fuente en `.woff/.woff2` y GDI+ solo carga `.ttf/.otf`. Es la misma familia histórica y el resultado es coherente con el logo tipográfico, que también es provisional (D-23). Si Francisco quiere la Cormorant exacta, hay que rehacer la pieza en una herramienta de diseño.
 
 ### P-49 — Runtime de React (193 KB) que se hornea en la imagen y nadie usa
 
@@ -550,6 +551,15 @@ Cuando un item se cierra, se mueve a la sección **Resueltos** al final con la f
 - **Owner:** Claude.
 - **Detalle:** `web/public/sitemap.xml` se escribió a mano con las 11 URLs públicas. Funciona y es exacto hoy, pero **no se actualiza solo**: cualquier página nueva que no se agregue a mano queda fuera del sitemap, y cualquier página retirada queda listada apuntando a un 404. El riesgo es que se olvide, no que falle.
 - **Próximo paso:** post-lanzamiento, evaluar la integración oficial `@astrojs/sitemap`, que lo genera en cada build a partir de las rutas reales. Ojo: genera `sitemap-index.xml` + `sitemap-0.xml`, así que hay que actualizar la referencia de `robots.txt`. Mientras tanto, **regla operativa: página nueva = entrada nueva en `sitemap.xml` en el mismo commit.**
+
+### P-51 — `privacidad@barreraglobal.com` no existe: configurar y PROBAR recepción
+
+- **Estado:** 🔴 BLOQUEADO por tarea manual de Francisco (alta del 04/08/2026, rama `publicacion-v1`)
+- **Criticidad:** **alta — PRE-REQUISITO del switch a público.**
+- **Bloquea a:** el pase a PÚBLICO. No bloquea staging.
+- **Owner:** **Francisco** (es tarea manual en Cloudflare; no se puede hacer desde este repo).
+- **Detalle:** la política de privacidad **v3** publica `privacidad@barreraglobal.com` como canal para ejercer derechos LOPDP, y lo hace **cuatro veces** (§1 contacto del responsable, §8 detalle de transferencias, §10 ejercicio de derechos con plazo de 15 días, §13 reclamos). **Esa casilla todavía no existe.** Publicar un canal de derechos que no recibe correo es peor que no publicarlo: se promete por escrito un plazo de respuesta de 15 días sobre una dirección que rebota. Hasta ahora el sitio usaba `fbarrera.inversiones@gmail.com` (D-20 / DM-05, ver **P-04**), que sigue siendo el contacto en `/terminos`, `/cookies` y el footer — con la v3 el sitio queda con **dos** direcciones distintas según la página.
+- **Próximo paso:** (1) Francisco configura **Cloudflare Email Routing** en `barreraglobal.com` con la regla `privacidad@` → su bandeja real; (2) **enviar un correo de prueba desde fuera y confirmar que llega** — configurar sin probar no cuenta; (3) recién entonces el switch a público. Aprovechar el mismo paso para decidir si `/terminos`, `/cookies` y el footer se unifican a una dirección del dominio propio y cerrar **P-04**.
 
 ---
 ## 9. Decisiones cerradas (referencia rápida)
@@ -705,6 +715,14 @@ Lista de items que fueron cerrados, con fecha. Sirve de memoria del proyecto.
 - **Resumen:** las tres rutas legales que el footer enlazaba sin destino quedaron resueltas en la rama `publicacion-v1`. `/terminos` v1 creada (commit `cd501fd`), `/cookies` v1 creada (commit `6b106e0`) y `/lopdp` repuntado a `/privacidad` (commit `faa00cf`), que es la opción (b) recomendada por el propio P-43. Verificación sobre el build, no sobre el fuente: **369 referencias internas, 13 rutas distintas, 0 rotas** en las 12 páginas; **0** apariciones residuales de `href="/lopdp"`.
 - **Nota de alcance:** cierra el **gate de higiene**, no el gate legal. Los textos de `/terminos` y `/cookies` son v1 y siguen pendientes de validación humana en **P-39**.
 - **Commits relacionados:** `cd501fd`, `6b106e0`, `faa00cf`.
+
+### R-16 — `og-default.png` inexistente (cierre de P-48)
+
+- **Cerrado:** 4 de agosto de 2026
+- **Estado al cerrar:** 🟢 RESUELTO
+- **Resumen:** las 12 páginas declaraban `og:image` y `twitter:image` hacia un archivo que no existía, así que toda tarjeta de vista previa compartida por WhatsApp salía sin imagen. Se generó la pieza 1200 × 630 con identidad de marca (fondo `#08080d`, "Barrera Global" en serif dorado `#c9a84c`, eyebrow "ARQUITECTURA FINANCIERA" espaciado, filete, tagline y dominio al pie), **26,3 KB**. Verificado sobre el build: el archivo llega a `dist/` y las **24** etiquetas (`og:image` + `twitter:image` de las 12 páginas) resuelven a URL absoluta.
+- **Nota de alcance:** cierra el defecto técnico. La **aprobación visual de Francisco** sigue pendiente, igual que la verificación en vivo con el depurador de Facebook una vez publicado el sitio.
+- **Commits relacionados:** `f64d53c`.
 
 ---
 **Fin del documento PENDIENTES.md.**

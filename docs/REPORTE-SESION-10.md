@@ -631,7 +631,7 @@ Build limpio con `dist/` borrado: **10/10 páginas**, sin errores.
 
 ---
 
-*Última actualización: 03/08/2026 tras dejar el sitio listo para público.*
+*Última actualización: 04/08/2026 tras incorporar la política de privacidad v3.*
 
 ---
 
@@ -816,3 +816,117 @@ valores siguen siendo `sha256-aOPTArMu…` (toggle del menú móvil) y
   textos legales · alta de **P-48**, **P-49** y **P-50**.
 - **Gate que sigue abierto:** **P-39**, revisión legal humana. Es el único que
   bloquea el pase a público.
+
+---
+
+## POLÍTICA DE PRIVACIDAD v3 — DICTAMEN VERBAL (rama `publicacion-v1`)
+
+**Fecha:** 4 de agosto de 2026 · misma rama, **sin merge**, **VPS y SSH
+intactos**. `main` sigue en `ffcf293`.
+
+Francisco trajo del abogado el texto de la política con el dictamen verbal ya
+incorporado. Esta jornada lo implementa **verbatim** y cierra los dos restos
+que quedaban de la jornada anterior.
+
+### Commits
+
+| # | Commit | Qué |
+|---|---|---|
+| 9 | `f64d53c` | `og-default.png` 1200 × 630 (cierra P-48) |
+| 10 | `4cee453` | Fusionar los dos enlaces del footer que iban a `/privacidad` |
+| 11 | `398b039` | Fuente legal versionada antes de transcribirla |
+| 12 | `65b3dd4` | **Política de privacidad v3** |
+| 13 | `4ec2cac` | Retirar las dos frases observadas en el dictamen |
+| 14 | `dc72ec8` | Aviso de cookies técnicas al pie |
+| 15 | este | Documentación |
+
+### La v3 se transcribió, no se redactó
+
+El cuerpo de `/privacidad` es una transcripción palabra por palabra de
+`docs/legal/POLITICA-PRIVACIDAD-V3-2026-08-03.md`, que se commiteó **antes**
+(`398b039`) justamente para que quede trazable de dónde salió cada frase.
+
+La verificación no fue a ojo: un comparador normaliza el fuente y el HTML
+renderizado y contrasta fragmento por fragmento. **64 fragmentos comparados,
+64 presentes.** La sección interna **NOTAS — DELTA** no se publica: 0
+apariciones de `NOTAS`, `DELTA`, `VALIDAR`, «PARA EL ABOGADO», «el cambio
+sensible», «se propone retirar», «retirada preventivamente» y «No publicar
+hasta».
+
+El **DISCLAIMER OPERATIVO se conserva**, ahora al final del documento y con el
+texto ajustado: dictamen verbal incorporado, pendiente el visto bueno
+**escrito**.
+
+**Lo que cambia de fondo con la v3, y conviene tener presente:**
+
+- **Reaparece la credencial 572619**, esta vez atribuida a **Insurance Trust
+  S.A. como agencia**, no a Francisco. Es exactamente la corrección que exigía
+  **E-23**, y es el propio dictamen quien la pide así. No contradice R-27.
+- **El canal de derechos pasa a `privacidad@barreraglobal.com`**, que **no
+  existe todavía**. Ver **P-51**: es prerrequisito del switch.
+- **Se nombran aseguradoras** destinatarias de datos (Chubb, Generali, Sweaden,
+  BMI, Ecuasanitas, BUPA, American Fidelity, RedBridge, Investors Trust,
+  Dominion). Declararlas es obligación LOPDP, no marketing. De paso aporta la
+  lista que **P-01/P-02** llevaban bloqueada.
+- **Se declara tratamiento de datos de seguros de auto**, aunque el sitio no
+  tenga página de auto (**D1**): la política cubre toda la operación, incluido
+  lo que se converse por WhatsApp, no solo lo que el sitio publica.
+
+Dos apuntes de transcripción: el fuente trae el placeholder «*Última
+actualización: [fecha de publicación]*», que no se publica literal — su función
+la cumple la línea de versión pedida. Y esa línea dice «reemplaza a la v2 del
+15 de julio de 2026», mientras que la página que estaba publicada declaraba
+«Versión 1.0 · 1 de junio de 2026»: **tres fechas que no concuerdan entre sí**,
+conviene que el abogado fije cuál es la buena.
+
+### Frases retiradas por el dictamen
+
+4 apariciones en 3 archivos, con corte limpio y sin inventar reemplazos:
+
+| Archivo | Frase |
+|---|---|
+| `index.astro` (tarjeta Salud) | «sin que el bolsillo sea el límite» |
+| `index.astro` (bullet Inversión) | «Vehículos offshore con carriers regulados» — se retira el bullet entero |
+| `seguros/salud-nacional.astro` | «sin que el bolsillo sea el límite» |
+| `inversion.astro` | «offshore» dentro de la frase |
+
+La oración de salud termina ahora en «cuando más importa.». **0 apariciones de
+`bolsillo` y `offshore`** en `web/src` y en las 12 páginas del build.
+
+### Aviso de cookies: línea permanente, no banner
+
+El §9 de la v3 dice que «al ingresar por primera vez, el sitio muestra un aviso
+informativo». Se implementó como **línea fija al pie en las 12 páginas**:
+
+> Este sitio solo utiliza cookies técnicas de seguridad · **Política de cookies**
+
+**Un banner de primera visita exigiría JavaScript y almacenamiento** para
+recordar que ya se descartó — justo lo que el mismo §9 y `/cookies` declaran
+que el sitio no usa. La línea permanente cumple transparencia sin contradecir
+el texto. **Queda como pregunta abierta para el visto bueno escrito** (anotada
+en P-39).
+
+Cero JavaScript nuevo, cero storage: **los hashes CSP no se tocaron**. El color
+del enlace lo pone la regla base `a` de `global.css`; no se le puso utilidad
+`text-*` porque sería inerte (**R-43**), y **no se tocaron las capas**.
+
+### QA final (build limpio)
+
+| # | Chequeo | Resultado |
+|---|---|---|
+| 1 | Build | ✅ **12/12 páginas** |
+| 2 | Transcripción verbatim de la v3 | ✅ 64/64 fragmentos |
+| 3 | Fuga de la sección interna NOTAS — DELTA | ✅ **0** |
+| 4 | Frases del dictamen | ✅ 0 `bolsillo` · 0 `offshore` (fuente y build) |
+| 5 | Aviso de cookies | ✅ presente en **12/12** páginas |
+| 6 | `og:image` / `twitter:image` | ✅ 24 etiquetas a URL absoluta, archivo en `dist/` |
+| 7 | Enlaces internos | ✅ 0 rotos |
+| 8 | **CSP — cruce bidireccional** | ✅ 2 ↔ 2, 0 huérfanos, 0 faltantes, 0 scripts externos |
+| 9 | `main` intacto | ✅ `ffcf293` local y origin |
+
+### Lo que sigue bloqueando el pase a público
+
+1. **P-39** — visto bueno **escrito** del abogado, que revisará las páginas
+   renderizadas en staging.
+2. **P-51** — `privacidad@barreraglobal.com` configurado **y probado**. La v3
+   lo publica 4 veces como canal de derechos con plazo de 15 días.
