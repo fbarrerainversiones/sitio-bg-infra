@@ -2,7 +2,7 @@
 
 > **Lista viva única.** Todos los cabos sueltos del proyecto en un solo archivo. Se actualiza con cada sesión que cierre un item o detecte uno nuevo.
 
-**Última actualización:** 4 de agosto de 2026 (rama `publicacion-v1`: **política de privacidad v3** publicada con el dictamen verbal del abogado; **P-48 CERRADO** (R-16); P-39 pasa a esperar el visto bueno **escrito**; alta de **P-51**. El 03/08: P-43 cerrado como R-15, P-37 entregado v1, P-36 parcial, alta de P-48, P-49 y P-50)
+**Última actualización:** 5 de agosto de 2026 (merge de `publicacion-v1` a `main` y **staging completo y navegable**. P-39 ampliado con la **inconsistencia de redacción del "trámite"** entre páginas de presentación y páginas legales. Reconciliación anti-fantasma: **P-42** afirmaba que `404.astro` no existía y sí existe desde Sesión 10; **P-06** mandaba editar un texto que ya no está en Footer ni en index; **P-23** citaba 551 KB de foto cuando P-44 la dejó en 54,8 KB. El 04/08: **política de privacidad v3** con el dictamen verbal del abogado, **P-48 CERRADO** (R-16), P-39 pasa a esperar el visto bueno **escrito**, alta de **P-51**. El 03/08: P-43 cerrado como R-15, P-37 entregado v1, P-36 parcial, alta de P-48, P-49 y P-50)
 **Documento maestro de referencia:** [`PLAN-MAESTRO-v2.md`](PLAN-MAESTRO-v2.md)
 
 ---
@@ -86,13 +86,14 @@ Cuando un item se cierra, se mueve a la sección **Resueltos** al final con la f
 - **Bloquea a:** P-34 (registro DPD), reemplazo del placeholder "credencial SCVS en tramite" en Footer/index/privacidad
 - **Owner:** SCVS (organismo) + Francisco (seguimiento).
 - **Detalle:** Francisco terminó el curso paralelo más completo (no el original). La credencial personal está en trámite con SCVS. Fecha estimada: julio-agosto 2026. ACTUALIZACION SESION 5: hasta que llegue, sitio muestra "credencial SCVS personal en tramite" (DM-07). NO se publica la credencial 572619 del broker como si fuera propia (E-23 corregido en commit 451121f).
-- **Próximo paso:** cuando llegue la credencial, ejecutar en una sola sesión (30 min total):
-  1. Actualizar Footer.astro (L108): cambiar "Credencial SCVS personal en tramite" por "Cred. SCVS Nº [propia]"
-  2. Actualizar index.astro (L232): mismo cambio
-  3. Actualizar privacidad.astro (L57): mismo cambio
-  4. Hacer documento auto-nombramiento DPD
-  5. Subir al portal SPDP (registro DPD = P-34)
-  6. Commit + push con mensaje "feat: credencial SCVS personal recibida + DPD registrado"
+- **Próximo paso:** cuando llegue la credencial, ejecutar en una sola sesión (30 min total). **Ojo: el mapa de archivos cambió el 05/08/2026** (commit `e921dc8`) — las páginas de presentación ya NO dicen "en trámite", así que buscar ese texto ahí no encuentra nada (esto es exactamente el fantasma que R-22 previene). Estado real al 05/08/2026, a re-verificar antes de editar:
+  1. `Footer.astro` (L136) — hoy dice "Operando bajo Insurance Trust · Bróker registrado ante la SCVS". Cuando llegue la credencial propia, decidir si se agrega y cómo.
+  2. `index.astro` (L267) — hoy dice "Opero bajo Insurance Trust, bróker registrado ante la SCVS". Mismo criterio.
+  3. `privacidad.astro` (L72) — **sí** conserva "en trámite ante la SCVS". Página legal: el cambio lo valida el abogado (P-39).
+  4. `terminos.astro` (L79) — **sí** conserva "Su credencial SCVS personal se encuentra en trámite". Página legal: ídem.
+  5. Hacer documento auto-nombramiento DPD.
+  6. Subir al portal SPDP (registro DPD = P-34).
+  7. Commit + push con mensaje "feat: credencial SCVS personal recibida + DPD registrado".
 
 ### P-07 — Revisión legal de la política de privacidad LOPDP
 
@@ -269,7 +270,7 @@ Cuando un item se cierra, se mueve a la sección **Resueltos** al final con la f
 - **Criticidad:** baja ahora (foto IA cubre Fase 1-2)
 - **Bloquea a:** nada urgente. La foto IA es suficiente hasta sesión fotográfica real.
 - **Owner:** Francisco.
-- **Detalle:** ACTUALIZACION SESION 5: Francisco aprobó foto retocada con IA como imagen oficial provisional del sitio (D-24). Se muestra en hero de home y eventualmente en `/sobre-mi`. Archivo: `web/public/images/francisco-barrera.jpg` (551 KB). NO bloquea lanzamiento. Eventualmente reemplazar con sesión fotográfica profesional para mejorar autoridad E-E-A-T.
+- **Detalle:** ACTUALIZACION SESION 5: Francisco aprobó foto retocada con IA como imagen oficial provisional del sitio (D-24). Se muestra en hero de home y eventualmente en `/sobre-mi`. Archivo: `web/public/images/francisco-barrera.jpg` (**54,8 KB** desde la recompresión de P-44 el 22/07/2026; el "551 KB" que decía este ítem quedó obsoleto y se corrige acá el 05/08). NO bloquea lanzamiento. Eventualmente reemplazar con sesión fotográfica profesional para mejorar autoridad E-E-A-T.
 - **Próximo paso:** post-Fase 2 (sitio en producción), Francisco evalúa hacer sesión profesional real para reforzar autoridad y E-E-A-T en SEO/AEO. Costo estimado: $80-200 USD.
 
 ### P-24 — Foto de Carolina + links a sus redes sociales
@@ -440,6 +441,16 @@ Cuando un item se cierra, se mueve a la sección **Resueltos** al final con la f
 - **Bloquea a:** Fase 2 (deploy a producción con respaldo legal). **Sigue siendo EL gate.**
 - **Owner:** Francisco (agendar) + abogado especializado en LOPDP/SCVS Ecuador.
 - **Pregunta abierta que dejó esta implementación:** el §9 de la v3 dice que «al ingresar por primera vez, el sitio muestra un aviso informativo». Se implementó como **línea permanente al pie** en las 12 páginas, no como banner de primera visita: un banner exigiría JavaScript y almacenamiento para recordar el descarte, que es justo lo que el mismo §9 declara que el sitio no usa. **¿El abogado da por cumplido el principio de transparencia con la línea permanente?** Si exige el banner de primera visita, hay que revisar también el texto del §9 y de `/cookies`.
+- **Inconsistencia de redacción abierta (05/08/2026) — la resuelve el abogado:** el sitio dice hoy **dos cosas distintas** sobre la credencial personal de Francisco, según la página:
+
+  | Página | Tipo | Texto vigente |
+  |---|---|---|
+  | Footer (las 12 páginas) | presentación | "Operando bajo Insurance Trust · Bróker registrado ante la SCVS" |
+  | `/` (bloque "Sobre mí") | presentación | "Opero bajo Insurance Trust, bróker registrado ante la SCVS" |
+  | `/privacidad` §1 | **legal** | "La credencial personal de asesor productor … se encuentra **en trámite** ante la SCVS" |
+  | `/terminos` §2 | **legal** | "Su credencial SCVS personal se encuentra **en trámite**" |
+
+  Las de presentación se cambiaron el 05/08 a pedido de Francisco (commit `e921dc8`): ya no declaran nada sobre la credencial personal y atribuyen el registro a Insurance Trust, que es quien efectivamente lo tiene (coherente con **E-23**). Las **legales NO se tocaron a propósito**, porque están bajo revisión y su redacción es decisión del abogado. **Pregunta (11) para la reunión: ¿se unifica la redacción, y en qué sentido?** Opciones sobre la mesa: (a) las legales dejan de mencionar el trámite, (b) las de presentación vuelven a mencionarlo, (c) se acepta la asimetría porque el nivel de detalle legal es distinto del comercial. Mientras no se resuelva, el sitio público mostraría dos versiones del mismo hecho.
 - **Alcance actualizado (03/08/2026):** los **tres** documentos ya existen y son los que el abogado valida:
 
   | Documento | Versión | Entregado en |
@@ -450,7 +461,7 @@ Cuando un item se cierra, se mueve a la sección **Resueltos** al final con la f
 
   Los tres textos son **v1 PENDIENTE DE VALIDACIÓN LEGAL HUMANA**. Esa marca vive **en este documento, no en las páginas**: `/terminos` y `/cookies` se publican sin ningún cartel de borrador, porque un disclaimer de "esto todavía no lo revisa un abogado" en un sitio público resta más de lo que protege. (Excepción heredada: `/privacidad` **sí** muestra hoy un recuadro "DISCLAIMER OPERATIVO" desde Sesión 8 — ver pregunta 9.)
 
-- **Detalle:** llevar los tres a abogado humano REAL (no más análisis IA) para validación vinculante. Preguntas a llevar: (1) `/privacidad` cumple Art. 12 LOPDP completo, (2) qué docs faltan según experto local, (3) registro SPDP DPD - timing y procedimiento, (4) restricciones SCVS para sitio propio bajo paraguas Insurance Trust, (5) marca SENADI - costos y proceso, (6) figura legal: persona natural vs jurídica para escalar, (7) tarifas razonables, **(8)** si las cookies técnicas que pueda fijar el proxy Cloudflare exigen algo más que la mención que ya hace `/cookies` (hoy el sitio no instala ninguna cookie propia), **(9)** si el recuadro "DISCLAIMER OPERATIVO" de `/privacidad` debe seguir visible una vez el sitio sea público o se retira al validar, **(10)** si conviene declarar jurisdicción de una ciudad concreta en `/terminos` — la v1 dice solo "jueces y tribunales competentes del Ecuador".
+- **Detalle:** llevar los tres a abogado humano REAL (no más análisis IA) para validación vinculante. Preguntas a llevar: (1) `/privacidad` cumple Art. 12 LOPDP completo, (2) qué docs faltan según experto local, (3) registro SPDP DPD - timing y procedimiento, (4) restricciones SCVS para sitio propio bajo paraguas Insurance Trust, (5) marca SENADI - costos y proceso, (6) figura legal: persona natural vs jurídica para escalar, (7) tarifas razonables, **(8)** si las cookies técnicas que pueda fijar el proxy Cloudflare exigen algo más que la mención que ya hace `/cookies` (hoy el sitio no instala ninguna cookie propia), **(9)** si el recuadro "DISCLAIMER OPERATIVO" de `/privacidad` debe seguir visible una vez el sitio sea público o se retira al validar (verificado el 05/08: **sigue visible**, `privacidad.astro:282`), **(10)** si conviene declarar jurisdicción de una ciudad concreta en `/terminos` — la v1 dice solo "jueces y tribunales competentes del Ecuador", **(11)** cómo se unifica la redacción del "trámite" de la credencial personal entre páginas de presentación y páginas legales (ver la tabla de inconsistencia arriba).
 - **Próximo paso:** reunión presencial o virtual con abogado antes del pase a PÚBLICO. Llevar los tres documentos impresos o PDF. Costo estimado: $80-150 USD por revisión (no redacción desde cero). **Sigue siendo EL gate del lanzamiento.**
 
 ### P-40 — Registro de marca "Barrera Global" ante SENADI
@@ -477,8 +488,9 @@ Cuando un item se cierra, se mueve a la sección **Resueltos** al final con la f
 - **Criticidad:** baja (UX; no bloquea funcionalidad, pero conviene tenerla antes del deploy público).
 - **Bloquea a:** nada crítico. Mejora la experiencia ante URLs inexistentes en producción.
 - **Owner:** Claude (implementa) + Francisco (aprueba copy).
-- **Detalle:** hoy NO existe `web/src/pages/404.astro` (páginas actuales: `index`, `sobre-mi`, `contacto`, `privacidad`). Cualquier URL inexistente cae en la 404 por defecto (Astro/nginx sin marca). Falta una página 404 con identidad Barrera Global: paleta `#08080d`/`#c9a84c`, logo, mensaje y CTAs de retorno al home y a secciones clave. NOTA: una 404 premium NO corrige los links rotos del footer (eso es P-43); son entregables distintos (una 404 bonita sigue siendo un 404 para quien hace clic en "Términos"). **Trazabilidad:** este ítem NO tuvo número propio en la bitácora Sesión 8; surge de la reconciliación del 17/07/2026, del mismo hallazgo que motivó la referencia P-46 de la bitácora (ver P-43).
-- **Próximo paso:** Claude crea `web/src/pages/404.astro` con el Layout de marca + CTAs de retorno; verificar que el nginx del paquete Docker (commit `53a309c`) sirva correctamente la 404 de Astro (`try_files` / `error_page`).
+- **CORRECCIÓN ANTI-FANTASMA (05/08/2026):** este ítem afirmaba que "hoy NO existe `web/src/pages/404.astro`" y listaba solo 4 páginas. **Es falso desde Sesión 10:** el archivo existe, entra en el build (`/404.html`) y las páginas son **12**, no 4. El texto quedó congelado en el estado de julio. Lo que sigue realmente abierto es solo la **verificación en el servidor**, no la creación de la página.
+- **Detalle:** `web/src/pages/404.astro` existe y usa el Layout de marca (paleta `#08080d`/`#c9a84c`, logo, mensaje y CTAs de retorno). Lo que **no** está verificado es que nginx la sirva: `infra/nginx.conf` usa `try_files $uri $uri/ =404` **sin `error_page 404 /404.html`**, así que una URL inexistente probablemente devuelva la 404 pelada de nginx en vez de la página de marca. Eso se comprueba en staging con una URL inventada. NOTA: una 404 premium NO corrige links rotos del footer (eso era P-43, ya cerrado); son entregables distintos. **Trazabilidad:** este ítem NO tuvo número propio en la bitácora Sesión 8; surge de la reconciliación del 17/07/2026, del mismo hallazgo que motivó la referencia P-46 de la bitácora (ver P-43).
+- **Próximo paso:** pedir una URL inexistente en staging (p. ej. `/no-existe`) y mirar qué se renderiza. Si sale la 404 de nginx y no la de marca, agregar `error_page 404 /404.html;` a `infra/nginx.conf` — **y recordar que eso exige rebuild de la imagen (R-44)**, no basta con un pull.
 
 ### P-43 — Links legales del footer que dan 404 (`/terminos`, `/cookies`, `/lopdp`)
 
@@ -495,7 +507,7 @@ Cuando un item se cierra, se mueve a la sección **Resueltos** al final con la f
 - **Criticidad:** media (performance / LCP; el hero del home carga esta imagen).
 - **Bloquea a:** nada funcional. Mejora Lighthouse Performance y LCP antes/después del deploy.
 - **Owner:** Claude (optimiza) + Francisco (aprueba resultado visual).
-- **Detalle:** `web/public/images/francisco-barrera.jpg` pesa 551 KB y se muestra en el hero del home y en `/sobre-mi`. 551 KB es alto para una imagen above-the-fold. Optimización: convertir a WebP/AVIF con fallback, redimensionar a los tamaños realmente usados y servir `srcset` responsivo. DISTINTO de **P-23** (que trata de reemplazar la foto IA por una sesión fotográfica profesional para E-E-A-T): aquí solo es optimización técnica del archivo actual, sin cambiar la imagen. **Trazabilidad:** referenciado en bitácora Sesión 8 como P-47 (numeración de notas, no oficial).
+- **Detalle:** `web/public/images/francisco-barrera.jpg` **pesaba** 551 KB y se muestra en el hero del home y en `/sobre-mi`; 551 KB era alto para una imagen above-the-fold. Tras la recompresión del 22/07 el archivo está en **54,8 KB** (verificado el 05/08), así que el problema de peso bruto ya no existe y lo que queda abierto es solo el formato moderno y el responsivo. Optimización: convertir a WebP/AVIF con fallback, redimensionar a los tamaños realmente usados y servir `srcset` responsivo. DISTINTO de **P-23** (que trata de reemplazar la foto IA por una sesión fotográfica profesional para E-E-A-T): aquí solo es optimización técnica del archivo actual, sin cambiar la imagen. **Trazabilidad:** referenciado en bitácora Sesión 8 como P-47 (numeración de notas, no oficial).
 - **Próximo paso:** Claude genera variantes WebP/AVIF + tamaños responsivos, actualiza el `<img>`/`<picture>` en home y `/sobre-mi`, y re-mide Lighthouse. Objetivo: bajar el peso del hero manteniendo calidad visual.
 
 ### P-45 — Informe Aurora actualizado (correr cuestionario + ensamblar)
@@ -527,7 +539,7 @@ Cuando un item se cierra, se mueve a la sección **Resueltos** al final con la f
 
 ### P-48 — `og-default.png` no existe: la vista previa al compartir sale rota
 
-- **Estado:** ✅ **CERRADO el 04/08/2026** (commit `f64d53c`) — ver **R-16** en Resueltos. Falta únicamente que **Francisco apruebe la pieza visualmente**; el defecto técnico (etiqueta apuntando a un archivo inexistente) ya no existe.
+- **Estado:** ✅ **CERRADO el 04/08/2026** (commit `f64d53c`) — ver **R-16** en Resueltos. El defecto técnico (etiqueta apuntando a un archivo inexistente) ya no existe, y la pieza está desplegada en staging desde el 05/08. **Queda un solo cabo, no técnico: el visto bueno visual de Francisco.** Es de los ítems a revisar en la pasada de aprobación del staging completo.
 - **Criticidad:** **alta para el lanzamiento**, aunque no rompa ninguna página.
 - **Bloquea a:** nada técnico. Afecta directo al canal principal del negocio.
 - **Owner:** Francisco (aprueba la imagen) + Claude (la conecta).
@@ -554,7 +566,7 @@ Cuando un item se cierra, se mueve a la sección **Resueltos** al final con la f
 
 ### P-51 — `privacidad@barreraglobal.com` no existe: configurar y PROBAR recepción
 
-- **Estado:** 🔴 BLOQUEADO por tarea manual de Francisco (alta del 04/08/2026, rama `publicacion-v1`)
+- **Estado:** 🔴 BLOQUEADO por tarea manual de Francisco (alta del 04/08/2026, rama `publicacion-v1`). **Criterio de cierre: CONFIGURAR SIN PROBAR NO CUENTA.** El ítem se cierra cuando un correo enviado desde fuera llegue efectivamente a la bandeja de Francisco, no cuando la regla aparezca creada en Cloudflare.
 - **Criticidad:** **alta — PRE-REQUISITO del switch a público.**
 - **Bloquea a:** el pase a PÚBLICO. No bloquea staging.
 - **Owner:** **Francisco** (es tarea manual en Cloudflare; no se puede hacer desde este repo).
