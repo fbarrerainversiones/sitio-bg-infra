@@ -2,10 +2,10 @@
 
 > **Catalogo consolidado de TODOS los errores, accidentes operativos, malentendidos, bugs y near-miss detectados desde el inicio del proyecto.** Este documento sube al knowledge del proyecto Claude.ai para que futuras sesiones aprendan del historico y no repitan errores.
 
-**Version:** 2.1
+**Version:** 2.2
 **Generado:** martes 26 de mayo de 2026
-**Ultima actualizacion:** 19 de julio de 2026 (Sesion 9)
-**Cubre las sesiones:** 0 (23/05), 1 (24/05), 2 (25/05 AM), 3 (25/05 PM), 4 (26/05), 5 (01-02/06), 9 (19/07 deploy staging)
+**Ultima actualizacion:** 5 de agosto de 2026 (Sesion 12)
+**Cubre las sesiones:** 0 (23/05), 1 (24/05), 2 (25/05 AM), 3 (25/05 PM), 4 (26/05), 5 (01-02/06), 9 (19/07 deploy staging), 10-11 (22-28/07 estructura y merge), 12 (03-05/08 publicacion y staging completo)
 **Documento maestro de referencia:** `PLAN-MAESTRO-v2.md`
 **Documentos hermanos:** `PROCESOS-COMPLETOS.md`, `CONTINUIDAD.md`
 
@@ -24,7 +24,7 @@ Cada error tiene la misma estructura:
 - **Como se resolvio.**
 - **Regla operativa para no repetir.**
 
-Al final del documento estan las **reglas consolidadas (R-01 a R-43)** que salen de estos errores.
+Al final del documento estan las **reglas consolidadas (R-01 a R-47)** que salen de estos errores.
 
 ---
 
@@ -56,6 +56,8 @@ Al final del documento estan las **reglas consolidadas (R-01 a R-43)** que salen
 | E-22 | Tailwind v4 con arbitrary value text-[#hex] no genera utility class | 5 | media |
 | E-23 | Credencial SCVS 572619 atribuida incorrectamente a Francisco | 5 | alta |
 | E-24 | Flip del default gateway del caddy al conectar segunda red (degradacion Aurora ~5 min) | 9 | alta |
+| E-25 | nginx filtraba su puerto interno 8080 en el 301 de barra final (ERR_CONNECTION_RESET) | 12 | alta |
+| E-26 | Linea de basicauth del Caddyfile corrompida por un sed re-ejecutado con la variable vacia | 12 | alta |
 
 ---
 
@@ -371,6 +373,32 @@ Al final del documento estan las **reglas consolidadas (R-01 a R-43)** que salen
 
 ---
 
+## E-25 — nginx detras del proxy filtraba su puerto interno 8080 en el 301 de barra final
+
+- **Fecha detectado:** 05/08/2026
+- **Sesion:** 12 (staging completo)
+- **Categoria:** infra / nginx / red
+- **Severidad:** alta (rompia la navegacion de TODAS las rutas sin barra final; de haber pasado a publico con esto, el sitio quedaba inusable)
+- **Dano real:** navegacion de staging rota hasta el fix. Cero impacto en Aurora (Gate 0 verde en todo momento) y cero impacto en produccion (el sitio publico todavia no existe).
+- **Causa raiz:** el `location /` resuelve las rutas con `try_files $uri $uri/ =404`. Al pedir `/seguros/vida-termino` (sin barra final) el archivo no existe, `$uri/` resuelve al directorio y nginx emite un `301` hacia `/seguros/vida-termino/`. Con los valores por defecto `absolute_redirect on` y `port_in_redirect on`, nginx arma ese `Location` como URL ABSOLUTA con el `Host` proxiado mas el puerto en el que EL PROPIO nginx escucha: el `8080` interno, que existe solo dentro de `sitio_bg_net` y no se publica al host. El Caddy compartido no reescribe la cabecera `Location` al hacer proxy, asi que la URL con `:8080` llegaba intacta al navegador, que intentaba conectarse a un puerto inexistente de cara a internet y moria con `ERR_CONNECTION_RESET`. El sintoma enganaba: parecia un problema de rutas de Astro o del Caddy, y estaba en la config de nginx.
+- **Como se resolvio:** `absolute_redirect off;` y `port_in_redirect off;` a nivel `server` en `infra/nginx.conf` (commit `68f5e7b`). Con eso el `Location` sale como ruta relativa (`/seguros/vida-termino/`), sin esquema, sin host y sin puerto, y el navegador lo resuelve contra el origen publico. Antes de editar se verifico que no hubiera configuracion contradictoria: cero apariciones previas de `absolute_redirect`, `port_in_redirect`, `server_name_in_redirect`, `rewrite` o `return 30x` en todo `infra/`.
+- **Regla operativa para no repetir:** R-44. Todo nginx detras de un proxy emite redirecciones RELATIVAS. Y como `infra/nginx.conf` se hornea dentro de la imagen, el fix no llega al VPS con un `git pull`: exige rebuild.
+
+---
+
+## E-26 — Linea de basicauth del Caddyfile corrompida por un sed re-ejecutado con la variable del hash vacia
+
+- **Fecha detectado:** 05/08/2026
+- **Sesion:** 12 (staging completo, "guerra del candado")
+- **Categoria:** operativo / disciplina / infra
+- **Severidad:** alta (dejo staging sin acceso para nadie, y ocurrio sobre el Caddyfile compartido, que es la zona de mayor riesgo del VPS)
+- **Dano real:** ninguna clave abria staging hasta la reparacion. Cero impacto en Aurora: Gate 0 verde en todo momento. Cero perdida de datos.
+- **Causa raiz:** en un episodio de pegar salidas de terminal de vuelta a la terminal, se re-ejecuto un `sed` cuya variable con el hash de la contrasena estaba VACIA en ese shell. El `sed` corrio sin error y dejo la linea de `basicauth` con el usuario `panchiviris` y SIN hash. Una linea de basicauth sin hash no puede validar ninguna contrasena: de ahi que fallara cualquier clave. El sintoma ("ninguna clave abre") apuntaba enganosamente a la contrasena, cuando el problema estaba en el archivo.
+- **Como se resolvio:** comparacion visual ANTES/DESPUES de la linea, que expuso el hash faltante. Reparacion con un `sed` de LINEA COMPLETA (no de fragmento) y verificacion ocular de que el hash escrito en el archivo fuera identico al hash generado. Acceso confirmado desde el navegador.
+- **Regla operativa para no repetir:** R-45 (las salidas de terminal van unicamente al archivo de reporte, jamas de vuelta a una terminal) y R-46 (el navegador es el juez oficial de credenciales). Refuerza R-05, R-06 y NM-08.
+
+---
+
 ## Near-miss (cosas que casi salen mal pero se atajaron a tiempo)
 
 ### NM-01 — Casi se renombra container caddy de Aurora
@@ -438,15 +466,23 @@ Al final del documento estan las **reglas consolidadas (R-01 a R-43)** que salen
 - **Por que pudo ser grave:** un comando corrupto pegado al VPS puede fallar en silencio o hacer algo distinto a lo previsto.
 - **Aprendizaje:** los bloques que van al VPS se copian del ARCHIVO del runbook (`docs/DEPLOY-STAGING-runbook.md`), no del render del chat. Mitigacion adicional: usar variables (p.ej. `$B` para tokens linkificables) para que la URL no viaje literal en la linea copiada.
 
+### NM-10 — Falso negativo de grep por locale: bash parte la vocal acentuada UTF-8
+
+- **Fecha:** 05/08/2026, Sesion 12.
+- **Que paso:** al auditar las menciones de "tramite" en `web/src/` para el cambio de la linea de credencial del footer, un `grep` de bash con el patron `tr[aa]mite` (con la segunda `a` acentuada) devolvio CERO resultados, cuando habia 4 apariciones reales: `Footer.astro`, `index.astro`, `privacidad.astro` y `terminos.astro`. El bash de esta maquina corre en locale C: la vocal acentuada en UTF-8 son DOS bytes, y dentro de un bracket el motor los trata como dos bytes sueltos, asi que el patron nunca puede casar la palabra acentuada.
+- **Como se atajo:** la misma busqueda se repitio con ripgrep, que interpreta UTF-8 correctamente, y devolvio las 4 apariciones. El falso negativo salto porque el resultado vacio contradecia una busqueda previa exitosa hecha con ripgrep sobre el mismo arbol.
+- **Por que pudo ser grave:** el reporte habria declarado "cero menciones de tramite en el sitio" mientras dos paginas legales seguian afirmando que la credencial personal estaba en tramite. Es el mismo patron que NM-07: un "no encontrado" tomado como prueba de ausencia, esta vez sobre texto que iba a un reporte de compliance.
+- **Aprendizaje:** familia de R-40, ahora ampliada. Un "no encontrado" tambien puede ser artefacto de ENCODING, no solo de regex complejo. Para buscar texto en espanol (tildes, "n con virgulilla") usar ripgrep o fijar locale UTF-8 antes del grep; nunca concluir ausencia desde un grep de bash con acentos en el patron.
+
 ### Nota de reconciliacion (Sesion 9) — repo GitHub privado pese a D-21
 
 El repo `fbarrerainversiones/sitio-bg-infra` seguia PRIVADO en GitHub pese a que D-21 lo daba por publico: el switch nunca se acciono. Resuelto el 19/07/2026 con "Make public" tras una DOBLE auditoria de secretos (nada sensible en el historial). Con esto D-21 queda por fin accionada y la documentacion coincide con la realidad. Riesgo latente que se evito: exponer un repo con secretos commiteados al hacerlo publico; mitigado por la auditoria previa.
 
 ---
 
-## Reglas operativas consolidadas (R-01 a R-43)
+## Reglas operativas consolidadas (R-01 a R-47)
 
-De los 24 errores y 9 near-miss anteriores, salen estas reglas vivas para no repetir.
+De los 26 errores y 10 near-miss anteriores, salen estas reglas vivas para no repetir.
 
 ### Reglas de herramientas
 
@@ -521,6 +557,7 @@ De los 24 errores y 9 near-miss anteriores, salen estas reglas vivas para no rep
 ### Reglas nuevas (Sesion 9)
 
 - **R-40:** Para probar la AUSENCIA de un termino, usar greps simples de un solo termino literal. Un "no encontrado" de un patron complejo (alternaciones con `|`, `.*`, o `\n` literales) NO es prueba de ausencia: puede ser un falso negativo silencioso del motor de regex. Antes de concluir "no existe" o "es alucinacion", repetir el grep con el termino simple y confirmar. (Origen: NM-07, falso negativo del grep de `522`.)
+  - **Ampliacion (Sesion 12, NM-10):** un "no encontrado" tambien puede ser artefacto de ENCODING. El `grep` de bash de esta maquina corre en locale C y parte las vocales acentuadas UTF-8 en dos bytes, asi que cualquier patron con tilde da falso negativo silencioso. Para buscar texto en espanol usar ripgrep, o fijar locale UTF-8 antes del grep.
 
 - **R-41:** `docker network connect` sobre un container con trafico productivo (p.ej. el `caddy` compartido) SIEMPRE con `--gw-priority` explicito y NEGATIVO (p.ej. `--gw-priority=-100`), para no robarle el default gateway a su red original. Inmediatamente despues del connect, `docker exec <container> ip route` y confirmar que la linea `default via ...` NO cambio; si cambio, `docker network disconnect` al instante, ANTES incluso del Gate 0. (Origen: E-24, degradacion parcial de Aurora ~5 min el 19/07.)
 
@@ -532,17 +569,32 @@ De los 24 errores y 9 near-miss anteriores, salen estas reglas vivas para no rep
   - **Mitigacion vigente y obligatoria:** en cualquier boton con fondo dorado, el color critico del texto se fija **inline** (`style="color:#08080d"`), nunca con una utilidad de Tailwind. Para estados (`:hover`) se usa una regla propia sin capa y con mayor especificidad (patron `.btn-outline`, ver `global.css`).
   - **Fix de raiz DIFERIDO:** envolver las reglas base en `@layer base` haria que las utilidades ganen y **cambiaria el color de los enlaces en todo el sitio**. Eso es un rediseno, no un fix, y toca el aspecto que Francisco ya aprobo visualmente. Se difiere a **sesion dedicada post-lanzamiento** (pendiente P-47). Hasta entonces, NO tocar las capas.
 
+### Reglas nuevas (Sesion 12)
+
+- **R-44:** **Todo nginx que corra detras de un reverse proxy emite redirecciones RELATIVAS:** `absolute_redirect off;` y `port_in_redirect off;` a nivel `server`. Con los valores por defecto, el `301` de barra final que genera `try_files $uri $uri/` se arma como URL absoluta usando el puerto en el que ESE nginx escucha — aqui el `8080` interno, invisible desde internet — y el proxy no reescribe la cabecera `Location`, asi que el puerto privado se filtra al navegador y la navegacion muere con `ERR_CONNECTION_RESET`.
+  - **Corolario de deploy (igual de obligatorio):** `infra/nginx.conf` se hornea DENTRO de la imagen Docker (`COPY infra/nginx.conf /etc/nginx/conf.d/default.conf`). Ningun cambio de esa config llega al VPS con un `git pull`: **exige rebuild de la imagen**. Lo mismo vale para los hashes CSP. Si el sintoma es "cambie la config y el VPS sigue igual", la respuesta casi siempre es que falto el rebuild.
+  - (Origen: E-25, 05/08/2026.)
+
+- **R-45:** **Las salidas de terminal jamas vuelven a una terminal.** A la terminal entran UNICAMENTE los bloques que entrega el auditor, uno a la vez. Lo que la terminal devuelve va EXCLUSIVAMENTE al archivo `.txt` de reporte, para que lo lea el auditor. Pegar una salida de vuelta al shell re-ejecuta comandos fuera de su contexto original — con las variables de ese momento ya perdidas — y puede escribir basura en archivos criticos sin arrojar ningun error. Regla escrita con sangre. (Origen: E-26, el `sed` re-ejecutado con la variable del hash vacia. Refuerza R-05, R-06 y NM-08.)
+
+- **R-46:** **Tests de credenciales por terminal RETIRADOS de este proyecto.** El juez oficial de una credencial es el NAVEGADOR. Durante la Sesion 12 ningun intento tecleado en `curl` conto como evidencia valida: todos fallaron mientras el navegador entraba sin problema, y esos falsos negativos alargaron el diagnostico del candado y empujaron a sospechar de la contrasena en vez del archivo. Si hay que verificar un basicauth, se abre el navegador y punto. (Origen: Sesion 12, "guerra del candado".)
+
+- **R-47:** **Secuencia de deploy: Claude Code pushea PRIMERO, el VPS jala DESPUES.** Nunca al reves ni en paralelo. Senal inequivoca de que la secuencia se violo: el `git pull` del VPS responde `Already up to date` y el build sale todo `CACHED` — eso significa que el VPS esta reconstruyendo la version VIEJA y el trabajo nuevo ni siquiera llego. Guardian obligatorio, ya institucionalizado: despues del `git pull` en el VPS y ANTES de lanzar el rebuild, correr `git log` y confirmar por HASH que el commit esperado efectivamente aterrizo. (Origen: Sesion 12.)
+
 ---
 
 ## Estadisticas del historico
 
 ```
-Errores documentados:    24
-Near-miss documentados:  9
-Reglas operativas:       43
+Errores documentados:    26
+Near-miss documentados:  10
+Reglas operativas:       47
 Rollbacks ejecutados:    1 (B4 v1 -> network disconnect, Sesion 9)
 Incidentes Aurora:       1 (contenido ~5 min, B4 v1 Sesion 9 — sin perdida de datos)
+Incidentes solo-staging:  1 (candado basicauth corrupto, E-26 Sesion 12 — sin impacto en Aurora)
 Danos reales:            ~115 min re-trabajo + 8 min espera reboot + ~5 min degradacion parcial 3 dominios (B4 v1)
+                         + Sesion 12: navegacion de staging rota (E-25) y acceso a staging bloqueado (E-26),
+                           ambos resueltos el mismo dia; sin cifra de minutos registrada
 Danos evitados:          incalculables (cualquier near-miss pudo replicar el 522 v2.0)
 ```
 
@@ -553,11 +605,11 @@ Danos evitados:          incalculables (cualquier near-miss pudo replicar el 522
 Si vos sos Claude leyendo este documento por primera vez en una sesion nueva:
 
 1. **Lee este documento ANTES de proponer cualquier accion tecnica.**
-2. Las 43 reglas (R-01 a R-43) son **inviolables** salvo argumento explicito de Francisco.
+2. Las 47 reglas (R-01 a R-47) son **inviolables** salvo argumento explicito de Francisco.
 3. Si una propuesta tuya contradice una regla, para y discutilo antes.
 4. Cuando detectes un error nuevo, agregalo a este documento con la misma estructura. La memoria del proyecto se construye con historico, no con olvido.
 
 **Fin del documento de errores y aprendizajes.**
 
-**Ultima revision:** 19 de julio de 2026, Sesion 9.
+**Ultima revision:** 5 de agosto de 2026, Sesion 12.
 **Proxima revision:** al cierre de la proxima sesion (cuando se detecten errores nuevos).
