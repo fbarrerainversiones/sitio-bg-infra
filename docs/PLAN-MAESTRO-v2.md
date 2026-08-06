@@ -1133,6 +1133,89 @@ El numero 572619 que aparecia como credencial personal de Francisco es en realid
 > **Esta sección se actualiza al cierre de cada sesión de trabajo.** Formato cronológico inverso (lo más reciente arriba).
 
 
+### Sesión 12 — 3 al 5 de agosto de 2026 (publicación: rama `publicacion-v1`, v3 legal y staging completo)
+
+**Ventana:** lunes 3 al miércoles 5 de agosto de 2026 (distribuida en 3 días)
+**Gap desde sesión anterior:** ~6 días (Sesión 10-11 cerró el 28/07)
+**HEAD al cierre:** ver el commit de este cierre documental en `git log` (parte de `e921dc8`)
+**Resultado:** **STAGING COMPLETO Y NAVEGABLE** — 12 páginas, política de privacidad v3 implementada verbatim, frases observadas por el abogado retiradas, candado de staging regenerado y bug de navegación muerto. El sitio sigue **NO público**: los gates son P-39 (visto bueno **escrito** del abogado) y P-51 (correo `privacidad@` probado).
+
+#### Objetivo de la sesión
+
+Dejar el sitio en condiciones de pasar a público: cerrar los links legales rotos, retirar los marcadores `[PENDIENTE: ...]` visibles, incorporar el dictamen legal, y dejar staging sirviendo exactamente lo que verá el visitante para que Francisco y el abogado lo revisen sobre el sitio real y no sobre un documento.
+
+#### Cronología resumida
+
+1. **03/08 — rama `publicacion-v1`.** Se abrió rama propia para no tocar `main` hasta tener el conjunto completo. Se retiraron los marcadores `[PENDIENTE: ...]` de las 5 páginas de producto (`b485140`), se crearon `/terminos` y `/cookies` v1 (`cd501fd`, `6b106e0`) y se cerró **P-43** repuntando el enlace LOPDP que daba 404 (`faa00cf`). Paquete SEO para la publicación: `/privacidad` indexable (`daab630`), forma del canonical unificada sin barra final (`3e5fa8c`) y `robots.txt` + `sitemap.xml` (`6cf7758`).
+2. **04/08 — dictamen legal verbal → v3.** El abogado dio su dictamen de forma **verbal**. Se transcribió a `docs/legal/POLITICA-PRIVACIDAD-V3-2026-08-03.md` (`398b039`) y de ahí se implementó **verbatim** en `/privacidad` (`65b3dd4`): los textos legales del sitio **se transcriben, no se redactan**. Se retiraron del sitio las frases observadas por riesgo SCVS (`4ec2cac`), se agregó el aviso informativo de cookies técnicas al footer —línea permanente, no banner, porque el sitio no instala cookies propias ni almacenamiento y por tanto no hay nada que consentir— (`dc72ec8`), se creó la `og-default.png` para la vista previa al compartir (`f64d53c`) y se fusionaron los dos enlaces del footer que apuntaban al mismo destino (`4cee453`).
+3. **05/08 AM — merge a `main`.** Verificación previa (ambas ramas coincidiendo con origin, tree limpio), merge `--no-ff` → **`340c6cb`**: 15 commits, 17 archivos, +1437 / −247, sin conflictos. Build 12/12 y cruce CSP 2↔2 verificados **antes** del push. La rama `publicacion-v1` se conservó a propósito.
+4. **05/08 PM — deploy a staging.** El VPS venía desde `b09b10e` (Sesión 9): el pull fue grande, **50 commits, 33 archivos, +4118 / −482**, hasta `340c6cb`. Rebuild obligatorio de la imagen (la config de nginx y los hashes CSP viven **dentro** de ella).
+5. **La "guerra del candado" — INCIDENTE (E-26).** Ninguna clave abría staging. La causa no era la contraseña: la línea de `basicauth` del Caddyfile había quedado con el usuario y **sin hash**, porque en un episodio de pegar salidas de terminal de vuelta a la terminal se re-ejecutó un `sed` con la variable del hash **vacía**. Se detectó con comparación visual ANTES/DESPUÉS, se reparó con un `sed` de línea completa y verificación ocular (hash del archivo == hash generado), y se confirmó el acceso **desde el navegador**. De aquí salieron **R-45** (las salidas de terminal jamás vuelven a una terminal) y **R-46** (el navegador es el juez oficial de credenciales: todos los intentos por `curl` dieron falsos negativos).
+6. **Bug de navegación muerto (E-25).** Al navegar a `/seguros/vida-termino` el navegador terminaba en `staging.barreraglobal.com:8080` con `ERR_CONNECTION_RESET`: el `301` de barra final que emite `try_files` se armaba como URL absoluta con el **puerto interno 8080**, y el Caddy no reescribe `Location`. Fix con `absolute_redirect off` + `port_in_redirect off` (**`68f5e7b`**). En la misma tanda, cambio de la línea de credencial del footer pedido por Francisco (**`e921dc8`**).
+7. **Gate 0 verde en todo momento.** Ninguno de los dos incidentes tocó Aurora.
+
+#### Métricas honestas
+
+```
+Ventana:                 3 al 5 de agosto de 2026 (3 dias)
+Commits de la rama:      15 (b485140 -> f6be080)
+Merge a main:            340c6cb (--no-ff, 17 archivos, +1437 / -247, sin conflictos)
+Fixes post-merge:        2 (68f5e7b nginx, e921dc8 footer)
+Paginas:                 10 -> 12 (/terminos y /cookies nuevas)
+Build:                   12/12 en cada verificacion
+CSP:                     cruce 2<->2 exacto, cero huerfanos, ningun hash cambio
+Pull del VPS:            b09b10e -> 340c6cb (50 commits, 33 archivos, +4118 / -482)
+Incidentes:              2, ambos solo-staging (E-26 candado, E-25 navegacion)
+Impacto en Aurora:       0 — Gate 0 verde en todo momento
+Reglas nuevas:           4 (R-44 a R-47)
+Errores nuevos:          2 (E-25, E-26) + 1 near-miss (NM-10)
+```
+
+#### Commits del día
+
+**03/08:** `b485140`, `cd501fd`, `6b106e0`, `faa00cf`, `daab630`, `3e5fa8c`, `6cf7758`, `ed440b6`.
+**04/08:** `f64d53c`, `4cee453`, `398b039`, `65b3dd4`, `4ec2cac`, `dc72ec8`, `f6be080`.
+**05/08:** `340c6cb` (merge), `68f5e7b` (fix nginx), `e921dc8` (fix footer), más los commits de este cierre documental (errores, bitácora, pendientes, CLAUDE.md v2.3, informe de continuidad).
+
+#### Estado al cierre
+
+- **Staging COMPLETO y navegable** en `https://staging.barreraglobal.com`, con candado nuevo y funcionando, sirviendo las 12 páginas reales.
+- `main` con las 12 páginas, build verde y CSP cuadrado. Rama `publicacion-v1` conservada.
+- Sitio **aún NO público**. El switch no se tocó en esta sesión.
+
+#### Pendientes abiertos al cierre
+
+1. **Visto visual final de Francisco** sobre el staging completo.
+2. **Og-image** creada y desplegada, pero **falta el visto** de Francisco (P-48).
+3. **P-51 — correo `privacidad@barreraglobal.com`:** la v3 lo publica como canal de derechos con plazo de 15 días y **la casilla todavía no existe**. Configurarlo sin probar recepción NO cuenta como cerrado.
+4. **P-39 — visto bueno ESCRITO del abogado.** El dictamen fue verbal y ya está implementado; falta el respaldo escrito. Dentro de este mismo gate quedan dos cosas para él: la pregunta sobre el aviso de cookies, y la **inconsistencia de redacción del "trámite"** — las páginas de presentación ya no mencionan que la credencial personal está en trámite, pero `/privacidad` y `/terminos` sí. No se tocaron a propósito: están bajo su revisión y la unificación la decide él.
+
+#### Reflexión de cierre
+
+La sesión valió menos por el código que por dos lecciones caras. La del candado no fue un problema de contraseña sino de disciplina: pegar la salida de una terminal de vuelta a la terminal re-ejecutó un comando con las variables ya perdidas y escribió basura en el archivo más delicado del VPS **sin arrojar un solo error**. De ahí salió R-45, y R-46 la acompaña porque durante horas los `curl` mintieron mientras el navegador decía la verdad. La del `:8080` enseñó lo mismo desde otro ángulo: el síntoma señalaba a Astro o al Caddy, y la causa estaba en dos defaults de nginx que nadie había mirado. Las dos comparten raíz — creerle al síntoma en vez de leer el archivo real — y las dos se cerraron el mismo día sin que Aurora se enterara.
+
+---
+
+### Sesión 10-11 — 22 al 28 de julio de 2026 (Fase 3 estructural y merge a `main`)
+
+**Ventana:** 22 al 28 de julio de 2026
+**Gap desde sesión anterior:** ~3 días (Sesión 9 cerró el 19/07)
+**HEAD al cierre:** `ffcf293` (CLAUDE.md v2.2), sobre el merge `4981b93`
+**Resultado:** el sitio pasó de **4 a 10 páginas**. Fase 3 estructural fusionada a `main`.
+
+**Bitácora detallada:** esta sesión tiene reporte propio y extenso en **`docs/REPORTE-SESION-10.md`** (bloques A-B, decisiones **D1** a **D6**, QA pre-merge e inventario de tildes). Aquí queda solo el registro de cierre para que la bitácora no tenga huecos.
+
+Lo esencial:
+
+- **5 páginas de producto** creadas sobre `ProductLayout.astro` (`/seguros/vida-termino`, `/seguros/vida-indexada`, `/seguros/salud-nacional`, `/seguros/salud-internacional`, `/inversion`), más `/404`.
+- **D1:** `/seguros/auto` retirada. La decisión de Sesión 2 de "6 productos" queda superada.
+- **D3:** revisión de español de Ecuador — 419 correcciones de tildes, inventariadas en `docs/INVENTARIO-TILDES_2026-07-25.md`. Efecto colateral: cambió el hash CSP del toggle del menú móvil (`sha256-IpuDn/OD…` → `sha256-aOPTArMu…`), porque las tildes entraron en sus `aria-label`.
+- **D6 → R-43:** hallazgo de la deuda de capas CSS. Las reglas base de enlaces de `global.css` viven fuera de toda `@layer` y ganan a cualquier utilidad `text-*` de Tailwind v4 sobre un `<a>`, sin importar la especificidad. Mitigación vigente: color inline en botones dorados. Fix de raíz diferido a **P-47**.
+- **Merge `4981b93`** (`--no-ff`, rama `sesion-10-estructura`): 22 archivos, +2368 / −330, sobre la base `27ae9a2`. Cerrado con `ffcf293` (CLAUDE.md v2.2).
+- **Cero incidentes.** El VPS no se tocó en toda la sesión, así que staging siguió sirviendo la versión de 4 páginas de Sesión 9 hasta el deploy de la Sesión 12.
+
+---
+
 ### Sesión 9 — 19 de julio de 2026 (deploy a staging)
 
 **Fecha:** domingo 19 de julio de 2026
