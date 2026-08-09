@@ -2,10 +2,10 @@
 
 > **Catalogo consolidado de TODOS los errores, accidentes operativos, malentendidos, bugs y near-miss detectados desde el inicio del proyecto.** Este documento sube al knowledge del proyecto Claude.ai para que futuras sesiones aprendan del historico y no repitan errores.
 
-**Version:** 2.2
+**Version:** 2.3
 **Generado:** martes 26 de mayo de 2026
-**Ultima actualizacion:** 5 de agosto de 2026 (Sesion 12)
-**Cubre las sesiones:** 0 (23/05), 1 (24/05), 2 (25/05 AM), 3 (25/05 PM), 4 (26/05), 5 (01-02/06), 9 (19/07 deploy staging), 10-11 (22-28/07 estructura y merge), 12 (03-05/08 publicacion y staging completo)
+**Ultima actualizacion:** 9 de agosto de 2026 (Sesion 13 — el switch a publico)
+**Cubre las sesiones:** 0 (23/05), 1 (24/05), 2 (25/05 AM), 3 (25/05 PM), 4 (26/05), 5 (01-02/06), 9 (19/07 deploy staging), 10-11 (22-28/07 estructura y merge), 12 (03-05/08 publicacion y staging completo), 13 (08-09/08 lanzamiento publico)
 **Documento maestro de referencia:** `PLAN-MAESTRO-v2.md`
 **Documentos hermanos:** `PROCESOS-COMPLETOS.md`, `CONTINUIDAD.md`
 
@@ -24,7 +24,7 @@ Cada error tiene la misma estructura:
 - **Como se resolvio.**
 - **Regla operativa para no repetir.**
 
-Al final del documento estan las **reglas consolidadas (R-01 a R-47)** que salen de estos errores.
+Al final del documento estan las **reglas consolidadas (R-01 a R-50)** que salen de estos errores.
 
 ---
 
@@ -58,6 +58,8 @@ Al final del documento estan las **reglas consolidadas (R-01 a R-47)** que salen
 | E-24 | Flip del default gateway del caddy al conectar segunda red (degradacion Aurora ~5 min) | 9 | alta |
 | E-25 | nginx filtraba su puerto interno 8080 en el 301 de barra final (ERR_CONNECTION_RESET) | 12 | alta |
 | E-26 | Linea de basicauth del Caddyfile corrompida por un sed re-ejecutado con la variable vacia | 12 | alta |
+| E-27 | `sed -i` sobre un archivo bind-monteado reemplaza el inodo: el caddy valido y recargo la config VIEJA | 13 | alta |
+| E-28 | La validacion previa al restart no valido nada: faltaba `--adapter caddyfile` | 13 | media |
 
 ---
 
@@ -399,6 +401,34 @@ Al final del documento estan las **reglas consolidadas (R-01 a R-47)** que salen
 
 ---
 
+## E-27 — `sed -i` sobre un archivo bind-monteado reemplaza el inodo: el caddy valido y recargo la config VIEJA
+
+- **Fecha detectado:** 09/08/2026
+- **Sesion:** 13 (el switch a publico, primer intento)
+- **Categoria:** infra / Docker / bind-mount
+- **Severidad:** alta (ocurrio sobre el Caddyfile compartido, que es la zona de mayor riesgo del VPS, y dejo el switch en el peor estado posible: "aplicado con exito" segun la terminal, sin ningun efecto real)
+- **Dano real:** el primer intento del switch no surtio efecto. `barreraglobal.com` siguio sirviendo el cartel viejo mientras todos los comandos reportaban exito. Costo: el tiempo de diagnostico mas un rollback. Cero impacto en Aurora.
+- **Sintoma delator:** `/no-existe` devolvia **HTTP 200**. El cartel viejo respondia a cualquier ruta, asi que un 200 en una URL inventada era la prueba de que el sitio real no estaba en linea, por mas que el resto de las verificaciones se vieran bien. Un 200 donde deberia haber un 404 es una senal de que se esta mirando otra cosa.
+- **Causa raiz:** el Caddyfile esta bind-monteado en el container `caddy` como **ARCHIVO individual** y en modo lectura (`:ro`), no como directorio. Un bind-mount de archivo lo resuelve Docker por **inodo** en el momento de arrancar el container. `sed -i` **no edita en el lugar**: escribe un archivo temporal y lo renombra encima del original, con lo cual el archivo del host queda con un inodo NUEVO. El mount del container sigue apuntando al inodo VIEJO. A partir de ahi el host ve el archivo nuevo y el container sigue leyendo el viejo: `caddy validate` valida el viejo, `caddy reload` recarga el viejo, y todo responde "exitoso" sin un solo mensaje de error. Es el mismo mecanismo que la regla de mayo (Plan Maestro seccion 2, Regla 5) prohibia bajo la forma de `mv`.
+- **Como se resolvio:** deteccion por **comparacion de inodos** — `ls -i` del archivo en el host devolvio **524375** y el mismo archivo visto desde dentro del container devolvio **528303**. Dos inodos distintos son prueba directa de que el container esta leyendo un archivo fantasma. Contencion: rollback inmediato de Francisco. Resolucion en el segundo intento con tres cambios: (1) edicion **inode-preserving** — `sed` a un archivo temporal y despues `cp` encima del original, que conserva el inodo; (2) `docker restart caddy` para re-enganchar el mount; (3) validacion previa del archivo candidato copiandolo al container con `docker cp` antes de aplicarlo.
+- **Regla operativa para no repetir:** **R-48**. `sed -i` y `mv` PROHIBIDOS sobre archivos bind-monteados; solo metodos que preserven el inodo; ante la menor duda, comparar `ls -i` del host contra el del container.
+
+---
+
+## E-28 — La validacion previa al restart no valido nada: faltaba `--adapter caddyfile`
+
+- **Fecha detectado:** 09/08/2026
+- **Sesion:** 13 (el switch a publico, segundo intento)
+- **Categoria:** operativo / auditoria / herramientas
+- **Severidad:** media (no rompio nada, pero anulo en silencio el paso de seguridad del runbook)
+- **Dano real:** ninguno. Y esa es exactamente la parte incomoda: el restart del caddy siguio adelante **sin validacion efectiva** y salio bien porque la config estaba bien, no porque nada la hubiera revisado. Salio bien de suerte.
+- **Bug del auditor, registrado como tal:** el comando defectuoso lo entrego el auditor de la sesion, no Francisco. Se documenta con el mismo rigor que cualquier otro error del proyecto; tapar un fallo de la propia auditoria es peor que el fallo.
+- **Causa raiz:** la validacion se ejecuto sobre un archivo temporal llamado `/tmp/cf.check`. `caddy validate` **infiere el adaptador por el NOMBRE del archivo**: si el archivo no se llama exactamente `Caddyfile`, asume el formato JSON nativo de Caddy y falla por sintaxis antes de mirar el contenido. Faltaba `--adapter caddyfile`. El comando fallo, y el paso siguiente del runbook (el restart) se ejecuto igual, en vez de detenerse.
+- **Como se resolvio:** no se resolvio en caliente: se detecto despues, al revisar la corrida. Lo que se corrige es el runbook y el habito. La leccion util no es "el comando estaba mal escrito" sino "una validacion que falla no puede dejar pasar al paso siguiente".
+- **Regla operativa para no repetir:** **R-50**. `caddy validate` sobre archivos que no se llamen `Caddyfile` SIEMPRE con `--adapter caddyfile`, y una validacion fallida DETIENE el runbook.
+
+---
+
 ## Near-miss (cosas que casi salen mal pero se atajaron a tiempo)
 
 ### NM-01 — Casi se renombra container caddy de Aurora
@@ -474,15 +504,23 @@ Al final del documento estan las **reglas consolidadas (R-01 a R-47)** que salen
 - **Por que pudo ser grave:** el reporte habria declarado "cero menciones de tramite en el sitio" mientras dos paginas legales seguian afirmando que la credencial personal estaba en tramite. Es el mismo patron que NM-07: un "no encontrado" tomado como prueba de ausencia, esta vez sobre texto que iba a un reporte de compliance.
 - **Aprendizaje:** familia de R-40, ahora ampliada. Un "no encontrado" tambien puede ser artefacto de ENCODING, no solo de regex complejo. Para buscar texto en espanol (tildes, "n con virgulilla") usar ripgrep o fijar locale UTF-8 antes del grep; nunca concluir ausencia desde un grep de bash con acentos en el patron.
 
+### NM-11 — Bloque de rollback "solo si falla" ejecutado despues de un switch EXITOSO
+
+- **Fecha:** 09/08/2026, Sesion 13 (el switch a publico).
+- **Que paso:** terminado el switch v2 con todas las verificaciones en verde, se pego tambien el bloque de **ROLLBACK** que el runbook traia marcado como "ejecutar SOLO si falla". El sitio publico volvio al cartel viejo durante **~10 minutos**, hasta que se re-aplico la configuracion buena y quedo definitiva alrededor de las **18:40**.
+- **Por que pudo ser grave:** el sitio ya era publico. Un bloque condicional ejecutado fuera de su condicion deshace en un segundo un trabajo verificado, y en otro contexto puede ser mucho peor: los bloques de rollback de este proyecto tocan el **Caddyfile compartido**, asi que uno ejecutado por inercia puede arrastrar los dominios de Aurora, no solo los del sitio.
+- **Honestidad sobre el dano:** cero dano permanente, pero **no fue cero efecto**. Hubo ~10 minutos de sitio publico sirviendo el cartel viejo. Se clasifica como near-miss porque nada quedo roto, la causa se entendio al instante y la re-aplicacion fue inmediata.
+- **Aprendizaje:** **R-49**. Un runbook no es una lista para pegar de corrido: los bloques condicionales solo se ejecutan si su condicion se cumple, y la condicion se confirma en voz alta ANTES de pegar.
+
 ### Nota de reconciliacion (Sesion 9) — repo GitHub privado pese a D-21
 
 El repo `fbarrerainversiones/sitio-bg-infra` seguia PRIVADO en GitHub pese a que D-21 lo daba por publico: el switch nunca se acciono. Resuelto el 19/07/2026 con "Make public" tras una DOBLE auditoria de secretos (nada sensible en el historial). Con esto D-21 queda por fin accionada y la documentacion coincide con la realidad. Riesgo latente que se evito: exponer un repo con secretos commiteados al hacerlo publico; mitigado por la auditoria previa.
 
 ---
 
-## Reglas operativas consolidadas (R-01 a R-47)
+## Reglas operativas consolidadas (R-01 a R-50)
 
-De los 26 errores y 10 near-miss anteriores, salen estas reglas vivas para no repetir.
+De los 28 errores y 11 near-miss anteriores, salen estas reglas vivas para no repetir.
 
 ### Reglas de herramientas
 
@@ -581,20 +619,34 @@ De los 26 errores y 10 near-miss anteriores, salen estas reglas vivas para no re
 
 - **R-47:** **Secuencia de deploy: Claude Code pushea PRIMERO, el VPS jala DESPUES.** Nunca al reves ni en paralelo. Senal inequivoca de que la secuencia se violo: el `git pull` del VPS responde `Already up to date` y el build sale todo `CACHED` — eso significa que el VPS esta reconstruyendo la version VIEJA y el trabajo nuevo ni siquiera llego. Guardian obligatorio, ya institucionalizado: despues del `git pull` en el VPS y ANTES de lanzar el rebuild, correr `git log` y confirmar por HASH que el commit esperado efectivamente aterrizo. (Origen: Sesion 12.)
 
+### Reglas nuevas (Sesion 13 — el switch a publico)
+
+- **R-48:** **`sed -i` y `mv` PROHIBIDOS sobre cualquier archivo bind-monteado en un container.** Docker resuelve un bind-mount de ARCHIVO por **inodo** al arrancar el container. `sed -i` y `mv` no editan en el lugar: crean un archivo nuevo y lo renombran encima, dejando al original con un inodo distinto. A partir de ese momento el host ve una version y el container sigue leyendo otra, y todo lo que se ejecute dentro del container —incluidos `validate` y `reload`— opera sobre el archivo VIEJO **reportando exito**. Editar unicamente con metodos que preserven el inodo: `tee`, o `sed` a un archivo temporal seguido de `cp` encima del original. Ante la menor duda de si el container esta viendo lo mismo que el host, comparar `ls -i` del archivo en el host contra `docker exec <container> ls -i` del archivo montado: **si los inodos difieren, el container esta leyendo un fantasma** y hace falta `docker restart` para re-enganchar el mount. Esta regla **amplia** la regla de mayo (Plan Maestro seccion 2, Regla 5: "editar el Caddyfile con tee o editor, NUNCA con mv"): **`sed -i` es un `mv` disfrazado**, y por eso se colo por debajo de una prohibicion que ya existia. (Origen: E-27, 09/08/2026.)
+
+- **R-49:** **Los bloques condicionales de un runbook se ejecutan UNICAMENTE si su condicion se cumple.** Todo bloque marcado "solo si falla", "si el Gate 0 sale rojo" o equivalente exige que el operador **confirme la condicion en voz alta antes de pegarlo**. Un runbook no es una lista para pegar de corrido de arriba a abajo: la mitad de sus bloques existen precisamente para el caso que no ocurrio. Peso extra en este proyecto: los bloques de rollback tocan el **Caddyfile compartido**, asi que uno ejecutado por inercia puede arrastrar los dominios de Aurora. (Origen: NM-11, el rollback pegado despues de un switch exitoso.)
+
+- **R-50:** **`caddy validate` sobre un archivo que NO se llame exactamente `Caddyfile` va SIEMPRE con `--adapter caddyfile`.** Caddy infiere el adaptador por el nombre del archivo; sobre un `/tmp/cf.check` asume JSON nativo y falla por sintaxis sin haber mirado el contenido. Corolario, que es la mitad importante de la regla: **una validacion que falla DETIENE el runbook.** Nunca se pasa al restart o al reload "porque el error parecia del comando": si la red de seguridad no corrio, el paso siguiente no se ejecuta. (Origen: E-28.)
+
 ---
 
 ## Estadisticas del historico
 
 ```
-Errores documentados:    26
-Near-miss documentados:  10
-Reglas operativas:       47
-Rollbacks ejecutados:    1 (B4 v1 -> network disconnect, Sesion 9)
+Errores documentados:    28
+Near-miss documentados:  11
+Reglas operativas:       50
+Rollbacks ejecutados:    3 — 1 planificado (B4 v1 -> network disconnect, Sesion 9)
+                            + 1 planificado (switch v1 fallido por inodo, E-27 Sesion 13)
+                            + 1 ACCIDENTAL (bloque condicional pegado de mas, NM-11 Sesion 13)
 Incidentes Aurora:       1 (contenido ~5 min, B4 v1 Sesion 9 — sin perdida de datos)
 Incidentes solo-staging:  1 (candado basicauth corrupto, E-26 Sesion 12 — sin impacto en Aurora)
+Incidentes sitio publico: 1 (~10 min sirviendo el cartel viejo tras el rollback accidental,
+                            NM-11 Sesion 13 — sin impacto en Aurora)
 Danos reales:            ~115 min re-trabajo + 8 min espera reboot + ~5 min degradacion parcial 3 dominios (B4 v1)
                          + Sesion 12: navegacion de staging rota (E-25) y acceso a staging bloqueado (E-26),
                            ambos resueltos el mismo dia; sin cifra de minutos registrada
+                         + Sesion 13: switch v1 sin efecto por el inodo (E-27) y ~10 min de cartel
+                           viejo en el sitio ya publico (NM-11)
 Danos evitados:          incalculables (cualquier near-miss pudo replicar el 522 v2.0)
 ```
 
@@ -605,11 +657,11 @@ Danos evitados:          incalculables (cualquier near-miss pudo replicar el 522
 Si vos sos Claude leyendo este documento por primera vez en una sesion nueva:
 
 1. **Lee este documento ANTES de proponer cualquier accion tecnica.**
-2. Las 47 reglas (R-01 a R-47) son **inviolables** salvo argumento explicito de Francisco.
+2. Las 50 reglas (R-01 a R-50) son **inviolables** salvo argumento explicito de Francisco.
 3. Si una propuesta tuya contradice una regla, para y discutilo antes.
 4. Cuando detectes un error nuevo, agregalo a este documento con la misma estructura. La memoria del proyecto se construye con historico, no con olvido.
 
 **Fin del documento de errores y aprendizajes.**
 
-**Ultima revision:** 5 de agosto de 2026, Sesion 12.
+**Ultima revision:** 9 de agosto de 2026, Sesion 13 (el switch a publico).
 **Proxima revision:** al cierre de la proxima sesion (cuando se detecten errores nuevos).
