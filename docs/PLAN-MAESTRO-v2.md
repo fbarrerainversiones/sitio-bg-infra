@@ -1024,6 +1024,11 @@ El logo del sitio se renderiza como texto Cormorant Garamond (tipografico) en lu
 **D-24 — Foto IA aprobada como imagen oficial provisional** (02/06/2026, Sesion 5)
 Francisco aprobo la foto retocada con IA como imagen oficial del sitio web. Esta foto se muestra en el hero de la home y eventualmente en `/sobre-mi`. Posible reemplazo futuro con sesion fotografica profesional real (no bloquea lanzamiento, no es urgente).
 
+> **D-25 a D-28 no estan en esta lista:** viven en la bitacora (§12), en las sesiones donde se tomaron — D-25 y D-26 en Sesion 6 (CLAUDE.md como fuente de verdad para Claude Code; sincronizacion obligatoria en 4 lugares) y D-27 y D-28 en Sesion 8 (pagina `/contacto` sin formulario ni backend). Se deja anotado para que nadie asuma que D-24 es la ultima decision tomada.
+
+**D-29 — Logo P3 "Arquitectonica" elegido** (09/08/2026, Sesion 13)
+Francisco eligio la propuesta **P3 "Arquitectonica"** (el portico) entre las tres presentadas en la pagina de evaluacion no enlazada (`833fc8a`). La eleccion es **firme y no se reabre**. Lo que queda es la **produccion final**, registrada como **P-52**: convertir el texto a trazados para que el SVG no dependa de la fuente instalada, generar el favicon en los tamanos reales de uso y preparar la aplicacion de marca (horizontal, cuadrada, monograma, fondo claro y oscuro). **Flag de auditoria obligatorio para esa produccion:** el mockup de tarjeta dice "Quito, Ecuador" cuando lo correcto es **AMBATO** (es lo que declaran el JSON-LD y `/privacidad`), y usa el CTA viejo "Agenda tu asesoria" en vez del vigente del manual v2.0. Las dos cosas se corrigen ANTES de generar cualquier pieza derivada. Esta decision **supera a D-23** (logo tipografico provisional) recien cuando P-52 entregue la pieza; hasta entonces el sitio publico sigue con el logo tipografico.
+
 ### Decision Memos (DM-XX)
 
 **DM-01 a DM-04** — Decisiones operativas menores tomadas en Sesiones 0-4 (ver bitacora §12 para detalles).
@@ -1132,6 +1137,75 @@ El numero 572619 que aparecia como credencial personal de Francisco es en realid
 
 > **Esta sección se actualiza al cierre de cada sesión de trabajo.** Formato cronológico inverso (lo más reciente arriba).
 
+
+### Sesión 13 — 8 y 9 de agosto de 2026 (EL SWITCH A PÚBLICO)
+
+**Ventana:** sábado 8 y domingo 9 de agosto de 2026
+**Gap desde sesión anterior:** ~3 días (Sesión 12 cerró el 05/08)
+**HEAD al cierre:** el último commit de este cierre documental (ver `git log`); la sesión arrancó desde `0620d52`
+**Resultado:** **EL SITIO ES PÚBLICO.** `barreraglobal.com` y `www.barreraglobal.com` sirven el sitio real (`reverse_proxy sitio-bg-web:8080`). Staging sigue vivo y con candado. Se pagó el precio de dos incidentes, ninguno con impacto en Aurora.
+
+> **Nota de honestidad sobre las fechas:** los **7 commits** de esta sesión llevan fecha **09/08/2026** según `git log`; el 08/08 no dejó commits en el repo. Detalle relacionado: el comentario del fix de la 404 en `infra/nginx.conf` está fechado *08/08* mientras su commit (`8c7c18a`) es del 09/08 a las 16:51. Se deja anotado en vez de emparejarlo a la fuerza.
+
+#### Objetivo de la sesión
+
+Cerrar lo que faltaba para publicar —la 404 servida de verdad y el gate legal— y **ejecutar el switch**: que `barreraglobal.com` dejara de mostrar el cartel y empezara a servir las 12 páginas.
+
+#### Cronología resumida
+
+1. **La 404 que nginx nunca servía (`8c7c18a`).** La página premium existía en el build desde Sesión 10, pero `infra/nginx.conf` no tenía **ninguna** directiva `error_page`: el 404 interno del `try_files` moría en la página empotrada de nginx. Fix: `error_page 404 /404.html;` a nivel `server`, **sin** el prefijo `=` para que el status siga siendo 404 y no un soft-404. Aplicado con **rebuild** de la imagen (R-44) y verificado en el navegador. Cerró **P-42** como **R-17** (`fa0a4a2`).
+2. **Cierre legal (`6772a51`, `35e4138`).** El abogado **aprobó las tres páginas legales** sobre las páginas renderizadas en staging, como estaba previsto. Con eso, el recuadro «DISCLAIMER OPERATIVO» de `/privacidad` —que anunciaba «pendiente de visto bueno escrito»— dejó de ser cierto y se retiró; retiro quirúrgico, sin tocar una letra del texto aprobado (13 secciones intactas, 0 apariciones de «visto bueno» o «dictamen» en las 12 páginas). Cerró **P-39** como **R-18**. El respaldo escrito de una línea quedó **solicitado por WhatsApp**; el dictamen formal, por criterio del propio abogado, solo se requiere ante una auditoría LOPDP.
+3. **Email Routing configurado.** La regla `privacidad@barreraglobal.com` quedó creada, activa y con destino cargado, pero **en estado «Sincronizando»** y sin prueba de recepción. Francisco **decidió lanzar igual**, con **P-51 en curso**. El ítem NO se cierra hasta que un correo enviado desde fuera llegue de verdad.
+4. **SW-0 limpio.** El chequeo previo al switch pasó sin observaciones.
+5. **Switch v1 — FALLIDO (INCIDENTE E-27).** El Caddyfile se editó con `sed -i`. El archivo está bind-monteado como **archivo individual** y Docker resuelve ese mount por **inodo**: `sed -i` escribe un temporal y lo renombra encima, así que el host quedó con un inodo nuevo y el container siguió leyendo el viejo. Consecuencia: `caddy validate` validó la config **vieja** y `caddy reload` recargó la config **vieja**, todo reportando éxito. El síntoma delator fue `/no-existe` devolviendo **HTTP 200** — el cartel respondía a cualquier ruta. **Rollback inmediato** de Francisco.
+6. **Diagnóstico por inodos.** `ls -i` en el host devolvió **524375** y el mismo archivo visto dentro del container devolvió **528303**. Dos inodos distintos: prueba directa de que el container leía un fantasma. De aquí sale **R-48**, que amplía la regla de mayo «nunca `mv` sobre el Caddyfile» (§2, Regla 5) — **`sed -i` es un `mv` disfrazado**, y por eso se coló por debajo de una prohibición que ya existía.
+7. **Switch v2 — EXITOSO.** Edición **inode-preserving** (`sed` a temporal + `cp` encima, que conserva el inodo), `docker restart caddy` para re-enganchar el mount y validación previa del candidato vía `docker cp`. Todo verde. En esa validación previa apareció **E-28**, el bug del auditor: se corrió `caddy validate` sobre `/tmp/cf.check` **sin `--adapter caddyfile`**, así que falló por sintaxis sin mirar el contenido y el restart siguió adelante sin red de seguridad efectiva. Salió bien porque la config estaba bien, no porque algo la hubiera revisado. De ahí **R-50**.
+8. **Rollback accidental (NEAR-MISS NM-11).** Con el switch v2 ya verde, se pegó también el bloque de **ROLLBACK** que el runbook traía marcado como «solo si falla». El sitio público volvió al cartel viejo durante **~10 minutos**, hasta re-aplicar la configuración buena, que quedó definitiva alrededor de las **18:40**. Cero daño permanente; efecto real, sí. De ahí **R-49**: los bloques condicionales solo se ejecutan si su condición se cumple, y la condición se confirma en voz alta antes de pegar.
+9. **Verificaciones finales.** **Gate 0 5/5**, HTML del sitio real en el raíz de `barreraglobal.com`, `/no-existe` devolviendo un **404 de verdad** (el mismo chequeo que había desenmascarado el switch v1) y **staging intacto con su candado** respondiendo **401**.
+10. **Elección de logo (D-29).** Francisco eligió la propuesta **P3 «Arquitectónica»** (el pórtico) entre las tres presentadas (`833fc8a`, página de evaluación no enlazada). La producción final queda como **P-52**.
+
+#### Métricas honestas
+
+```
+Ventana:                 8 y 9 de agosto de 2026
+Commits en el repo:      7 en el dia (8c7c18a -> 833fc8a) + los de este cierre documental
+Fecha real de commits:   todos 09/08/2026; el 08/08 no dejo commits
+Intentos de switch:      2 (v1 fallido por inodo, v2 exitoso)
+Rollbacks:               2 — 1 planificado (tras el v1) + 1 ACCIDENTAL (tras el v2)
+Errores nuevos:          2 (E-27 inodo del bind-mount, E-28 validacion sin --adapter)
+Near-miss nuevos:        1 (NM-11 bloque condicional pegado de mas)
+Reglas nuevas:           3 (R-48, R-49, R-50)  -> total 50
+Pendientes cerrados:     2 (P-42 -> R-17, P-39 -> R-18)
+Pendientes nuevos:       2 (P-52 logo P3, P-53 basic_auth)
+Decisiones nuevas:       1 (D-29 logo P3 elegido)
+Caida del sitio:         0 — nunca dejo de responder; hubo ~10 min sirviendo el cartel viejo
+Impacto en Aurora:       0 — Gate 0 5/5 al cierre
+Paginas publicadas:      12
+```
+
+#### Commits del día
+
+**09/08:** `8c7c18a` (fix 404), `fa0a4a2` (cierre P-42), `6772a51` (retiro del disclaimer), `35e4138` (cierre P-39), `833fc8a` (propuestas de logo), más los commits de este cierre documental (errores, pendientes, bitácora, CLAUDE.md v2.4, informe de continuidad).
+
+#### Estado al cierre
+
+- **SITIO PÚBLICO en `barreraglobal.com` y `www.barreraglobal.com`**, sirviendo las 12 páginas reales vía `reverse_proxy sitio-bg-web:8080`.
+- **Staging vivo y protegido** en `staging.barreraglobal.com` (basicauth + `X-Robots-Tag: noindex`), verificado respondiendo 401.
+- **Aurora intacta.** Gate 0 5/5. El downtime acumulado de Aurora en todo el proyecto sigue siendo el de Sesión 9 (~5 min).
+
+#### Pendientes abiertos al cierre
+
+1. **P-51 — correo `privacidad@` probado.** Configurado, sincronizando, **sin prueba de recepción**. Es el pendiente número uno: el sitio ya publica esa dirección como canal de derechos con plazo de 15 días.
+2. **Baseline nuevo del Caddyfile** pendiente de registrar (falta el `ls -l` de Francisco).
+3. **P-52 — producción del logo P3**, con las dos correcciones del mockup: «Quito» → **Ambato** y el CTA viejo → el del manual v2.0.
+4. **P-53 — `basicauth` → `basic_auth`**, cuando se vuelva a tocar el Caddyfile, con método inode-safe.
+5. **Espejo del knowledge** con los snapshots nuevos.
+
+#### Reflexión de cierre
+
+El sitio se publicó, y las dos lecciones del día son la misma lección vista de frente y de perfil. El `sed -i` enseñó que una prohibición escrita —«nunca `mv` sobre el Caddyfile», de mayo— no protege si el mecanismo prohibido tiene otro nombre: el reemplazo de inodo entró por la puerta de atrás y consiguió que **todos** los comandos mintieran a la vez, validando y recargando un archivo que ya nadie estaba editando. Lo que lo delató no fue ninguna herramienta sofisticada sino un chequeo tonto: una URL inventada devolviendo 200 donde tenía que devolver 404. El rollback accidental enseñó lo opuesto y complementario: un runbook bien escrito también es peligroso si se pega de corrido, porque la mitad de sus bloques existen para el caso que **no** ocurrió. Y el bug del auditor queda escrito con nombre y apellido, porque una validación que falla y deja pasar al paso siguiente es peor que no tener validación: da la ilusión de red donde no hay red.
+
+---
 
 ### Sesión 12 — 3 al 5 de agosto de 2026 (publicación: rama `publicacion-v1`, v3 legal y staging completo)
 
