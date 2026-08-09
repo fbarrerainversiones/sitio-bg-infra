@@ -1,0 +1,374 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="robots" content="noindex, nofollow" />
+<title>Propuestas de logo · Barrera Global</title>
+<style>
+  /* ===== Fuentes reales del sitio (self-hosted, copiadas de Fontsource) ===== */
+  @font-face{font-family:'Cormorant Garamond';src:url('./fonts/cormorant-garamond-latin-400-normal.woff2') format('woff2');font-weight:400;font-display:swap;}
+  @font-face{font-family:'Cormorant Garamond';src:url('./fonts/cormorant-garamond-latin-600-normal.woff2') format('woff2');font-weight:600;font-display:swap;}
+  @font-face{font-family:'Cormorant Garamond';src:url('./fonts/cormorant-garamond-latin-700-normal.woff2') format('woff2');font-weight:700;font-display:swap;}
+  @font-face{font-family:'Outfit';src:url('./fonts/outfit-latin-400-normal.woff2') format('woff2');font-weight:400;font-display:swap;}
+  @font-face{font-family:'Outfit';src:url('./fonts/outfit-latin-500-normal.woff2') format('woff2');font-weight:500;font-display:swap;}
+  @font-face{font-family:'Outfit';src:url('./fonts/outfit-latin-600-normal.woff2') format('woff2');font-weight:600;font-display:swap;}
+  @font-face{font-family:'JetBrains Mono';src:url('./fonts/jetbrains-mono-latin-wght-normal.woff2') format('woff2');font-weight:400 700;font-display:swap;}
+
+  :root{
+    --bg:#08080d; --bg2:#0e0e15; --cd:#14141d;
+    --tx:#edeae3; --t2:#9a978f; --t3:#6b6860;
+    --gd:#c9a84c; --gl:#e8d48b; --gk:#a07e2e; --gd-dark:#a88a3a;
+    --bg-light:#fafaf7;
+    --font-display:'Cormorant Garamond',Georgia,serif;
+    --font-body:'Outfit',system-ui,sans-serif;
+    --font-mono:'JetBrains Mono','Consolas',monospace;
+  }
+
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{margin:0;background:var(--bg);color:var(--tx);font-family:var(--font-body);font-weight:400;line-height:1.7;-webkit-font-smoothing:antialiased;}
+
+  .wrap{max-width:1100px;margin:0 auto;padding:0 24px;}
+
+  /* ===== Contextos de color de la marca (accionan los CSS vars de los SVG) ===== */
+  .on-dark{--ink:#edeae3;--accent:#c9a84c;--line:#c9a84c;}
+  .on-light{--ink:#08080d;--accent:#a88a3a;--line:#a88a3a;}
+
+  /* clases usadas dentro de los <symbol> */
+  .ink{fill:var(--ink,#edeae3);}
+  .acc{fill:var(--accent,#c9a84c);}
+  .wm{font-family:var(--font-display);font-weight:600;letter-spacing:-0.01em;}
+  .fb{font-family:var(--font-display);font-weight:600;}
+  .fb7{font-family:var(--font-display);font-weight:700;}
+  .d-mono{font-family:var(--font-mono);font-weight:400;letter-spacing:4.5px;}
+  .d-ui{font-family:var(--font-body);font-weight:600;letter-spacing:4px;}
+  .d-ui5{font-family:var(--font-body);font-weight:500;letter-spacing:5px;}
+  .desc-op{opacity:.72;}
+  .hair{fill:none;stroke:var(--line,#c9a84c);stroke-width:1.25;vector-effect:non-scaling-stroke;}
+  .hair-sq{stroke-linecap:square;}
+
+  /* ===== Cabecera del documento ===== */
+  header.doc{border-bottom:1px solid rgba(201,168,76,.18);padding:64px 0 40px;}
+  .kicker{font-family:var(--font-mono);font-size:.72rem;letter-spacing:.28em;text-transform:uppercase;color:var(--gd);margin:0 0 14px;}
+  header.doc h1{font-family:var(--font-display);font-weight:600;font-size:clamp(2.1rem,5vw,3.4rem);line-height:1.12;letter-spacing:-.02em;margin:0 0 16px;}
+  header.doc p{color:var(--t2);max-width:66ch;margin:0 0 6px;font-size:1.02rem;}
+  .toc{display:flex;gap:10px;flex-wrap:wrap;margin-top:28px;}
+  .toc a{font-family:var(--font-mono);font-size:.78rem;letter-spacing:.05em;color:var(--gd);text-decoration:none;border:1px solid rgba(201,168,76,.35);border-radius:3px;padding:7px 14px;transition:background .2s,color .2s;}
+  .toc a:hover{background:rgba(201,168,76,.1);color:var(--gl);}
+
+  .meta-tokens{display:flex;flex-wrap:wrap;gap:18px;margin-top:30px;font-family:var(--font-mono);font-size:.74rem;color:var(--t2);}
+  .swatch{display:inline-flex;align-items:center;gap:8px;}
+  .chip{width:16px;height:16px;border-radius:3px;border:1px solid rgba(255,255,255,.08);}
+
+  /* ===== Bloque de propuesta ===== */
+  section.prop{padding:56px 0;border-bottom:1px solid rgba(255,255,255,.05);}
+  .prop-head{display:flex;align-items:baseline;gap:16px;flex-wrap:wrap;margin-bottom:6px;}
+  .badge{font-family:var(--font-mono);font-weight:700;font-size:.8rem;letter-spacing:.1em;color:var(--bg);background:linear-gradient(180deg,var(--gd),var(--gk));border-radius:3px;padding:4px 11px;}
+  .prop-head h2{font-family:var(--font-display);font-weight:600;font-size:clamp(1.7rem,3.5vw,2.4rem);letter-spacing:-.01em;margin:0;}
+  .rationale{color:var(--t2);max-width:74ch;margin:0 0 34px;font-size:1rem;}
+  .rationale b{color:var(--tx);font-weight:600;}
+
+  .ctx-label{font-family:var(--font-mono);font-size:.68rem;letter-spacing:.22em;text-transform:uppercase;color:var(--t3);margin:0 0 12px;}
+
+  .grid{display:grid;gap:22px;}
+  @media(min-width:820px){.grid-2{grid-template-columns:1.4fr 1fr;}}
+
+  .panel{background:var(--cd);border:1px solid rgba(255,255,255,.05);border-radius:8px;padding:22px;}
+  .panel.light{background:var(--bg-light);border-color:#e6e2d7;}
+
+  /* header simulado */
+  .site-header{display:flex;align-items:center;justify-content:space-between;gap:20px;background:var(--bg);border:1px solid rgba(201,168,76,.15);border-radius:8px;padding:16px 22px;overflow:hidden;}
+  .site-header .mk{height:38px;width:auto;flex:0 0 auto;}
+  .nav{display:flex;align-items:center;gap:20px;}
+  .nav a{color:var(--t2);text-decoration:none;font-size:.82rem;font-weight:500;letter-spacing:.01em;white-space:nowrap;}
+  .nav a:hover{color:var(--gd);}
+  .btn{font-family:var(--font-body);font-weight:600;font-size:.78rem;letter-spacing:.03em;color:#08080d;background:linear-gradient(180deg,#c9a84c,#a07e2e);border-radius:3px;padding:10px 18px;white-space:nowrap;}
+  @media(max-width:720px){.nav .lnk{display:none;}}
+
+  /* avatares */
+  .avatars{display:flex;align-items:flex-end;gap:26px;flex-wrap:wrap;}
+  .av{display:flex;flex-direction:column;align-items:center;gap:8px;}
+  .av .tile{background:var(--bg);border:1px solid rgba(201,168,76,.15);border-radius:10px;display:flex;align-items:center;justify-content:center;}
+  .av .tile.round{border-radius:50%;}
+  .av small{font-family:var(--font-mono);font-size:.64rem;color:var(--t3);letter-spacing:.05em;}
+  .t64{width:64px;height:64px;} .t64 svg{width:44px;height:44px;}
+  .t32{width:32px;height:32px;} .t32 svg{width:24px;height:24px;}
+  .t64r svg{width:42px;height:42px;}
+
+  /* tab del navegador */
+  .tabbar{display:inline-flex;align-items:center;gap:8px;background:var(--bg2);border:1px solid rgba(255,255,255,.06);border-radius:8px 8px 0 0;padding:9px 14px;max-width:280px;}
+  .tabbar svg{width:16px;height:16px;flex:0 0 auto;}
+  .tabbar span{font-size:.78rem;color:var(--t2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+
+  /* tarjeta de presentacion */
+  .card-mock{aspect-ratio:1.75/1;max-width:360px;background:linear-gradient(155deg,#101017,#08080d 60%);border:1px solid rgba(201,168,76,.2);border-radius:10px;padding:22px;display:flex;flex-direction:column;justify-content:space-between;box-shadow:0 20px 60px rgba(0,0,0,.4);}
+  .card-mock .mk{height:34px;width:auto;}
+  .card-mock .who{font-family:var(--font-display);font-weight:600;font-size:1.15rem;line-height:1.2;color:var(--tx);}
+  .card-mock .role{font-family:var(--font-body);font-size:.72rem;letter-spacing:.16em;text-transform:uppercase;color:var(--gd);margin-top:2px;}
+  .card-mock .contact{font-family:var(--font-mono);font-size:.66rem;color:var(--t2);line-height:1.6;margin-top:10px;}
+
+  /* fondo claro */
+  .light-row{display:flex;align-items:center;gap:30px;flex-wrap:wrap;}
+  .light-row .mk{height:40px;width:auto;}
+
+  footer.doc{padding:48px 0 80px;color:var(--t3);font-family:var(--font-mono);font-size:.76rem;line-height:1.8;}
+  footer.doc b{color:var(--t2);}
+</style>
+</head>
+<body>
+
+<!-- ============ DEFINICIONES DE MARCAS (una sola vez, reutilizadas) ============ -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <!-- P1 CLASICA -->
+    <symbol id="p1h" viewBox="0 0 480 130">
+      <text class="wm" x="240" y="70" text-anchor="middle" font-size="66"><tspan class="ink">Barrera </tspan><tspan class="acc">Global</tspan></text>
+      <text class="d-mono desc-op ink" x="243" y="104" text-anchor="middle" font-size="12.5">ARQUITECTURA FINANCIERA</text>
+    </symbol>
+    <symbol id="p1sq" viewBox="0 0 100 100">
+      <text class="fb7 ink" x="50" y="47" text-anchor="middle" font-size="52">F</text>
+      <text class="fb7 acc" x="50" y="90" text-anchor="middle" font-size="52">B</text>
+    </symbol>
+
+    <!-- P2 SELLO -->
+    <symbol id="p2h" viewBox="0 0 560 130">
+      <circle class="hair" cx="62" cy="65" r="44"/>
+      <circle class="hair" cx="62" cy="65" r="38.5"/>
+      <text class="fb acc" x="62" y="79" text-anchor="middle" font-size="40">FB</text>
+      <line class="hair" x1="140" y1="33" x2="140" y2="97"/>
+      <text class="wm" x="164" y="62" font-size="54"><tspan class="ink">Barrera </tspan><tspan class="acc">Global</tspan></text>
+      <text class="d-ui desc-op ink" x="166" y="90" font-size="12">ARQUITECTURA FINANCIERA</text>
+    </symbol>
+    <symbol id="p2sq" viewBox="0 0 100 100">
+      <circle class="hair" cx="50" cy="50" r="46"/>
+      <circle class="hair" cx="50" cy="50" r="40"/>
+      <text class="fb acc" x="50" y="64" text-anchor="middle" font-size="42">FB</text>
+      <line class="hair" x1="40" y1="72" x2="60" y2="72"/>
+    </symbol>
+
+    <!-- P3 ARQUITECTONICA -->
+    <symbol id="p3h" viewBox="0 0 560 130">
+      <g class="hair hair-sq">
+        <polyline points="20,58 60,34 100,58"/>
+        <line x1="20" y1="58" x2="100" y2="58"/>
+        <line x1="24" y1="64" x2="96" y2="64"/>
+        <line x1="30" y1="64" x2="30" y2="96"/>
+        <line x1="46" y1="64" x2="46" y2="96"/>
+        <line x1="74" y1="64" x2="74" y2="96"/>
+        <line x1="90" y1="64" x2="90" y2="96"/>
+        <line x1="24" y1="96" x2="96" y2="96"/>
+        <line x1="20" y1="101" x2="100" y2="101"/>
+      </g>
+      <text class="wm" x="132" y="62" font-size="54"><tspan class="ink">Barrera </tspan><tspan class="acc">Global</tspan></text>
+      <text class="d-ui5 desc-op ink" x="134" y="90" font-size="12">ARQUITECTURA FINANCIERA</text>
+    </symbol>
+    <symbol id="p3sq" viewBox="0 0 100 100">
+      <g class="hair hair-sq" style="stroke-width:1.4">
+        <polyline points="18,44 50,22 82,44"/>
+        <line x1="18" y1="44" x2="82" y2="44"/>
+        <line x1="23" y1="51" x2="77" y2="51"/>
+        <line x1="30" y1="51" x2="30" y2="82"/>
+        <line x1="43" y1="51" x2="43" y2="82"/>
+        <line x1="57" y1="51" x2="57" y2="82"/>
+        <line x1="70" y1="51" x2="70" y2="82"/>
+        <line x1="23" y1="82" x2="77" y2="82"/>
+        <line x1="18" y1="87" x2="82" y2="87"/>
+      </g>
+    </symbol>
+  </defs>
+</svg>
+
+<header class="doc">
+  <div class="wrap">
+    <p class="kicker">Barrera Global · Fase de exploración de identidad</p>
+    <h1>Tres propuestas de logo</h1>
+    <p>Comparativa para elegir una dirección. Todas usan <b style="color:var(--tx)">solo</b> la paleta oficial y las tres tipografías reales del sitio (Cormorant Garamond, Outfit, JetBrains Mono), renderizadas aquí con las mismas fuentes self-hosted que sirve el sitio.</p>
+    <p style="color:var(--t3);font-size:.9rem;">Fase 1: SVG con texto vivo. La vectorización final (texto → trazados) se hace solo con la propuesta elegida.</p>
+
+    <div class="meta-tokens">
+      <span class="swatch"><i class="chip" style="background:#08080d"></i>#08080d · fondo</span>
+      <span class="swatch"><i class="chip" style="background:#c9a84c"></i>#c9a84c · dorado</span>
+      <span class="swatch"><i class="chip" style="background:#e8d48b"></i>#e8d48b · dorado claro</span>
+      <span class="swatch"><i class="chip" style="background:#a07e2e"></i>#a07e2e · dorado oscuro</span>
+      <span class="swatch"><i class="chip" style="background:#edeae3"></i>#edeae3 · crema</span>
+      <span class="swatch"><i class="chip" style="background:#fafaf7"></i>#fafaf7 · fondo claro</span>
+    </div>
+
+    <nav class="toc">
+      <a href="#p1">P1 · Clásica</a>
+      <a href="#p2">P2 · Sello</a>
+      <a href="#p3">P3 · Arquitectónica</a>
+    </nav>
+  </div>
+</header>
+
+<!-- ============================= P1 ============================= -->
+<section class="prop" id="p1">
+  <div class="wrap">
+    <div class="prop-head"><span class="badge">P1</span><h2>Clásica</h2></div>
+    <p class="rationale">El sistema actual, depurado. Wordmark a dos tonos —<b>Barrera</b> en crema, <b>Global</b> en dorado— en Cormorant Garamond 600, con descriptor en JetBrains Mono espaciado (el mismo recurso que ya usa el header del sitio). Riesgo mínimo, máxima continuidad: es evolución, no ruptura. El monograma <b>FB</b> apilado en serif resuelve el favicon.</p>
+
+    <div class="grid grid-2">
+      <div>
+        <p class="ctx-label">Header del sitio</p>
+        <div class="site-header on-dark">
+          <svg class="mk" viewBox="0 0 480 130"><use href="#p1h"/></svg>
+          <nav class="nav">
+            <a class="lnk" href="#p1">Inicio</a><a class="lnk" href="#p1">Seguros</a><a class="lnk" href="#p1">Inversión</a>
+            <span class="btn">Agenda tu asesoría</span>
+          </nav>
+        </div>
+
+        <p class="ctx-label" style="margin-top:26px">Sobre fondo claro · versatilidad</p>
+        <div class="panel light">
+          <div class="light-row on-light">
+            <svg class="mk" viewBox="0 0 480 130"><use href="#p1h"/></svg>
+            <div class="av"><div class="tile round t64r" style="background:var(--bg-light);border-color:#e6e2d7"><svg viewBox="0 0 100 100"><use href="#p1sq"/></svg></div><small>avatar</small></div>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <p class="ctx-label">Avatar / favicon</p>
+        <div class="panel">
+          <div class="avatars on-dark">
+            <div class="av"><div class="tile round t64"><svg viewBox="0 0 100 100"><use href="#p1sq"/></svg></div><small>64px</small></div>
+            <div class="av"><div class="tile round t32"><svg viewBox="0 0 100 100"><use href="#p1sq"/></svg></div><small>32px</small></div>
+            <div class="av"><div class="tile t64"><svg viewBox="0 0 100 100"><use href="#p1sq"/></svg></div><small>cuadrado</small></div>
+          </div>
+          <div class="tabbar on-dark" style="margin-top:20px">
+            <svg viewBox="0 0 100 100"><use href="#p1sq"/></svg><span>Barrera Global · Arquitectura Financiera</span>
+          </div>
+        </div>
+
+        <p class="ctx-label" style="margin-top:26px">Tarjeta de presentación</p>
+        <div class="card-mock on-dark">
+          <svg class="mk" viewBox="0 0 480 130"><use href="#p1h"/></svg>
+          <div>
+            <div class="who">Francisco Javier Barrera</div>
+            <div class="role">Arquitectura Financiera</div>
+            <div class="contact">barreraglobal.com · Quito, Ecuador</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================= P2 ============================= -->
+<section class="prop" id="p2">
+  <div class="wrap">
+    <div class="prop-head"><span class="badge">P2</span><h2>Sello</h2></div>
+    <p class="rationale">Aire de banca privada. El monograma <b>FB</b> vive dentro de un doble anillo de línea fina dorada —un sello institucional— y se enlaza con el wordmark mediante un filete vertical. Comunica solidez, custodia y confianza. El sello aislado funciona solo como emblema en piezas donde el wordmark sobra. Descriptor en Outfit versalitas para tono formal.</p>
+
+    <div class="grid grid-2">
+      <div>
+        <p class="ctx-label">Header del sitio</p>
+        <div class="site-header on-dark">
+          <svg class="mk" viewBox="0 0 560 130"><use href="#p2h"/></svg>
+          <nav class="nav">
+            <a class="lnk" href="#p2">Inicio</a><a class="lnk" href="#p2">Seguros</a><a class="lnk" href="#p2">Inversión</a>
+            <span class="btn">Agenda tu asesoría</span>
+          </nav>
+        </div>
+
+        <p class="ctx-label" style="margin-top:26px">Sobre fondo claro · versatilidad</p>
+        <div class="panel light">
+          <div class="light-row on-light">
+            <svg class="mk" viewBox="0 0 560 130"><use href="#p2h"/></svg>
+            <div class="av"><div class="tile round t64r" style="background:var(--bg-light);border-color:#e6e2d7"><svg viewBox="0 0 100 100"><use href="#p2sq"/></svg></div><small>sello</small></div>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <p class="ctx-label">Avatar / favicon</p>
+        <div class="panel">
+          <div class="avatars on-dark">
+            <div class="av"><div class="tile round t64"><svg viewBox="0 0 100 100"><use href="#p2sq"/></svg></div><small>64px</small></div>
+            <div class="av"><div class="tile round t32"><svg viewBox="0 0 100 100"><use href="#p2sq"/></svg></div><small>32px</small></div>
+            <div class="av"><div class="tile t64"><svg viewBox="0 0 100 100"><use href="#p2sq"/></svg></div><small>cuadrado</small></div>
+          </div>
+          <div class="tabbar on-dark" style="margin-top:20px">
+            <svg viewBox="0 0 100 100"><use href="#p2sq"/></svg><span>Barrera Global · Arquitectura Financiera</span>
+          </div>
+        </div>
+
+        <p class="ctx-label" style="margin-top:26px">Tarjeta de presentación</p>
+        <div class="card-mock on-dark">
+          <svg class="mk" viewBox="0 0 560 130"><use href="#p2h"/></svg>
+          <div>
+            <div class="who">Francisco Javier Barrera</div>
+            <div class="role">Arquitectura Financiera</div>
+            <div class="contact">barreraglobal.com · Quito, Ecuador</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================= P3 ============================= -->
+<section class="prop" id="p3">
+  <div class="wrap">
+    <div class="prop-head"><span class="badge">P3</span><h2>Arquitectónica</h2></div>
+    <p class="rationale">La opción más moderna. Una marca abstracta de línea fina evoca un <b>pórtico</b> —columnas, dintel, basamento— traducción literal del descriptor «Arquitectura Financiera»: estructura, diseño, permanencia. Sin caer en el escudo. Pareada con el wordmark en Cormorant y descriptor en Outfit fino. El pórtico aislado es un icono fuerte y reconocible a 32px.</p>
+
+    <div class="grid grid-2">
+      <div>
+        <p class="ctx-label">Header del sitio</p>
+        <div class="site-header on-dark">
+          <svg class="mk" viewBox="0 0 560 130"><use href="#p3h"/></svg>
+          <nav class="nav">
+            <a class="lnk" href="#p3">Inicio</a><a class="lnk" href="#p3">Seguros</a><a class="lnk" href="#p3">Inversión</a>
+            <span class="btn">Agenda tu asesoría</span>
+          </nav>
+        </div>
+
+        <p class="ctx-label" style="margin-top:26px">Sobre fondo claro · versatilidad</p>
+        <div class="panel light">
+          <div class="light-row on-light">
+            <svg class="mk" viewBox="0 0 560 130"><use href="#p3h"/></svg>
+            <div class="av"><div class="tile round t64r" style="background:var(--bg-light);border-color:#e6e2d7"><svg viewBox="0 0 100 100"><use href="#p3sq"/></svg></div><small>icono</small></div>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <p class="ctx-label">Avatar / favicon</p>
+        <div class="panel">
+          <div class="avatars on-dark">
+            <div class="av"><div class="tile round t64"><svg viewBox="0 0 100 100"><use href="#p3sq"/></svg></div><small>64px</small></div>
+            <div class="av"><div class="tile round t32"><svg viewBox="0 0 100 100"><use href="#p3sq"/></svg></div><small>32px</small></div>
+            <div class="av"><div class="tile t64"><svg viewBox="0 0 100 100"><use href="#p3sq"/></svg></div><small>cuadrado</small></div>
+          </div>
+          <div class="tabbar on-dark" style="margin-top:20px">
+            <svg viewBox="0 0 100 100"><use href="#p3sq"/></svg><span>Barrera Global · Arquitectura Financiera</span>
+          </div>
+        </div>
+
+        <p class="ctx-label" style="margin-top:26px">Tarjeta de presentación</p>
+        <div class="card-mock on-dark">
+          <svg class="mk" viewBox="0 0 560 130"><use href="#p3h"/></svg>
+          <div>
+            <div class="who">Francisco Javier Barrera</div>
+            <div class="role">Arquitectura Financiera</div>
+            <div class="contact">barreraglobal.com · Quito, Ecuador</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer class="doc">
+  <div class="wrap">
+    <p><b>Restricciones respetadas:</b> solo paleta oficial (#08080d · #c9a84c · #e8d48b · #a07e2e · #edeae3 · #fafaf7) · solo Cormorant Garamond, Outfit y JetBrains Mono · sin degradados de color, sin sombras 3D, sin escudos/apretones/gráficas.</p>
+    <p><b>Página no enlazada</b> desde ninguna parte del sitio · <b>noindex</b> · vive en <b>web/public/brand-propuestas/</b> · rama <b>propuestas-logo</b> (sin merge).</p>
+    <p>Assets SVG sueltos en la misma carpeta: <b>p1/p2/p3 · horizontal + cuadrado</b>. Fase 2: elección + vectorización.</p>
+  </div>
+</footer>
+
+</body>
+</html>

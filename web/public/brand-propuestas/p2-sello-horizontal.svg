@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 560 130" width="560" height="130" role="img" aria-label="Barrera Global — sello institucional">
+  <!-- P2 SELLO · horizontal · fondo oscuro. -->
+  <defs>
+    <style>
+      @font-face{font-family:'Cormorant Garamond';src:url('./fonts/cormorant-garamond-latin-600-normal.woff2') format('woff2');font-weight:600;font-display:swap;}
+      @font-face{font-family:'Outfit';src:url('./fonts/outfit-latin-600-normal.woff2') format('woff2');font-weight:600;font-display:swap;}
+      .wm{font-family:'Cormorant Garamond',Georgia,serif;font-weight:600;letter-spacing:-0.01em;}
+      .fb{font-family:'Cormorant Garamond',Georgia,serif;font-weight:600;}
+      .desc{font-family:'Outfit',sans-serif;font-weight:600;letter-spacing:4px;}
+      .hair{fill:none;stroke:#c9a84c;stroke-width:1.25;vector-effect:non-scaling-stroke;}
+    </style>
+  </defs>
+  <!-- sello -->
+  <circle class="hair" cx="62" cy="65" r="44"/>
+  <circle class="hair" cx="62" cy="65" r="38.5"/>
+  <text class="fb" x="62" y="79" text-anchor="middle" font-size="40" fill="#c9a84c">FB</text>
+  <!-- divisor -->
+  <line class="hair" x1="140" y1="33" x2="140" y2="97"/>
+  <!-- wordmark -->
+  <text class="wm" x="164" y="62" font-size="54"><tspan fill="#edeae3">Barrera </tspan><tspan fill="#c9a84c">Global</tspan></text>
+  <text class="desc" x="166" y="90" font-size="12" fill="#edeae3" opacity="0.72">ARQUITECTURA FINANCIERA</text>
+</svg>

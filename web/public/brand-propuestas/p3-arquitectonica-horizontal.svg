@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 560 130" width="560" height="130" role="img" aria-label="Barrera Global — marca arquitectonica">
+  <!-- P3 ARQUITECTONICA · horizontal · portico en linea fina -->
+  <defs>
+    <style>
+      @font-face{font-family:'Cormorant Garamond';src:url('./fonts/cormorant-garamond-latin-600-normal.woff2') format('woff2');font-weight:600;font-display:swap;}
+      @font-face{font-family:'Outfit';src:url('./fonts/outfit-latin-500-normal.woff2') format('woff2');font-weight:500;font-display:swap;}
+      .wm{font-family:'Cormorant Garamond',Georgia,serif;font-weight:600;letter-spacing:-0.01em;}
+      .desc{font-family:'Outfit',sans-serif;font-weight:500;letter-spacing:5px;}
+      .hair{fill:none;stroke:#c9a84c;stroke-width:1.25;vector-effect:non-scaling-stroke;stroke-linecap:square;}
+    </style>
+  </defs>
+  <!-- portico -->
+  <g class="hair">
+    <polyline points="20,58 60,34 100,58"/>
+    <line x1="20" y1="58" x2="100" y2="58"/>
+    <line x1="24" y1="64" x2="96" y2="64"/>
+    <line x1="30" y1="64" x2="30" y2="96"/>
+    <line x1="46" y1="64" x2="46" y2="96"/>
+    <line x1="74" y1="64" x2="74" y2="96"/>
+    <line x1="90" y1="64" x2="90" y2="96"/>
+    <line x1="24" y1="96" x2="96" y2="96"/>
+    <line x1="20" y1="101" x2="100" y2="101"/>
+  </g>
+  <!-- wordmark -->
+  <text class="wm" x="132" y="62" font-size="54"><tspan fill="#edeae3">Barrera </tspan><tspan fill="#c9a84c">Global</tspan></text>
+  <text class="desc" x="134" y="90" font-size="12" fill="#edeae3" opacity="0.72">ARQUITECTURA FINANCIERA</text>
+</svg>

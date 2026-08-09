@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100" role="img" aria-label="Monograma FB — Barrera Global">
+  <!-- P1 CLASICA · avatar/favicon · monograma FB apilado. -->
+  <defs>
+    <style>
+      @font-face{font-family:'Cormorant Garamond';src:url('./fonts/cormorant-garamond-latin-700-normal.woff2') format('woff2');font-weight:700;font-display:swap;}
+      .mono{font-family:'Cormorant Garamond',Georgia,serif;font-weight:700;}
+    </style>
+  </defs>
+  <text class="mono" x="50" y="47" text-anchor="middle" font-size="52" fill="#edeae3">F</text>
+  <text class="mono" x="50" y="90" text-anchor="middle" font-size="52" fill="#c9a84c">B</text>
+</svg>
