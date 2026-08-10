@@ -237,7 +237,7 @@ sitio-bg-infra/
 ├── .gitignore (endurecido con *.bak.*)
 ├── docs/
 │   ├── PLAN-MAESTRO-v2.md          ← doc maestro (LEER PRIMERO)
-│   ├── PENDIENTES.md                ← 53 items (P-01 a P-53) + 18 resueltos
+│   ├── PENDIENTES.md                ← 56 items (P-01 a P-56) + 21 resueltos
 │   ├── ERRORES-Y-APRENDIZAJES.md    ← 28 errores + 11 NM + 50 reglas
 │   ├── ESTADO-GENERAL-PROYECTO.md   ← estado consolidado Sesion 5
 │   ├── DIAGRAMA-FLUJO-PROYECTO.md   ← visualizacion completa
