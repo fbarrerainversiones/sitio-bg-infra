@@ -610,7 +610,7 @@ Cuando un item se cierra, se mueve a la sección **Resueltos** al final con la f
 
 ### P-54 — Experiencia visual del home (estilo Apple)
 
-- **Estado:** 🟡 EN CURSO (alta del 09/08/2026, Sesión 13). **F1 arranca mañana**; F2 a F4 esperan insumos.
+- **Estado:** 🟡 EN CURSO (alta del 09/08/2026, Sesión 13). **F1 CONSTRUIDA el 10/08/2026** y en `main`, pendiente de la **verificación visual de Francisco** y del **deploy** (que exige rebuild de la imagen, R-44, y hoy está bajo veda por la ventana de promoción de Aurora). F2 a F4 esperan insumos.
 - **Criticidad:** media. El sitio ya convierte sin esto; es la capa que lo separa de un sitio correcto y lo vuelve memorable.
 - **Bloquea a:** nada. Ninguna fase bloquea a la siguiente salvo por los insumos que cada una necesita.
 - **Owner:** Claude (implementa) + Francisco (aprueba y entrega los insumos de F2 y F4).
@@ -618,12 +618,18 @@ Cuando un item se cierra, se mueve a la sección **Resueltos** al final con la f
 
 | Fase | Qué | Estado / bloqueo |
 |---|---|---|
-| **F1** | **«El pórtico que se construye»** — el símbolo se dibuja solo a medida que el visitante baja: SVG animado por scroll, **CSS puro, cero JavaScript**. Sin JS no hay `<script>` nuevo, y por lo tanto **ningún hash CSP nuevo** que regenerar (R-44). | **Arranca mañana.** Falta el prompt del auditor. |
+| **F1** | **«El pórtico que se construye»** — el símbolo se dibuja solo a medida que el visitante baja: SVG animado por scroll, **CSS puro, cero JavaScript**. Sin JS no hay `<script>` nuevo, y por lo tanto **ningún hash CSP nuevo** que regenerar (R-44). | ✅ **CONSTRUIDA** (10/08/2026). Falta verla en el navegador y desplegarla. |
 | **F2** | **Video hero de impacto** — 15-25 s, en loop, **sin audio**, **menos de 8 MB**, con `poster` para la primera pintura, tratamiento visual del Brand Book. | Espera el **MP4 de Francisco** (HeyGen / Krea). |
 | **F3** | **Loops ambientales** por página de producto. | Después de F2, con el mismo tratamiento. |
 | **F4** | **Avatar HeyGen de Francisco** — **solo para reels primero**. Los guiones pasan por **las 4 puertas** antes de grabar. | **Nunca debuta en el sitio.** El sitio es el último lugar donde aparece, si aparece. |
 
-- **Próximo paso:** F1. Recibir el prompt del auditor y construir la animación sobre la geometría oficial, verificando que el build siga sin scripts nuevos y el cruce CSP siga en 2 ↔ 2.
+- **F1 — lo que quedó construido (10/08/2026, commits `e85bd0d`, `954ca63`, `57a4ee1`, `e82887e`):**
+  - `web/src/components/PorticoConstruye.astro` — sección `#metodo` del home, entre el hero y `#productos`. Cinco bloques de texto (4 etapas + cierre) y un visor `sticky` con el pórtico.
+  - Geometría **verbatim de `web/public/logo.svg`**: los 9 trazos, mismas coordenadas, mismo `viewBox 0 0 100 100`, `stroke-width` 1.4, `linecap` square. Cada trazo pasó de `<line>`/`<polyline>` a `<path>` (misma coordenada, letra por letra) porque `pathLength` está garantizado en `<path>` en todos los motores. Mapeo: **basamento** `18,87→82,87` + `23,82→77,82`; **columnas** x=30/43/57/70 de y=82 a y=51 (son **4**, no 2: el contenido aprobado decía «2 trazos verticales», la geometría oficial manda); **dintel + arquitrabe** `23,51→77,51` + `18,44→82,44`; **frontón** `18,44→50,22→82,44`.
+  - El dibujado es CSS puro en `global.css`: `stroke-dasharray`/`stroke-dashoffset` con `pathLength="1"`, disparado por el `.visible` que ya pone el IntersectionObserver de `Layout.astro`, leído con `:has()` desde el ancestro común. **Cero JavaScript nuevo.**
+  - Doble guardia sobre el estado oculto: `prefers-reduced-motion: no-preference` **y** `@supports selector(:has(*))`. Sin cualquiera de las dos, el estado base es el **pórtico completo y estático**: degrada a la pieza terminada, nunca a una pieza rota.
+  - **QA cerrada:** build **12/12**; cruce CSP **2 ↔ 2** exacto y sin huérfanos en ninguna dirección (los mismos dos hashes de siempre, 12 apariciones cada uno); **cero** atributos `on*` y **cero** `<script src>` en todo el `dist`.
+- **Próximo paso:** que Francisco **la mire en el navegador** (móvil primero) y, cuando se levante la veda de infraestructura por la ventana de Aurora, **rebuild de la imagen y deploy** — el cambio vive en `web/src`, así que un `git pull` en el VPS **no alcanza** (R-44). Después, F2.
 
 ### P-55 — `logo.svg` con recuadro oscuro opcional para el panel de Google
 
