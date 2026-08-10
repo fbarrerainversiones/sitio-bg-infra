@@ -100,9 +100,19 @@ const WA_PATH =
 
       <!-- VISOR — móvil: banda pegada a sangre bajo el header, con fondo
            sólido para que el texto pase por debajo sin ensuciarla.
-           Desktop: columna izquierda pegada y centrada en el alto libre. -->
+           Desktop: columna izquierda pegada y centrada en el alto libre.
+
+           El `top-16` de móvil se queda DEBAJO del alto real del header
+           (~78px: py-4 32 + logo 45.4 + borde 1) a propósito, para que la
+           banda se meta unos píxeles por detrás. Calzar el número exacto es
+           lo que NO hay que hacer: cualquier diferencia de más deja una
+           rendija transparente entre el header —que es `bg-bg/85`, o sea que
+           no tapa— y la banda, y por ahí se ve pasar el texto. Metida por
+           debajo no puede haber rendija, y el header (z-50) la cubre igual.
+           Nada se recorta: el pórtico deja ~30px libres arriba del frontón
+           dentro de su viewBox. -->
       <div
-        class="pc-visor sticky top-[5.5rem] z-10 -mx-6 px-6 py-4 bg-bg-elev-1 border-b border-gd-muted flex items-center justify-center
+        class="pc-visor sticky top-16 z-10 -mx-6 px-6 py-4 bg-bg-elev-1 border-b border-gd-muted flex items-center justify-center
                md:col-span-5 md:top-28 md:mx-0 md:px-0 md:py-0 md:border-b-0 md:h-[calc(100vh-9rem)]"
       >
         <svg
