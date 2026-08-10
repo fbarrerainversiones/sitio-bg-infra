@@ -440,6 +440,16 @@ a.btn-outline:hover {
    trazo, en el estado oculto NO queda ningun dash de largo cero, que con
    `stroke-linecap: square` —el de logo.svg— algunos motores pintan como
    un cuadradito suelto.
+
+   POR QUE EL OFFSET INICIAL VIAJA EN UNA CUSTOM PROPERTY:
+   escrito como `stroke-dashoffset: 1` pelado, el minificador del build
+   (Lightning CSS, dentro de Tailwind v4) lo emite como `1px`. Por spec da
+   igual —en SVG 1px es 1 unidad de usuario, y el escalado por `pathLength`
+   se aplica DESPUES de resolver la unidad, asi que el valor computado es
+   el mismo—, pero el valor de una custom property el minificador no lo
+   puede tipar y lo deja intacto. La propiedad de la que cuelga todo el
+   efecto queda entonces fuera del alcance de cualquier reescritura de la
+   cadena de build, presente o futura. Verificado sobre el CSS emitido.
    ============================================================ */
 
 @media (prefers-reduced-motion: no-preference) {
@@ -447,8 +457,9 @@ a.btn-outline:hover {
 
     /* Estado inicial: el trazo existe pero todavia no se dibujo. */
     .pc-trazo {
+      --pc-oculto: 1;
       stroke-dasharray: 1 1.2;
-      stroke-dashoffset: 1;
+      stroke-dashoffset: var(--pc-oculto);
       transition: stroke-dashoffset 400ms ease-out;
     }
 
