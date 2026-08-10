@@ -1138,6 +1138,52 @@ El numero 572619 que aparecia como credencial personal de Francisco es en realid
 > **Esta sección se actualiza al cierre de cada sesión de trabajo.** Formato cronológico inverso (lo más reciente arriba).
 
 
+### Sesión 14 — 10 de agosto de 2026 (día 1 del sitio público)
+
+**Ventana:** lunes 10 de agosto de 2026, mañana y mediodía
+**Gap desde sesión anterior:** ~14 horas (Sesión 13 cerró la noche del 09/08)
+**HEAD al cierre:** el último commit de este cierre documental (ver `git log`); la sesión arrancó desde `be196c5`
+**Resultado:** **murieron los tres ítems abiertos del lanzamiento** y el sitio entró a su día 1 sin gates. Se construyó P-54 F1 completa **sin desplegarla**: rigió veda de infraestructura compartida todo el día.
+
+> **Nota sobre el conteo de commits:** los commits de P-54 F1 son **8** (`be196c5..69f83bd`), no 7. Seis de código y dos de documentación. El número está leído de `git rev-list`, no recordado — y corrige de paso un «7» que circuló durante la propia sesión.
+
+#### Objetivo de la sesión
+
+Construir F1 de P-54, y aprovechar el día para cerrar lo que quedaba colgando del lanzamiento.
+
+#### Lo que se cerró
+
+1. **P-51 PROBADO → R-19. Se murió el último gate operativo.** La casilla `privacidad@barreraglobal.com` estaba configurada desde el 09/08 pero sin prueba, y el switch a público se había ejecutado con el ítem abierto por decisión explícita de Francisco. El 10/08 se probó: Cloudflare Email Routing reporta **1 recibido / 1 entregado** y el correo llegó al Gmail de Francisco a las **11:53**. Evidencia: captura de Francisco. **Aterrizó en Spam** y se le aplicó «No es spam». Se cierra igual, porque lo que el ítem exigía era demostrar que el canal **recibe**, y recibe; la carpeta de destino es reputación de dominio (SPF/DKIM/DMARC) y queda anotada como cabo operativo. Con esto, la política de privacidad ya no promete por escrito un plazo de 15 días sobre una dirección sin probar.
+2. **P-56 APROBADO → R-21. El Manual pasa a v3.1 FINAL.** Francisco aprobó **misión, visión y valores**, que se habían entregado marcados como PROPUESTA. El manual pasó de **v3.0** a **v3.1 FINAL** y se **entregó al manager de marketing**. Los tres bloques dejan de ser propuesta y pasan a fuente única de voz para reels, bio, papelería y F4.
+3. **Capa comercial del símbolo, sellada.** El mismo manual v3.1 fija la lectura de negocio del pórtico: **basamento = método**, **columnas = vida y salud**, **frontón = inversión**. Es narrativa **oficial** y queda anotada en P-54 para que la respete cualquier pieza futura. Se deja escrito el desfase honesto: la sección F1 construida hoy usa la lectura **arquitectónica**, que no la contradice pero tampoco la enuncia. Alinear ambas es decisión de copy de Francisco.
+4. **P-55 EJECUTADO → R-20 (`fd8316b`).** Francisco decidió **SÍ**: `web/public/logo.svg` lleva el mismo cuadrado redondeado del favicon (`rx=22`, `#08080d`), porque es el archivo que declara el JSON-LD de `InsuranceAgency` y el que Google puede levantar para un panel de fondo blanco, donde el dorado daba ~2:1 de contraste. La **geometría no se tocó**: los 9 trazos conservan coordenadas, grosor y `viewBox`. `favicon.svg` tampoco. **No está en producción**: se hornea en la imagen, así que espera el rebuild.
+
+#### P-54 F1 — «El pórtico que se construye» (8 commits, `be196c5..69f83bd`)
+
+Nueva sección `#metodo` del home, entre el hero y `#productos`: el símbolo de la marca se dibuja por etapas mientras el visitante baja.
+
+- **Cero JavaScript nuevo, y por lo tanto CSP intacta.** El disparo lo da el `IntersectionObserver` que **ya existía** en `Layout.astro`: los bloques de texto llevan `.reveal`, el observer les pone `.visible`, y el CSS lo traduce a los trazos con **`:has()`** desde el ancestro común. El observer no puede observar los trazos porque el SVG es `sticky` —entra una vez y no se mueve—, así que el reloj del relato son los textos. Cruce de hashes **2 ↔ 2** exacto, sin huérfanos en ninguna dirección, **ningún hash cambiado**.
+- **Geometría verbatim de `logo.svg`.** Los 9 trazos oficiales, mismas coordenadas. Único cambio de forma: cada trazo pasó de `<line>`/`<polyline>` a `<path>`, letra por letra, porque `pathLength` está garantizado en `<path>` en todos los motores. **Las columnas son 4, no 2**: el contenido aprobado decía «2 trazos verticales» y la geometría oficial manda.
+- **Doble guardia sobre el estado oculto:** `prefers-reduced-motion: no-preference` **y** `@supports selector(:has(*))`. Si falta cualquiera de las dos, el estado base es el **pórtico completo y estático**: degrada a la pieza terminada, nunca a una pieza rota.
+- **Auditoría adversarial, con autocorrección.** Se corrió una auditoría de cinco lentes (geometría, cascada CSS, layout móvil, JS/CSP, accesibilidad y copy) con refutadores por hallazgo. Las lentes de geometría, cascada y JS/CSP no encontraron nada. **El error de método quedó registrado:** se leyó el journal de la auditoría cuando todavía faltaban refutadores, se reportó «los cinco hallazgos cayeron», y el resultado final traía **uno confirmado**. La corrección se emitió y se aplicó. Lección operativa: un journal a medio llenar no es un resultado.
+- **Dos fixes que salieron de la QA, no del diseño.** (a) `stroke-dashoffset: 1` lo emitía el minificador como `1px` —por spec idéntico, porque el escalado por `pathLength` se aplica **después** de resolver la unidad, pero es la propiedad de la que cuelga todo el efecto—, así que pasó a viajar en una **custom property**, que el minificador no puede tipar. (b) En móvil el visor se pegaba a `5.5rem` (88px), que es el alto del header de **desktop**; el móvil mide 78.4px, y esos ~9.6px eran una rendija por donde se veía pasar el texto, porque el header es `bg-bg/85` y no tapa. Ahora la banda se mete **por debajo** del header (**`top-16`**) en vez de calzar su alto exacto. Se agregó además una regla para **viewports bajos**: bajo 35rem de alto el visor se suelta (`position: static`), lo que arregla de una el teléfono en horizontal angosto (header + banda se comían el área de lectura) y el ancho ≥768px, donde entra por la rama desktop y un símbolo cuadrado de 320px desbordaba una columna de 286px.
+- **Riesgo residual, dicho sin adorno:** la sección **no se pudo ver en un navegador** en la sesión que la construyó. Se verificó todo lo verificable sin render —geometría, cascada, las 26 utilidades Tailwind generadas, HTML emitido, hashes, aritmética del header—. Lo que falta es exactamente la verificación visual.
+
+#### Veda de Aurora — respetada
+
+El proyecto Aurora abrió el 10/08 su **ventana de promoción a producción**, con **veda total de infraestructura compartida** (Caddy, red Docker, Postgres, Redis, VPS) hasta que Francisco declare el cierre. **No se tocó nada**: la sesión fue enteramente local —componente, CSS, build, commits y push a GitHub—. El deploy quedó **en cola**, y no es opcional saltearlo: tanto F1 como P-55 viven en archivos que se hornean en la imagen, así que un `git pull` en el VPS **no alcanza** (R-44).
+
+#### Pendiente al cierre
+
+1. **Verificación visual LOCAL de F1 por Francisco**, móvil primero — y con ella la **decisión sobre los rótulos** «01 · Basamento», «02 · Columnas», «03 · Dintel y arquitrabe», «04 · Frontón», que salieron de los nombres de etapa del contenido aprobado pero no del texto aprobado propiamente dicho. Sacarlos es borrar dos líneas.
+2. **Veda levantada por Francisco.**
+3. **Deploy de F1 + P-55** (van juntos, mismo rebuild).
+4. **Espejo del knowledge.**
+5. **Confirmación formal del handoff al manager de marketing, con hora**, que es lo que arranca el reloj de 48 h.
+6. **F2 sigue esperando el MP4** de Francisco.
+
+---
+
 ### Sesión 13 — 8 y 9 de agosto de 2026 (EL SWITCH A PÚBLICO)
 
 **Ventana:** sábado 8 y domingo 9 de agosto de 2026
