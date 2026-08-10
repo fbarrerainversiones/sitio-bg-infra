@@ -407,3 +407,78 @@ a.btn-outline:hover {
     transform: translateY(0);
   }
 }
+
+/* ============================================================
+   P-54 F1 — «EL PORTICO QUE SE CONSTRUYE» (10/08/2026)
+   CSS puro, cero JavaScript nuevo.
+   ============================================================
+   Componente: web/src/components/PorticoConstruye.astro
+
+   COMO SE DISPARA, sin una linea de JS nueva:
+   el IntersectionObserver que ya vive en Layout.astro le pone `.visible`
+   a los bloques de texto (que llevan `.reveal`). Este CSS lee ese estado
+   desde el ancestro comun con `:has()` y lo traduce a los trazos del SVG.
+   El observer NO puede observar los trazos directamente: el SVG es
+   `sticky`, o sea que una vez que entra ya no se mueve, y las cuatro
+   etapas se dispararian todas juntas. El reloj del relato son los textos.
+
+   POR QUE EL ESTADO OCULTO VIVE DENTRO DE DOS GUARDIAS:
+     - @media (prefers-reduced-motion: no-preference) -> regla de la casa:
+       lo que mueve, va guardado.
+     - @supports selector(:has(*)) -> si el navegador no entiende `:has()`,
+       nunca podria volver a mostrar los trazos. Al encerrar el ocultamiento
+       tambien aca, el estado BASE (el que ve quien no tiene soporte, y
+       quien pide reducir movimiento) es el portico COMPLETO y estatico:
+       degrada a la pieza terminada, nunca a una pieza rota.
+
+   Solo se anima `stroke-dashoffset` (y un `filter` de cierre): ninguna
+   de estas reglas reflowea el layout.
+
+   `pathLength="1"` en cada trazo normaliza el largo a 1, asi que el mismo
+   par dasharray/dashoffset sirve para un trazo de 64 unidades y para uno
+   de 31. El dasharray es `1 1.2` y no `1`: con hueco mas largo que el
+   trazo, en el estado oculto NO queda ningun dash de largo cero, que con
+   `stroke-linecap: square` —el de logo.svg— algunos motores pintan como
+   un cuadradito suelto.
+   ============================================================ */
+
+@media (prefers-reduced-motion: no-preference) {
+  @supports selector(:has(*)) {
+
+    /* Estado inicial: el trazo existe pero todavia no se dibujo. */
+    .pc-trazo {
+      stroke-dasharray: 1 1.2;
+      stroke-dashoffset: 1;
+      transition: stroke-dashoffset 400ms ease-out;
+    }
+
+    /* Dentro de una etapa los trazos se encadenan, no aparecen en bloque.
+       Aplica a las 4 columnas de la etapa 2 y a los pares de las etapas
+       1 y 3; la etapa 4 tiene un solo trazo. */
+    .pc-etapa .pc-trazo:nth-child(2) { transition-delay: 90ms; }
+    .pc-etapa .pc-trazo:nth-child(3) { transition-delay: 180ms; }
+    .pc-etapa .pc-trazo:nth-child(4) { transition-delay: 270ms; }
+
+    /* Cada paso de texto que entra en pantalla dibuja SU etapa.
+       El observer hace `unobserve` tras marcar `.visible`, asi que lo
+       dibujado no se deshace al volver a subir: un portico construido
+       no se desarma. */
+    .pc-seccion:has(.pc-paso-1.visible) .pc-etapa-1 .pc-trazo,
+    .pc-seccion:has(.pc-paso-2.visible) .pc-etapa-2 .pc-trazo,
+    .pc-seccion:has(.pc-paso-3.visible) .pc-etapa-3 .pc-trazo,
+    .pc-seccion:has(.pc-paso-4.visible) .pc-etapa-4 .pc-trazo {
+      stroke-dashoffset: 0;
+    }
+
+    /* Cierre: con la pieza completa, un halo dorado muy contenido.
+       Es `drop-shadow` de CSS (no filtro SVG): no necesita region ni
+       recorta nada del dibujo. */
+    .pc-portico {
+      transition: filter 600ms ease-out;
+    }
+
+    .pc-seccion:has(.pc-cierre.visible) .pc-portico {
+      filter: drop-shadow(0 0 4px rgba(201, 168, 76, 0.45));
+    }
+  }
+}
