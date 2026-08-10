@@ -4,9 +4,9 @@
 > Tambien sirve como referencia rapida para cualquier sesion de chat (Claude.ai).
 > NO editar sin actualizar la version y la fecha al final.
 
-**Version:** 2.3
-**Ultima actualizacion:** miercoles 5 de agosto de 2026 (Sesion 12: merge de `publicacion-v1` a `main` + staging completo)
-**Cubre el estado del proyecto hasta:** Sesion 12 cerrada (03-05/08: rama `publicacion-v1`, politica de privacidad v3 con dictamen legal, merge a `main`, deploy y **staging COMPLETO y navegable** con 12 paginas). Sitio aun NO publico: los gates son P-39 (visto bueno ESCRITO del abogado) y P-51 (correo `privacidad@` probado).
+**Version:** 2.4
+**Ultima actualizacion:** domingo 9 de agosto de 2026 (Sesion 13: **EL SWITCH A PUBLICO**)
+**Cubre el estado del proyecto hasta:** Sesion 13 cerrada (08-09/08). **EL SITIO ES PUBLICO**: `barreraglobal.com` y `www` sirven las 12 paginas reales. Staging sigue vivo con candado. Se cerraron P-42 (404 servida de verdad) y P-39 (aprobacion del abogado). **Unico item abierto del lanzamiento: P-51** — la casilla `privacidad@` esta configurada pero SIN prueba de recepcion, y Francisco decidio lanzar igual.
 
 ---
 
@@ -14,9 +14,9 @@
 
 Antes de proponer cualquier accion tecnica, Claude Code debe leer estos archivos en este orden:
 
-1. **`docs/ERRORES-Y-APRENDIZAJES.md`** — 26 errores (E-01 a E-26) + 10 near-miss (NM-01 a NM-10) + 47 reglas operativas (R-01 a R-47). NO repetir errores ya documentados.
-2. **`docs/PLAN-MAESTRO-v2.md`** — documento maestro con decisiones tecnicas firmes (D-01 a D-28), bitacora de sesiones (la ultima entrada es Sesion 12), hallazgos legales.
-3. **`docs/PENDIENTES.md`** — 51 items (P-01 a P-51) + 16 resueltos historicos (R-01 a R-16).
+1. **`docs/ERRORES-Y-APRENDIZAJES.md`** — 28 errores (E-01 a E-28) + 11 near-miss (NM-01 a NM-11) + 50 reglas operativas (R-01 a R-50). NO repetir errores ya documentados.
+2. **`docs/PLAN-MAESTRO-v2.md`** — documento maestro con decisiones tecnicas firmes (D-01 a D-29), bitacora de sesiones (la ultima entrada es Sesion 13), hallazgos legales. Ojo con la numeracion D-XX: la seccion 10 lista D-18 a D-24 y D-29; D-25 a D-28 viven en la bitacora (Sesiones 6 y 8).
+3. **`docs/PENDIENTES.md`** — 53 items (P-01 a P-53) + 18 resueltos historicos (R-01 a R-18).
 4. **`docs/ESTADO-GENERAL-PROYECTO.md`** — estado consolidado del proyecto al cierre de Sesion 5.
 5. **`docs/DIAGRAMA-FLUJO-PROYECTO.md`** — visualizacion completa de fases y dependencias.
 6. **`docs/REPORTE-SESION-10.md`** — bitacora de la jornada estructural (Bloques A-B) + decisiones D1 a D6 + QA pre-merge.
@@ -28,14 +28,14 @@ Si una propuesta tuya contradice algo de estos documentos, PARAR y discutirlo co
 ## Identidad
 
 - **Proyecto:** Sitio web publico de Barrera Global (asesoria de seguros, Ecuador).
-- **Dominio:** barreraglobal.com y www.barreraglobal.com (staging desplegado en staging.barreraglobal.com; produccion publica pendiente de P-39).
+- **Dominio:** barreraglobal.com y www.barreraglobal.com — **PUBLICOS desde el 09/08/2026**, sirviendo el sitio real via `reverse_proxy sitio-bg-web:8080`. Staging sigue vivo y protegido en staging.barreraglobal.com (basicauth + noindex).
 - **Marca:** Barrera Global (marca personal de Francisco Javier Barrera Bonilla).
 - **Vinculacion legal:** Francisco opera como APS bajo paraguas de Insurance Trust (Cred. SCVS Nro 572619).
 - **Slug interno:** sitio-bg
 - **Carpeta local:** `C:\Users\panch\projects\sitio-bg-infra\`
 - **Carpeta VPS:** `/opt/sitio-bg/` (creada en HITO 01)
 - **Repo GitHub:** `fbarrerainversiones/sitio-bg-infra` (publico, D-21)
-- **Fase actual:** Fase 1 al 100% + Fase 3 estructural + **publicacion fusionada en `main`** (12 paginas). **STAGING COMPLETO Y NAVEGABLE** en staging.barreraglobal.com (basicauth + noindex), sirviendo ya las 12 paginas reales. Sitio aun **NO publico**: el switch no se ha tocado.
+- **Fase actual:** **SITIO PUBLICO Y EN LINEA** desde el 09/08/2026 con 12 paginas. El switch se ejecuto (Sesion 13). Staging se mantiene con candado como ambiente de revision. Lo que sigue es post-lanzamiento: probar el correo `privacidad@` (P-51), producir el logo P3 (P-52) y la deuda tecnica ya catalogada.
 
 ---
 
@@ -99,7 +99,7 @@ vuelve a ser gate antes de publicar.
 
 ---
 
-## REGLAS DURAS INVIOLABLES (resumen de las 47 reglas)
+## REGLAS DURAS INVIOLABLES (resumen de las 50 reglas)
 
 ### Herramientas
 - **R-01:** SIEMPRE pwsh 7 en Windows. NUNCA Windows PowerShell 5.1 ni ISE.
@@ -165,7 +165,15 @@ vuelve a ser gate antes de publicar.
 - **R-46:** **tests de credenciales por terminal RETIRADOS.** El juez oficial de una credencial es el **navegador**. Los `curl` dieron falsos negativos toda la Sesion 12 mientras el navegador entraba sin problema.
 - **R-47:** **Claude Code pushea PRIMERO, el VPS jala DESPUES.** Nunca al reves. Senal de que se violo: `git pull` responde `Already up to date` y el build sale todo `CACHED` — el VPS esta reconstruyendo la version vieja. Guardian: tras el pull y ANTES del rebuild, `git log` y confirmar por hash que el commit esperado llego.
 
-**Lista completa de las 47 reglas:** ver `docs/ERRORES-Y-APRENDIZAJES.md` seccion "Reglas operativas consolidadas".
+### Operacion en el VPS (Sesion 13) — las tres del switch
+
+- **R-48:** **`sed -i` y `mv` PROHIBIDOS sobre archivos bind-monteados.** Docker resuelve un bind-mount de ARCHIVO por **inodo**; `sed -i` escribe un temporal y lo renombra encima, asi que el host queda con un inodo nuevo y el container **sigue leyendo el viejo**. Todo dentro del container —`validate`, `reload`— opera sobre el archivo viejo **reportando exito**. Editar solo con metodos que preserven el inodo (`tee`, o `sed` a temporal + `cp` encima). Ante duda, comparar `ls -i` del host contra `docker exec <c> ls -i`: si difieren, el container lee un fantasma y hace falta `docker restart`. Amplia la regla de mayo "nunca `mv` sobre el Caddyfile" (Plan Maestro §2, Regla 5): **`sed -i` es un `mv` disfrazado** (E-27).
+- **R-49:** **los bloques condicionales de un runbook se ejecutan UNICAMENTE si su condicion se cumple.** Antes de pegar un bloque marcado "solo si falla", el operador **confirma la condicion en voz alta**. Un runbook no se pega de corrido: la mitad de sus bloques existen para el caso que no ocurrio, y los de rollback tocan el Caddyfile compartido (NM-11).
+- **R-50:** **`caddy validate` sobre un archivo que no se llame `Caddyfile` va SIEMPRE con `--adapter caddyfile`** (Caddy infiere el adaptador por el nombre y si no, asume JSON). Corolario, que es la mitad importante: **una validacion que falla DETIENE el runbook**; nunca se pasa al restart "porque el error parecia del comando" (E-28).
+
+**Chequeo barato que vale por diez:** despues de tocar el proxy, pedir **una URL inventada**. Si `/no-existe` devuelve **200**, no estas mirando el sitio real. Ese 200 fue lo que desenmascaro el switch v1.
+
+**Lista completa de las 50 reglas:** ver `docs/ERRORES-Y-APRENDIZAJES.md` seccion "Reglas operativas consolidadas".
 
 ### CSP (hashes horneados en la imagen)
 `infra/nginx.conf` autoriza por hash los **2 unicos `<script>` inline** del build
@@ -178,13 +186,14 @@ y la interaccion se rompe **en silencio**.
 
 ## Hallazgos criticos pendientes (H-01 a H-05)
 
-Detectados en analisis legal IA externo de Sesion 5. Cuatro de los cinco siguen
-abiertos y son gate del pase a PUBLICO (no del staging protegido):
+Detectados en analisis legal IA externo de Sesion 5. **Ya NO son gate de nada: el
+sitio se publico el 09/08/2026.** Los que sigan abiertos son ahora exposicion viva,
+no trabajo previo al lanzamiento — y eso los hace mas urgentes, no menos:
 
-- **H-01:** 7 huecos LOPDP en la politica de privacidad — cerrados tecnicamente en la v2 (Sesion 8) y **superados por la v3** (04/08/2026, commit `65b3dd4`), que transcribe **verbatim** el dictamen **verbal** del abogado humano. Falta unicamente el **visto bueno ESCRITO** (P-39). ABIERTO, pero mucho mas cerca.
-- **H-02:** DPD no registrado ante SPDP (bloqueado hasta SCVS personal de Francisco, P-06). ABIERTO.
+- **H-01:** ✅ **RESUELTO el 09/08/2026.** Los 7 huecos LOPDP se cerraron en la v2 (Sesion 8), la v3 los supero transcribiendo **verbatim** el dictamen del abogado (04/08, commit `65b3dd4`) y el **abogado aprobo las tres paginas legales** el 09/08 sobre las paginas renderizadas. Cerro **P-39** como **R-18**. Cabo administrativo abierto, no bloqueante: el respaldo escrito de una linea, solicitado por WhatsApp.
+- **H-02:** DPD no registrado ante SPDP (bloqueado hasta SCVS personal de Francisco, P-06). ABIERTO **con el sitio ya publico**.
 - **H-03:** Sitio antiguo con Meta Pixel — decision aun no tomada (P-38, 3 opciones sobre la mesa). ABIERTO.
-- **H-04:** Aurora no declarada como decision automatizada (Art. 12.4 LOPDP) — cubierto por el alcance de P-35. Verificar en el texto vigente antes del pase a publico.
+- **H-04:** Aurora no declarada como decision automatizada (Art. 12.4 LOPDP) — cubierto por el alcance de P-35. Verificar contra el texto vigente de `/privacidad`, que ya esta publico.
 - **H-05:** ✅ RESUELTO — credencial 572619 removida del sitio (E-23).
 
 ---
@@ -197,8 +206,8 @@ sitio-bg-infra/
 ├── .gitignore (endurecido con *.bak.*)
 ├── docs/
 │   ├── PLAN-MAESTRO-v2.md          ← doc maestro (LEER PRIMERO)
-│   ├── PENDIENTES.md                ← 51 items (P-01 a P-51) + 16 resueltos
-│   ├── ERRORES-Y-APRENDIZAJES.md    ← 26 errores + 10 NM + 47 reglas
+│   ├── PENDIENTES.md                ← 53 items (P-01 a P-53) + 18 resueltos
+│   ├── ERRORES-Y-APRENDIZAJES.md    ← 28 errores + 11 NM + 50 reglas
 │   ├── ESTADO-GENERAL-PROYECTO.md   ← estado consolidado Sesion 5
 │   ├── DIAGRAMA-FLUJO-PROYECTO.md   ← visualizacion completa
 │   ├── IDENTIDAD-MARCA.md           ← Brand Book extraido
@@ -242,21 +251,18 @@ sitio-bg-infra/
 
 ---
 
-## Estado actual (05/08/2026 — Sesion 12: merge de `publicacion-v1` + staging completo)
+## Estado actual (09/08/2026 — Sesion 13: EL SWITCH A PUBLICO)
 
-- **HEAD de `main`:** `e921dc8` (`fix(footer)`), sobre el merge `340c6cb` (`--no-ff` de `publicacion-v1`) y el fix `68f5e7b` (`fix(nginx)`), mas los commits del cierre documental de esta sesion. Base previa: `ffcf293`.
-- **Lo que entro en el merge:** 15 commits, 17 archivos, +1437 / -247 lineas, sin conflictos. Rama `publicacion-v1` **conservada** (se borra cuando el staging quede aprobado).
+- **EL SITIO ESTA EN LINEA.** `barreraglobal.com` y `www.barreraglobal.com` sirven las 12 paginas reales via `reverse_proxy sitio-bg-web:8080`. El cartel viejo ya no existe. Verificado al cierre: **Gate 0 5/5**, HTML del sitio real en el raiz, `/no-existe` devolviendo un **404 de verdad** y **staging respondiendo 401** con su candado intacto.
+- **HEAD de `main`:** los commits del cierre documental de Sesion 13, sobre `833fc8a` (propuestas de logo), `35e4138` (cierre P-39), `6772a51` (retiro del disclaimer), `fa0a4a2` (cierre P-42) y `8c7c18a` (fix 404). Base previa: `0620d52`. **Confirmar siempre por `git log`, no por este archivo.**
 - **Paginas: 12** — `/`, `/sobre-mi`, `/contacto`, `/privacidad`, `/terminos`, `/cookies`, `/inversion`, `/404` y las 4 de `/seguros/`. Build verificado: **12/12** sin errores.
-- **CSP:** los 2 hashes de `infra/nginx.conf` coinciden con los 2 scripts inline del build **en las 12 paginas** (cruce bidireccional, cero huerfanos). Ningun hash cambio en Sesion 12. Los 3 bloques JSON-LD son `application/ld+json`: no ejecutables, no requieren hash.
-- **Deploy:** **STAGING COMPLETO Y NAVEGABLE** en `https://staging.barreraglobal.com` (basicauth + `X-Robots-Tag: noindex`), sirviendo las 12 paginas reales. El VPS venia de `b09b10e`: el pull fue de **50 commits** hasta `340c6cb`, con rebuild de imagen.
-- **VPS:** `caddy` en dos redes (stack_net con default gateway + sitio_bg_net con `--gw-priority=-100`); `sitio-bg-web` healthy en 172.22.10.10. **Gate 0 verde durante toda la Sesion 12.**
-- **Contenido:** los marcadores `[PENDIENTE: ...]` ya **no existen** (cero en fuente y en build). Ese gate esta cerrado.
-- **Incidentes acumulados:** 1 que toco Aurora (Sesion 9, ~5 min, E-24 — primer y unico rollback del proyecto) + 2 **solo-staging** en Sesion 12 (**E-26** candado basicauth corrupto, **E-25** navegacion rota por el puerto 8080), ambos resueltos el mismo dia y sin impacto en Aurora.
-- **Aurora downtime real acumulado:** ~5 minutos (sigue siendo el unico, de Sesion 9).
-- **Los DOS gates que faltan para el switch a PUBLICO:**
-  1. **P-39 — visto bueno ESCRITO del abogado.** El dictamen verbal ya esta implementado en la v3; falta el respaldo escrito. Revisara las **paginas renderizadas en staging**, no el markdown. Dentro del mismo gate quedan la pregunta del aviso de cookies y la **inconsistencia del "tramite"**: las paginas de presentacion ya no lo mencionan, `/privacidad` y `/terminos` si. **Esas dos NO se tocan sin el abogado.**
-  2. **P-51 — correo `privacidad@barreraglobal.com`.** La v3 lo publica 4 veces como canal de derechos con plazo de 15 dias y **la casilla no existe**. Tarea manual de Francisco en Cloudflare Email Routing. **Configurar sin probar recepcion NO cuenta como cerrado.**
-- **Ademas, antes o junto al switch:** visto visual final de Francisco sobre el staging completo y aprobacion de la `og-image` (P-48, ya desplegada).
+- **CSP:** los 2 hashes de `infra/nginx.conf` cuadran con los 2 scripts inline del build en las 12 paginas (cruce bidireccional, cero huerfanos). **Ningun hash cambio en Sesion 13.** Los 3 bloques JSON-LD son `application/ld+json`: no ejecutables, no requieren hash.
+- **404 propia:** `error_page 404 /404.html;` en `infra/nginx.conf` (sin `=`, para conservar el status 404 y no generar un soft-404). Cerro **P-42** como **R-17**.
+- **VPS:** `caddy` en dos redes (stack_net con default gateway + sitio_bg_net con `--gw-priority=-100`); `sitio-bg-web` healthy en 172.22.10.10.
+- **Incidentes acumulados:** 1 que toco Aurora (Sesion 9, ~5 min, E-24) + 2 solo-staging en Sesion 12 (E-25, E-26) + **2 nuevos en Sesion 13**: **E-27** (el `sed -i` que reemplazo el inodo y dejo al caddy validando y recargando la config vieja) y **E-28** (validacion sin `--adapter caddyfile`, que dejo pasar el restart sin red de seguridad). Mas el near-miss **NM-11**: el bloque de rollback pegado despues de un switch exitoso, **~10 min de cartel viejo** en el sitio ya publico.
+- **Aurora downtime real acumulado:** ~5 minutos (sigue siendo el unico, de Sesion 9). **Ningun incidente de Sesion 13 la toco.**
+- **UNICO item abierto del lanzamiento: P-51 — correo `privacidad@barreraglobal.com`.** La regla de Cloudflare Email Routing esta **creada, activa y con destino cargado**, pero al momento del switch seguia **"Sincronizando"** y no hay prueba de recepcion. **Francisco decidio lanzar igual.** El criterio de cierre no se movio: **configurar sin probar NO cuenta.** Mientras tanto el sitio publica esa direccion 4 veces como canal de derechos con plazo de 15 dias, asi que es el pendiente numero uno del proyecto.
+- **Otros pendientes vivos del post-lanzamiento:** **P-52** (produccion del logo P3 elegido en **D-29**, corrigiendo "Quito" por **Ambato** y el CTA viejo por el del manual v2.0), **P-53** (`basicauth` a `basic_auth`, con metodo inode-safe), baseline nuevo del Caddyfile pendiente de registrar, y el espejo del knowledge.
 
 ---
 
@@ -334,7 +340,7 @@ Si Claude detecta desincronizacion entre estos 3 lugares, ALERTAR a Francisco an
 ## Checklist al iniciar cada sesion
 
 ```
-[ ] Leer ERRORES-Y-APRENDIZAJES.md (al menos las reglas R-01 a R-47)
+[ ] Leer ERRORES-Y-APRENDIZAJES.md (al menos las reglas R-01 a R-50)
 [ ] Leer ESTADO-GENERAL-PROYECTO.md (saber donde estamos)
 [ ] Confirmar pwsh 7 activo ($PSVersionTable.PSVersion)
 [ ] cd al repo + git pull origin main
@@ -357,10 +363,19 @@ Si Claude detecta desincronizacion entre estos 3 lugares, ALERTAR a Francisco an
 [ ] Las salidas de terminal van al .txt de reporte, NUNCA de vuelta
     a una terminal (R-45)
 [ ] Credenciales se prueban en el NAVEGADOR, no con curl (R-46)
+[ ] NUNCA sed -i ni mv sobre un archivo bind-monteado: reemplazan el
+    inodo y el container sigue leyendo el viejo (R-48). Editar
+    preservando inodo; ante duda, comparar ls -i host vs container
+[ ] Bloques marcados "solo si falla" NO se pegan salvo que su condicion
+    se cumpla; confirmarla en voz alta antes (R-49)
+[ ] caddy validate sobre archivos que no se llamen Caddyfile SIEMPRE
+    con --adapter caddyfile; si la validacion falla, el runbook PARA (R-50)
+[ ] Tras tocar el proxy, pedir una URL inventada: si /no-existe da 200,
+    no estas mirando el sitio real
 ```
 
 ---
 
 **Fin del CLAUDE.md.**
 
-**Proxima revision:** al pase a PUBLICO (gates P-39 y P-51) o cuando se modifique cualquiera de los 5 documentos clave del knowledge.
+**Proxima revision:** cuando se cierre **P-51** (correo `privacidad@` probado), cuando **P-52** entregue el logo P3 producido, o cuando se modifique cualquiera de los 5 documentos clave del knowledge.
