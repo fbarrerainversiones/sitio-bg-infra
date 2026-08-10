@@ -4,9 +4,9 @@
 > Tambien sirve como referencia rapida para cualquier sesion de chat (Claude.ai).
 > NO editar sin actualizar la version y la fecha al final.
 
-**Version:** 2.4
-**Ultima actualizacion:** domingo 9 de agosto de 2026 (Sesion 13: **EL SWITCH A PUBLICO**)
-**Cubre el estado del proyecto hasta:** Sesion 13 cerrada (08-09/08). **EL SITIO ES PUBLICO**: `barreraglobal.com` y `www` sirven las 12 paginas reales. Staging sigue vivo con candado. Se cerraron P-42 (404 servida de verdad) y P-39 (aprobacion del abogado). **Unico item abierto del lanzamiento: P-51** — la casilla `privacidad@` esta configurada pero SIN prueba de recepcion, y Francisco decidio lanzar igual.
+**Version:** 2.5
+**Ultima actualizacion:** lunes 10 de agosto de 2026 (Sesion 14: **DIA 1 DEL SITIO PUBLICO**)
+**Cubre el estado del proyecto hasta:** Sesion 14 cerrada (10/08). **EL SITIO ES PUBLICO Y YA NO TIENE NINGUN GATE DE LANZAMIENTO ABIERTO.** Cayo el ultimo: **P-51 probado** (Cloudflare 1 recibido / 1 entregado, el correo llego al Gmail de Francisco a las 11:53, en Spam, se aplico «No es spam») y cerro como **R-19**. Tambien cerraron **P-55** como **R-20** (fondo oscuro del `logo.svg`, commit `fd8316b`) y **P-56** como **R-21** (mision/vision/valores aprobados; Manual de Marca **v3.1 FINAL** entregado al manager de marketing). **P-54 F1 esta CONSTRUIDA en `main` pero NO desplegada**: el 10/08 rigio veda de infraestructura compartida por la ventana de promocion a produccion de Aurora.
 
 ---
 
@@ -15,8 +15,8 @@
 Antes de proponer cualquier accion tecnica, Claude Code debe leer estos archivos en este orden:
 
 1. **`docs/ERRORES-Y-APRENDIZAJES.md`** — 28 errores (E-01 a E-28) + 11 near-miss (NM-01 a NM-11) + 50 reglas operativas (R-01 a R-50). NO repetir errores ya documentados.
-2. **`docs/PLAN-MAESTRO-v2.md`** — documento maestro con decisiones tecnicas firmes (D-01 a D-29), bitacora de sesiones (la ultima entrada es Sesion 13), hallazgos legales. Ojo con la numeracion D-XX: la seccion 10 lista D-18 a D-24 y D-29; D-25 a D-28 viven en la bitacora (Sesiones 6 y 8).
-3. **`docs/PENDIENTES.md`** — 53 items (P-01 a P-53) + 18 resueltos historicos (R-01 a R-18).
+2. **`docs/PLAN-MAESTRO-v2.md`** — documento maestro con decisiones tecnicas firmes (D-01 a D-29), bitacora de sesiones (la ultima entrada es **Sesion 14**), hallazgos legales. Ojo con la numeracion D-XX: la seccion 10 lista D-18 a D-24 y D-29; D-25 a D-28 viven en la bitacora (Sesiones 6 y 8).
+3. **`docs/PENDIENTES.md`** — **56 items (P-01 a P-56) + 21 resueltos historicos (R-01 a R-21)**. Numeracion verificada contra el archivo el 10/08/2026.
 4. **`docs/ESTADO-GENERAL-PROYECTO.md`** — estado consolidado del proyecto al cierre de Sesion 5.
 5. **`docs/DIAGRAMA-FLUJO-PROYECTO.md`** — visualizacion completa de fases y dependencias.
 6. **`docs/REPORTE-SESION-10.md`** — bitacora de la jornada estructural (Bloques A-B) + decisiones D1 a D6 + QA pre-merge.
@@ -35,7 +35,8 @@ Si una propuesta tuya contradice algo de estos documentos, PARAR y discutirlo co
 - **Carpeta local:** `C:\Users\panch\projects\sitio-bg-infra\`
 - **Carpeta VPS:** `/opt/sitio-bg/` (creada en HITO 01)
 - **Repo GitHub:** `fbarrerainversiones/sitio-bg-infra` (publico, D-21)
-- **Fase actual:** **SITIO PUBLICO Y EN LINEA** desde el 09/08/2026 con 12 paginas. El switch se ejecuto (Sesion 13). Staging se mantiene con candado como ambiente de revision. Lo que sigue es post-lanzamiento: probar el correo `privacidad@` (P-51), producir el logo P3 (P-52) y la deuda tecnica ya catalogada.
+- **Fase actual:** **SITIO PUBLICO Y EN LINEA** desde el 09/08/2026 con 12 paginas y **simbolo propio**. El switch se ejecuto (Sesion 13) y el dia 1 (Sesion 14) cerro los tres items que quedaban del lanzamiento. Staging se mantiene con candado como ambiente de revision. Lo que sigue ya no es lanzamiento sino producto: **desplegar lo que espera en `main`** (P-54 F1 + P-55), la papeleria de **P-52** fase 2, y la deuda tecnica ya catalogada.
+- **HAY TRABAJO CONSTRUIDO SIN DESPLEGAR.** `main` tiene P-54 F1 (la seccion «El portico que se construye») y P-55 (fondo oscuro del `logo.svg`) **verificados en build pero NO en produccion**. Los dos viven en archivos que se hornean en la imagen Docker, asi que **un `git pull` en el VPS no alcanza: exigen rebuild** (R-44). No asumir que el sitio publico ya los muestra.
 
 ---
 
@@ -175,6 +176,36 @@ vuelve a ser gate antes de publicar.
 
 **Lista completa de las 50 reglas:** ver `docs/ERRORES-Y-APRENDIZAJES.md` seccion "Reglas operativas consolidadas".
 
+### PROTOCOLO DE VEDA (practica establecida en Sesion 14, 10/08/2026)
+
+> **Todavia NO es una regla numerada.** Las reglas siguen siendo **50** (R-01 a
+> R-50) en `docs/ERRORES-Y-APRENDIZAJES.md`. Esto es practica confirmada por uso,
+> y se numera el dia que se formalice ahi. No inventar un "R-51" mientras tanto.
+
+El VPS es compartido con **Aurora** y **FBE Sport**. Cuando cualquiera de esos
+proyectos abre una **ventana de promocion a produccion**, avisa y queda declarada
+**VEDA TOTAL de infraestructura compartida**: ni reinicios ni ediciones de Caddy,
+red Docker, Postgres, Redis ni del VPS, hasta que el dueno de la ventana declare
+el cierre. Como funciono en Sesion 14, que es como debe volver a funcionar:
+
+1. **El aviso llega y se acusa recibo con alcance explicito.** No basta con
+   entenderlo: se dice en voz alta que trabajo de esta sesion cae dentro y cual
+   fuera de la veda.
+2. **El trabajo local NO se detiene.** Componente, CSS, build, commits y push a
+   GitHub no tocan infraestructura compartida. Sesion 14 construyo P-54 F1 entera
+   y ejecuto P-55 con la veda activa, sin rozar el VPS.
+3. **El deploy se pone EN COLA, no se negocia.** Y se dice desde el principio,
+   no al final: todo lo que vive horneado en la imagen (`infra/nginx.conf`,
+   `web/src/**`, `web/public/**`) necesita rebuild, y el rebuild es VPS.
+4. **La cola se documenta donde se va a leer.** `PENDIENTES.md`, la bitacora y
+   el snapshot de continuidad dicen que quedo sin desplegar y por que. Un cambio
+   verificado en build y no desplegado es exactamente el tipo de cosa que a los
+   tres dias alguien da por publicada.
+5. **La veda la levanta Francisco, nadie mas**, y recien ahi corre el deploy.
+
+**Reciprocidad:** este proyecto recibio de Aurora la adopcion de la leccion del
+inodo (R-48) en su propio runbook. El canal funciona en los dos sentidos.
+
 ### CSP (hashes horneados en la imagen)
 `infra/nginx.conf` autoriza por hash los **2 unicos `<script>` inline** del build
 (toggle del menu movil + scroll-reveal). Si se toca el contenido de cualquiera de
@@ -233,12 +264,21 @@ sitio-bg-infra/
     ├── public/
     │   ├── images/francisco-barrera.jpg (foto IA D-24, 54.8 KB tras P-44)
     │   ├── og-default.png           ← vista previa al compartir (P-48/R-16)
+    │   ├── logo.svg                 ← FUENTE de la geometria: los 9 trazos
+    │   │                              del portico. Con fondo oscuro desde
+    │   │                              P-55/R-20. Lo declara el JSON-LD.
+    │   ├── favicon.svg              ← version simplificada de 6 trazos para
+    │   │                              16-32 px (P-52). NO es la fuente.
     │   ├── robots.txt
     │   └── sitemap.xml              ← a mano, ver P-50
     └── src/
-        ├── styles/ (tokens.css, global.css con animations + dinamismo)
-        ├── layouts/ (Layout.astro con SEO + 3 JSON-LD, ProductLayout.astro)
-        ├── components/ (Logo, Header sticky con dropdown, Footer,
+        ├── styles/ (tokens.css, global.css con animations + dinamismo
+        │            + el dibujado por etapas de P-54 F1)
+        ├── layouts/ (Layout.astro con SEO + 3 JSON-LD + el unico
+        │             IntersectionObserver del sitio, ProductLayout.astro)
+        ├── components/ (Logo, Portico ← simbolo de header y footer,
+        │                PorticoConstruye ← seccion #metodo del home (P-54
+        │                F1), Header sticky con dropdown, Footer,
         │                Pendiente ← huerfano: ya no lo usa ninguna pagina)
         └── pages/ (index, sobre-mi, contacto, privacidad, terminos,
                     cookies, inversion, 404,
@@ -251,18 +291,20 @@ sitio-bg-infra/
 
 ---
 
-## Estado actual (09/08/2026 — Sesion 13: EL SWITCH A PUBLICO)
+## Estado actual (10/08/2026 — Sesion 14: DIA 1 DEL SITIO PUBLICO)
 
-- **EL SITIO ESTA EN LINEA.** `barreraglobal.com` y `www.barreraglobal.com` sirven las 12 paginas reales via `reverse_proxy sitio-bg-web:8080`. El cartel viejo ya no existe. Verificado al cierre: **Gate 0 5/5**, HTML del sitio real en el raiz, `/no-existe` devolviendo un **404 de verdad** y **staging respondiendo 401** con su candado intacto.
-- **HEAD de `main`:** los commits del cierre documental de Sesion 13, sobre `833fc8a` (propuestas de logo), `35e4138` (cierre P-39), `6772a51` (retiro del disclaimer), `fa0a4a2` (cierre P-42) y `8c7c18a` (fix 404). Base previa: `0620d52`. **Confirmar siempre por `git log`, no por este archivo.**
+- **EL SITIO ESTA EN LINEA Y SIN GATES.** `barreraglobal.com` y `www.barreraglobal.com` sirven las 12 paginas reales via `reverse_proxy sitio-bg-web:8080`. Al cierre de Sesion 13 se verifico: **Gate 0 5/5**, HTML del sitio real en el raiz, `/no-existe` devolviendo un **404 de verdad** y **staging respondiendo 401**. En Sesion 14 cayo el ultimo item abierto del lanzamiento.
+- **LO QUE ESPERA EN `main` SIN DESPLEGAR (lo primero que hay que saber):** **P-54 F1** (seccion «El portico que se construye» del home) y **P-55** (fondo oscuro del `logo.svg`). Verificados en build, **no en produccion**. Ambos viven en archivos horneados en la imagen: **exigen rebuild, el pull no alcanza (R-44)**. Salen juntos en el mismo deploy.
+- **HEAD de `main`:** los commits del cierre documental de Sesion 14, sobre `fd8316b` (P-55) y los **8** de P-54 F1 (`be196c5..69f83bd`). Base previa: `be196c5`. **Confirmar siempre por `git log`, no por este archivo.**
 - **Paginas: 12** — `/`, `/sobre-mi`, `/contacto`, `/privacidad`, `/terminos`, `/cookies`, `/inversion`, `/404` y las 4 de `/seguros/`. Build verificado: **12/12** sin errores.
-- **CSP:** los 2 hashes de `infra/nginx.conf` cuadran con los 2 scripts inline del build en las 12 paginas (cruce bidireccional, cero huerfanos). **Ningun hash cambio en Sesion 13.** Los 3 bloques JSON-LD son `application/ld+json`: no ejecutables, no requieren hash.
+- **CSP:** los 2 hashes de `infra/nginx.conf` cuadran con los 2 scripts inline del build en las 12 paginas (cruce bidireccional, cero huerfanos). **Ningun hash cambio en Sesion 13 ni en Sesion 14** — y F1 se diseno justamente para eso: cero JavaScript nuevo, el dibujado por scroll sale de `:has()` mas el `IntersectionObserver` que ya existia en `Layout.astro`. Los 3 bloques JSON-LD son `application/ld+json`: no ejecutables, no requieren hash.
 - **404 propia:** `error_page 404 /404.html;` en `infra/nginx.conf` (sin `=`, para conservar el status 404 y no generar un soft-404). Cerro **P-42** como **R-17**.
 - **VPS:** `caddy` en dos redes (stack_net con default gateway + sitio_bg_net con `--gw-priority=-100`); `sitio-bg-web` healthy en 172.22.10.10.
 - **Incidentes acumulados:** 1 que toco Aurora (Sesion 9, ~5 min, E-24) + 2 solo-staging en Sesion 12 (E-25, E-26) + **2 nuevos en Sesion 13**: **E-27** (el `sed -i` que reemplazo el inodo y dejo al caddy validando y recargando la config vieja) y **E-28** (validacion sin `--adapter caddyfile`, que dejo pasar el restart sin red de seguridad). Mas el near-miss **NM-11**: el bloque de rollback pegado despues de un switch exitoso, **~10 min de cartel viejo** en el sitio ya publico.
-- **Aurora downtime real acumulado:** ~5 minutos (sigue siendo el unico, de Sesion 9). **Ningun incidente de Sesion 13 la toco.**
-- **UNICO item abierto del lanzamiento: P-51 — correo `privacidad@barreraglobal.com`.** La regla de Cloudflare Email Routing esta **creada, activa y con destino cargado**, pero al momento del switch seguia **"Sincronizando"** y no hay prueba de recepcion. **Francisco decidio lanzar igual.** El criterio de cierre no se movio: **configurar sin probar NO cuenta.** Mientras tanto el sitio publica esa direccion 4 veces como canal de derechos con plazo de 15 dias, asi que es el pendiente numero uno del proyecto.
-- **Otros pendientes vivos del post-lanzamiento:** **P-52** (produccion del logo P3 elegido en **D-29**, corrigiendo "Quito" por **Ambato** y el CTA viejo por el del manual v2.0), **P-53** (`basicauth` a `basic_auth`, con metodo inode-safe), baseline nuevo del Caddyfile pendiente de registrar, y el espejo del knowledge.
+- **Aurora downtime real acumulado:** ~5 minutos (sigue siendo el unico, de Sesion 9). **Ningun incidente de Sesion 13 ni de Sesion 14 la toco** — Sesion 14 no toco infraestructura en absoluto.
+- **CERO items abiertos del lanzamiento.** **P-51 cerro como R-19 el 10/08:** la casilla `privacidad@barreraglobal.com` quedo **PROBADA** (Cloudflare 1 recibido / 1 entregado; el correo llego al Gmail de Francisco a las 11:53). Cabo operativo, no bloqueante: **aterrizo en Spam**, se aplico «No es spam»; conviene revisar SPF/DKIM/DMARC del dominio antes de que un ejercicio de derechos real se pierda ahi.
+- **Marca:** **P-56 cerro como R-21** — mision, vision y valores **aprobados**, Manual de Marca **v3.1 FINAL** entregado al manager de marketing. De ahi sale la **capa comercial del simbolo**, que ahora es narrativa **oficial**: **basamento = metodo**, **columnas = vida y salud**, **fronton = inversion**. Cualquier pieza futura la respeta. **P-55 cerro como R-20** (`fd8316b`).
+- **Pendientes vivos del post-lanzamiento:** **desplegar F1 + P-55** (lo primero de la fila), **P-52** fase 2 (papeleria y mockups, corrigiendo "Quito" por **Ambato** y el CTA viejo por el del manual), **P-53** (`basicauth` a `basic_auth`, con metodo inode-safe), **P-04** (unificar la direccion de contacto entre paginas), baseline nuevo del Caddyfile pendiente de registrar, y el espejo del knowledge.
 
 ---
 
@@ -378,4 +420,4 @@ Si Claude detecta desincronizacion entre estos 3 lugares, ALERTAR a Francisco an
 
 **Fin del CLAUDE.md.**
 
-**Proxima revision:** cuando se cierre **P-51** (correo `privacidad@` probado), cuando **P-52** entregue el logo P3 producido, o cuando se modifique cualquiera de los 5 documentos clave del knowledge.
+**Proxima revision:** cuando se **despliegue** lo que espera en `main` (P-54 F1 + P-55) y el sitio publico deje de estar desfasado del repo, cuando **P-52** entregue la papeleria de fase 2, o cuando se modifique cualquiera de los 5 documentos clave del knowledge.
