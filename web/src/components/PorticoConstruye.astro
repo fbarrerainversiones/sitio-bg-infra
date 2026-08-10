@@ -1,0 +1,183 @@
+---
+/**
+ * P-54 F1 — «El pórtico que se construye».
+ *
+ * Narrativa por scroll: el símbolo de la marca se dibuja por etapas mientras
+ * el visitante baja. CERO JavaScript nuevo. El disparo lo da el
+ * IntersectionObserver que YA vive en Layout.astro: los bloques de texto
+ * llevan `.reveal`, el observer les pone `.visible`, y el CSS de global.css
+ * traduce ese estado a los trazos del SVG con `:has()`. Por lo tanto no hay
+ * ningún <script> nuevo y los hashes CSP de infra/nginx.conf NO cambian.
+ *
+ * GEOMETRÍA (guardián de P-54): sale VERBATIM de `web/public/logo.svg` — la
+ * versión completa de 9 trazos, la de tamaños grandes. Mismas coordenadas,
+ * mismo viewBox 0 0 100 100, mismo stroke-width 1.4, mismo linecap square.
+ * Acá NO se redibuja un pórtico paralelo.
+ *
+ * Único cambio de forma respecto de la fuente: cada trazo se expresa como
+ * <path> en vez de <line>/<polyline>. Es una transcripción literal de las
+ * mismas coordenadas y responde a una sola razón técnica: `pathLength` está
+ * garantizado en <path> en todos los motores, mientras que sobre las formas
+ * básicas llegó tarde y con baches. Con `pathLength="1"` el dibujado se
+ * normaliza y el dasharray no depende del largo real de cada trazo.
+ *
+ * Mapeo trazo → etapa (línea de logo.svg entre paréntesis):
+ *   etapa-1 BASAMENTO           18,87→82,87 (L26) · 23,82→77,82 (L25)
+ *   etapa-2 COLUMNAS            x=30,43,57,70 · y 82→51 (L21-L24)
+ *   etapa-3 DINTEL + ARQUITRABE 23,51→77,51 (L20) · 18,44→82,44 (L19)
+ *   etapa-4 FRONTÓN             18,44 → 50,22 → 82,44 (L18)
+ *
+ * Nota sobre el orden: dentro de cada <g> los trazos van en orden de
+ * construcción (de abajo hacia arriba), no en el orden del archivo fuente.
+ * Son trazos sin relleno: el orden de pintado no cambia una sola coordenada.
+ *
+ * Atribución del CTA: mensaje propio de esta sección. NO se usa UTM —
+ * wa.me ignora los query params ajenos a phone/text (ver ProductLayout.astro
+ * y el hallazgo UTM de REPORTE-SESION-10.md).
+ */
+
+const WHATSAPP_AURORA = "593998027819";
+const WHATSAPP_MESSAGE = encodeURIComponent(
+  "Hola, llego desde la sección El Método de barreraglobal.com y quiero conversar."
+);
+const WHATSAPP_URL = `https://wa.me/${WHATSAPP_AURORA}?text=${WHATSAPP_MESSAGE}`;
+
+// Etapas del relato. El `n` y la `etiqueta` son la lectura arquitectónica de
+// cada tramo del símbolo; el resto es el copy aprobado.
+const ETAPAS = [
+  {
+    n: "01",
+    etiqueta: "Basamento",
+    titulo: "Primero, el diagnóstico.",
+    detalle: "Entender tu situación real antes de proponer nada.",
+  },
+  {
+    n: "02",
+    etiqueta: "Columnas",
+    titulo: "Luego, el respaldo.",
+    detalle: "Estructura regulada e institucional que sostiene cada decisión.",
+  },
+  {
+    n: "03",
+    etiqueta: "Dintel y arquitrabe",
+    titulo: "Encima, la protección.",
+    detalle: "El techo que cubre a tu familia y a tu patrimonio.",
+  },
+  {
+    n: "04",
+    etiqueta: "Frontón",
+    titulo: "Y arriba, el patrimonio que crece.",
+    detalle: "Acumulación diseñada a largo plazo.",
+  },
+];
+
+// Path del icono de WhatsApp (el mismo del resto del sitio).
+const WA_PATH =
+  "M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z";
+---
+
+<section
+  id="metodo"
+  class="pc-seccion scroll-mt-24 border-t border-gd-muted bg-bg-elev-1 py-20 md:py-32"
+>
+  <div class="max-w-6xl mx-auto px-6">
+
+    <div class="reveal max-w-2xl mb-12 md:mb-20">
+      <p class="font-mono text-xs text-gd uppercase tracking-widest mb-4">
+        El método
+      </p>
+      <h2 class="text-4xl md:text-5xl font-display font-semibold text-tx">
+        Así se construye tu
+        <span class="text-gd">arquitectura financiera.</span>
+      </h2>
+    </div>
+
+    <!-- El contenedor es bloque en móvil y grilla recién en md. Con grilla en
+         móvil el visor caería en su propia fila y `sticky` solo podría viajar
+         dentro de esa fila: se despegaría al primer scroll. En bloque, su
+         bloque contenedor es todo este div y acompaña a los cinco pasos. -->
+    <div class="md:grid md:grid-cols-12 md:gap-16 md:items-start">
+
+      <!-- VISOR — móvil: banda pegada a sangre bajo el header, con fondo
+           sólido para que el texto pase por debajo sin ensuciarla.
+           Desktop: columna izquierda pegada y centrada en el alto libre. -->
+      <div
+        class="pc-visor sticky top-[5.5rem] z-10 -mx-6 px-6 py-4 bg-bg-elev-1 border-b border-gd-muted flex items-center justify-center
+               md:col-span-5 md:top-28 md:mx-0 md:px-0 md:py-0 md:border-b-0 md:h-[calc(100vh-9rem)]"
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 100 100"
+          class="pc-portico w-36 md:w-full md:max-w-[20rem] h-auto"
+          fill="none"
+          stroke="#c9a84c"
+          stroke-width="1.4"
+          stroke-linecap="square"
+          stroke-linejoin="miter"
+          role="img"
+          aria-label="Símbolo de Barrera Global: un pórtico que se construye por etapas, desde el basamento hasta el frontón."
+        >
+          <g class="pc-etapa pc-etapa-1">
+            <path class="pc-trazo" pathLength="1" d="M18 87 L82 87" />
+            <path class="pc-trazo" pathLength="1" d="M23 82 L77 82" />
+          </g>
+          <g class="pc-etapa pc-etapa-2">
+            <path class="pc-trazo" pathLength="1" d="M30 82 L30 51" />
+            <path class="pc-trazo" pathLength="1" d="M43 82 L43 51" />
+            <path class="pc-trazo" pathLength="1" d="M57 82 L57 51" />
+            <path class="pc-trazo" pathLength="1" d="M70 82 L70 51" />
+          </g>
+          <g class="pc-etapa pc-etapa-3">
+            <path class="pc-trazo" pathLength="1" d="M23 51 L77 51" />
+            <path class="pc-trazo" pathLength="1" d="M18 44 L82 44" />
+          </g>
+          <g class="pc-etapa pc-etapa-4">
+            <path class="pc-trazo" pathLength="1" d="M18 44 L50 22 L82 44" />
+          </g>
+        </svg>
+      </div>
+
+      <!-- PASOS -->
+      <div class="md:col-span-7">
+
+        {ETAPAS.map((etapa, i) => (
+          <div
+            class={`pc-paso pc-paso-${i + 1} reveal min-h-[52vh] md:min-h-[60vh] flex flex-col justify-center`}
+          >
+            <p class="font-mono text-xs text-gd uppercase tracking-widest mb-4">
+              {etapa.n} · {etapa.etiqueta}
+            </p>
+            <h3 class="text-3xl md:text-4xl font-display font-semibold text-tx mb-4">
+              {etapa.titulo}
+            </h3>
+            <p class="font-body text-base md:text-lg text-tx-muted leading-relaxed max-w-md">
+              {etapa.detalle}
+            </p>
+          </div>
+        ))}
+
+        <div class="pc-paso pc-cierre reveal min-h-[52vh] md:min-h-[60vh] flex flex-col justify-center">
+          <h3 class="text-3xl md:text-4xl font-display font-semibold text-tx mb-8">
+            Eso es <span class="text-gd">arquitectura financiera.</span>
+          </h3>
+          <div>
+            <a
+              href={WHATSAPP_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              class="cta-lift inline-flex items-center justify-center gap-2 bg-gd px-7 py-4 rounded-md font-body font-medium text-base hover:bg-gd-light"
+              style="color:#08080d"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                <path d={WA_PATH} />
+              </svg>
+              <span>Conversar por WhatsApp</span>
+            </a>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+</section>
