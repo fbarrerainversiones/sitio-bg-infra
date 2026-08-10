@@ -2,7 +2,7 @@
 
 > **Lista viva única.** Todos los cabos sueltos del proyecto en un solo archivo. Se actualiza con cada sesión que cierre un item o detecte uno nuevo.
 
-**Última actualización:** 9 de agosto de 2026, tarde — **EL SITIO ES PÚBLICO** (Sesión 13). Se ejecutó el switch: `barreraglobal.com` y `www` sirven el sitio real. Altas de esta tanda: **P-52** (producción del logo P3, decisión **D-29**) y **P-53** (renombrar `basicauth` → `basic_auth`, con método inode-safe). **P-51 queda ABIERTO**: la casilla `privacidad@` está configurada pero sin prueba de recepción, y Francisco decidió lanzar igual — configurar sin probar sigue sin contar. Antes, esa misma mañana: **P-39 CERRADO como R-18** (el abogado aprobó las tres páginas legales y el recuadro "DISCLAIMER OPERATIVO" de `/privacidad` se retiró, commit `6772a51`) y **P-42 CERRADO como R-17**: nginx ya sirve la 404 premium — `error_page 404 /404.html;` en `infra/nginx.conf`, commit `8c7c18a`, aplicado con rebuild de la imagen y verificado en el navegador sobre staging. El 5 de agosto: merge de `publicacion-v1` a `main` y **staging completo y navegable**. P-39 ampliado con la **inconsistencia de redacción del "trámite"** entre páginas de presentación y páginas legales. Reconciliación anti-fantasma: **P-42** afirmaba que `404.astro` no existía y sí existe desde Sesión 10; **P-06** mandaba editar un texto que ya no está en Footer ni en index; **P-23** citaba 551 KB de foto cuando P-44 la dejó en 54,8 KB. El 04/08: **política de privacidad v3** con el dictamen verbal del abogado, **P-48 CERRADO** (R-16), P-39 pasa a esperar el visto bueno **escrito**, alta de **P-51**. El 03/08: P-43 cerrado como R-15, P-37 entregado v1, P-36 parcial, alta de P-48, P-49 y P-50)
+**Última actualización:** 9 de agosto de 2026, noche — **EL SITIO ES PÚBLICO Y YA TIENE SÍMBOLO PROPIO**. La producción del logo P3 (fase 1 de **P-52**) quedó **desplegada y verificada en producción**. Altas de la noche: **P-54** (experiencia visual del home, 4 fases), **P-55** (recuadro opcional del `logo.svg`) y **P-56** (aprobar misión/visión/valores del Manual v3.0). Queda registrada la lección de caché: el Purge de Cloudflare va **después** del deploy, nunca antes. Antes, esa misma tarde (Sesión 13). Se ejecutó el switch: `barreraglobal.com` y `www` sirven el sitio real. Altas de esta tanda: **P-52** (producción del logo P3, decisión **D-29**) y **P-53** (renombrar `basicauth` → `basic_auth`, con método inode-safe). **P-51 queda ABIERTO**: la casilla `privacidad@` está configurada pero sin prueba de recepción, y Francisco decidió lanzar igual — configurar sin probar sigue sin contar. Antes, esa misma mañana: **P-39 CERRADO como R-18** (el abogado aprobó las tres páginas legales y el recuadro "DISCLAIMER OPERATIVO" de `/privacidad` se retiró, commit `6772a51`) y **P-42 CERRADO como R-17**: nginx ya sirve la 404 premium — `error_page 404 /404.html;` en `infra/nginx.conf`, commit `8c7c18a`, aplicado con rebuild de la imagen y verificado en el navegador sobre staging. El 5 de agosto: merge de `publicacion-v1` a `main` y **staging completo y navegable**. P-39 ampliado con la **inconsistencia de redacción del "trámite"** entre páginas de presentación y páginas legales. Reconciliación anti-fantasma: **P-42** afirmaba que `404.astro` no existía y sí existe desde Sesión 10; **P-06** mandaba editar un texto que ya no está en Footer ni en index; **P-23** citaba 551 KB de foto cuando P-44 la dejó en 54,8 KB. El 04/08: **política de privacidad v3** con el dictamen verbal del abogado, **P-48 CERRADO** (R-16), P-39 pasa a esperar el visto bueno **escrito**, alta de **P-51**. El 03/08: P-43 cerrado como R-15, P-37 entregado v1, P-36 parcial, alta de P-48, P-49 y P-50)
 **Documento maestro de referencia:** [`PLAN-MAESTRO-v2.md`](PLAN-MAESTRO-v2.md)
 
 ---
@@ -577,7 +577,8 @@ Cuando un item se cierra, se mueve a la sección **Resueltos** al final con la f
 
 ### P-52 — Producción final del logo P3 "Arquitectónica" (trazados, favicon, aplicación)
 
-- **Estado:** 🟡 EN CURSO — **fase 1 COMPLETADA el 09/08/2026** (favicon + integración en el sitio). La **elección** ya era firme (**D-29**); ahora el símbolo está produciendo en el sitio real. **Lo único que queda es la papelería y los mockups finales.**
+- **Estado:** 🟡 EN CURSO — **fase 1 COMPLETADA Y DESPLEGADA EN PRODUCCIÓN el 09/08/2026**. No es "listo en el repo": el rebuild se ejecutó y se verificó en vivo — `favicon.svg` **200**, `logo.svg` **200**, container **healthy**, **Gate 0 5/5**. El símbolo P3 está sirviéndose en `barreraglobal.com`. **Lo único que queda es la papelería y los mockups finales.**
+- **⚠️ Lección de caché (09/08/2026, ventana 18:40–21:15):** durante ~2 h 35 min el borde de Cloudflare siguió entregando el **favicon viejo de Astro** aunque el origen ya servía el nuevo. Causa: el **Purge se ejecutó ANTES** de desplegar los assets, así que volvió a cachear lo viejo. **Regla: el Purge de Cloudflare va SIEMPRE DESPUÉS del deploy de assets cacheables, nunca antes.** Y la verificación se hace en **incógnito**, porque el caché del navegador propio miente igual que el del borde. Aplica a cualquier cambio futuro en `favicon.*`, `logo.svg`, `og-default.png` o `/images/` — todos con `expires` largo en `infra/nginx.conf`.
 - **Fase 1, entregada (commits `d38da29`, `5f9e65d`, `3d84f01`):**
   - `web/public/favicon.svg` — cuadrado redondeado `#08080d` con el pórtico dorado. **Reemplaza el logo por defecto de Astro**, que se venía sirviendo desde mayo y que, con el sitio ya público, era lo que aparecía en la pestaña de cualquier visitante.
   - `web/public/logo.svg` — pórtico limpio, geometría idéntica a la fuente. **Cierra el fantasma del JSON-LD:** el campo `logo` de `InsuranceAgency` declaraba `https://barreraglobal.com/logo.svg` sobre un archivo que no existía, en las 12 páginas.
@@ -606,6 +607,41 @@ Cuando un item se cierra, se mueve a la sección **Resueltos** al final con la f
 - **Owner:** Claude (prepara el bloque) + Francisco (lo ejecuta en el VPS).
 - **Detalle:** el candado de `staging.barreraglobal.com` usa `basicauth`, que en las versiones actuales de Caddy se llama **`basic_auth`**. Mientras el alias siga soportado no rompe nada, pero es exactamente el tipo de deuda que aparece en el peor momento: durante una actualización de Caddy, sobre el archivo compartido y con Aurora en la misma config.
 - **Próximo paso:** cuando se toque el Caddyfile por cualquier otro motivo, aprovechar el viaje y renombrar la directiva. **Obligatorio hacerlo con método inode-safe (R-48):** nada de `sed -i` ni `mv` sobre el archivo bind-monteado; edición que preserve el inodo, validación con `--adapter caddyfile` (R-50) y verificación de que el container esté leyendo el archivo nuevo antes de recargar.
+
+### P-54 — Experiencia visual del home (estilo Apple)
+
+- **Estado:** 🟡 EN CURSO (alta del 09/08/2026, Sesión 13). **F1 arranca mañana**; F2 a F4 esperan insumos.
+- **Criticidad:** media. El sitio ya convierte sin esto; es la capa que lo separa de un sitio correcto y lo vuelve memorable.
+- **Bloquea a:** nada. Ninguna fase bloquea a la siguiente salvo por los insumos que cada una necesita.
+- **Owner:** Claude (implementa) + Francisco (aprueba y entrega los insumos de F2 y F4).
+- **Principio que ordena las cuatro fases:** la geometría es **la oficial del repo** —`web/src/components/Portico.astro` y `web/public/logo.svg`—, no una versión dibujada de nuevo para la animación. Si el símbolo cambia, cambia en un solo lugar.
+
+| Fase | Qué | Estado / bloqueo |
+|---|---|---|
+| **F1** | **«El pórtico que se construye»** — el símbolo se dibuja solo a medida que el visitante baja: SVG animado por scroll, **CSS puro, cero JavaScript**. Sin JS no hay `<script>` nuevo, y por lo tanto **ningún hash CSP nuevo** que regenerar (R-44). | **Arranca mañana.** Falta el prompt del auditor. |
+| **F2** | **Video hero de impacto** — 15-25 s, en loop, **sin audio**, **menos de 8 MB**, con `poster` para la primera pintura, tratamiento visual del Brand Book. | Espera el **MP4 de Francisco** (HeyGen / Krea). |
+| **F3** | **Loops ambientales** por página de producto. | Después de F2, con el mismo tratamiento. |
+| **F4** | **Avatar HeyGen de Francisco** — **solo para reels primero**. Los guiones pasan por **las 4 puertas** antes de grabar. | **Nunca debuta en el sitio.** El sitio es el último lugar donde aparece, si aparece. |
+
+- **Próximo paso:** F1. Recibir el prompt del auditor y construir la animación sobre la geometría oficial, verificando que el build siga sin scripts nuevos y el cruce CSP siga en 2 ↔ 2.
+
+### P-55 — `logo.svg` con recuadro oscuro opcional para el panel de Google
+
+- **Estado:** ⚪ POR DECIDIR (alta del 09/08/2026, Sesión 13). **Es una línea de código; lo que falta es la decisión.**
+- **Criticidad:** baja.
+- **Bloquea a:** nada.
+- **Owner:** **Francisco** (decide), Claude (aplica).
+- **Detalle:** `web/public/logo.svg` es el pórtico limpio, sin fondo, y es el archivo que declara el JSON-LD en el campo `logo` de `InsuranceAgency`. Google puede levantarlo para el panel de conocimiento, donde el fondo suele ser **blanco**: el dorado `#c9a84c` sobre blanco da un contraste flojo (~2:1) y el pórtico se ve deslavado. La alternativa es agregarle el mismo `<rect width="100" height="100" rx="22" fill="#08080d"/>` que ya usa el favicon. **Contra:** deja de ser un logo "limpio" y el recuadro aparece en cualquier lugar que lo consuma, no solo en Google.
+- **Próximo paso:** Francisco decide entre las dos opciones. Si elige el recuadro, es agregar una línea y rebuild.
+
+### P-56 — Aprobar o ajustar misión, visión y valores del Manual de Marca v3.0
+
+- **Estado:** ⚪ POR DECIDIR (alta del 09/08/2026, Sesión 13). El Manual v3.0 se entregó con esos tres bloques en estado **PROPUESTA**, explícitamente pendientes del veredicto de Francisco.
+- **Criticidad:** media. Es la capa de la que cuelga todo el copy futuro: guiones de reels, bio, textos de producto. Aprobar tarde significa reescribir después.
+- **Bloquea a:** el copy de las piezas nuevas (F4 de **P-54**, papelería de **P-52**) si se quiere que hablen con una voz ya definida.
+- **Owner:** **Francisco**, solo él. Misión, visión y valores no los redacta un auditor: los aprueba el dueño de la marca.
+- **Detalle:** el Manual de Marca v3.0 **vive fuera del repo** (lo entregó el auditor). Los tres bloques están marcados como propuesta, no como hecho consumado, justamente para que Francisco los ajuste con sus palabras antes de que se conviertan en la fuente de la que copian todos los textos.
+- **Próximo paso:** Francisco da el veredicto: aprobar tal cual, ajustar redacción o reescribir. Una vez cerrado, el manual pasa de propuesta a vigente y se cita como fuente única de voz.
 
 ---
 ## 9. Decisiones cerradas (referencia rápida)
