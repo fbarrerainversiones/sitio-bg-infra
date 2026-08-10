@@ -577,9 +577,15 @@ Cuando un item se cierra, se mueve a la sección **Resueltos** al final con la f
 
 ### P-52 — Producción final del logo P3 "Arquitectónica" (trazados, favicon, aplicación)
 
-- **Estado:** 🟡 EN CURSO (alta del 09/08/2026, Sesión 13). La **elección** ya está hecha y es firme: **D-29**. Lo que queda es la producción.
-- **Criticidad:** media (identidad de marca; el sitio ya está público con el logo tipográfico provisional de **D-23**, que sigue funcionando).
-- **Bloquea a:** nada del sitio en vivo. Bloquea el cierre de **P-30** (logo vectorial), **P-31** (variantes) y **P-32** (favicon en múltiples tamaños), que dependen todos de esta pieza.
+- **Estado:** 🟡 EN CURSO — **fase 1 COMPLETADA el 09/08/2026** (favicon + integración en el sitio). La **elección** ya era firme (**D-29**); ahora el símbolo está produciendo en el sitio real. **Lo único que queda es la papelería y los mockups finales.**
+- **Fase 1, entregada (commits `d38da29`, `5f9e65d`, `3d84f01`):**
+  - `web/public/favicon.svg` — cuadrado redondeado `#08080d` con el pórtico dorado. **Reemplaza el logo por defecto de Astro**, que se venía sirviendo desde mayo y que, con el sitio ya público, era lo que aparecía en la pestaña de cualquier visitante.
+  - `web/public/logo.svg` — pórtico limpio, geometría idéntica a la fuente. **Cierra el fantasma del JSON-LD:** el campo `logo` de `InsuranceAgency` declaraba `https://barreraglobal.com/logo.svg` sobre un archivo que no existía, en las 12 páginas.
+  - `web/public/apple-touch-icon.png` (180×180, a sangre sobre `#08080d`), `web/public/favicon-32.png` (fallback) y `web/public/favicon.ico` regenerado — el de Astro **no era un ICO**, era un PNG con extensión `.ico`, y los navegadores lo piden solos aunque no esté enlazado.
+  - `web/src/components/Portico.astro` — el símbolo como componente único, usado por el **header** (a la izquierda del wordmark, que sigue siendo texto HTML) y por el **footer**. 24 instancias verificadas sobre el build, dos por página.
+  - Simplificaciones del símbolo para tamaño pequeño, verificadas rasterizando y mirando el resultado: se colapsan arquitrabe y segunda línea de basamento (a 16 px quedaban a menos de 1 px de su vecina), el trazo sube de 1.4 a 5.4 y el frontón va como triángulo cerrado. El pórtico **completo** de 9 trazos se conserva en `logo.svg`, que se usa a tamaño grande.
+- **Criticidad:** media (identidad de marca; el wordmark del sitio sigue siendo el tipográfico de **D-23**, que sigue funcionando).
+- **Bloquea a:** nada del sitio en vivo. Bloquea el cierre de **P-30** (logo vectorial) y **P-31** (variantes). **P-32** (favicon en múltiples tamaños) queda **cubierto de hecho** por la fase 1 — falta solo cerrarlo formalmente.
 - **Owner:** Claude (produce) + Francisco (aprueba cada entrega).
 - **Detalle:** Francisco eligió la propuesta **P3 "Arquitectónica"** (el pórtico) entre las tres presentadas el 09/08. La fase 2 de producción incluye: **convertir el texto a trazados** para que el SVG no dependa de que la fuente esté instalada, generar el **favicon** en los tamaños reales de uso, y preparar la **aplicación** de la marca (variante horizontal, cuadrada, monograma, versiones sobre fondo claro y oscuro).
 - **Dónde está la galería (ruta nueva, 09/08/2026):** `docs/marca/brand-propuestas/` — las 6 piezas SVG (3 propuestas × cuadrada y horizontal), el `index.html` de evaluación y las 7 tipografías `.woff2` que usa esa página. **Galería archivada post-elección D-29; para la producción final usar `docs/marca/brand-propuestas/` como referencia; corregir Quito→Ambato y el CTA del mockup en los entregables finales.** Vivía en `web/public/brand-propuestas/`, y todo lo que está en `web/public/` lo copia Astro a `dist/` y viaja dentro de la imagen: con el sitio ya público habría quedado alcanzable en `barreraglobal.com/brand-propuestas/` al primer rebuild. Se movió con `git mv` a `docs/`, que no entra al build. **Regla general que deja este ítem: material interno de marca NO se guarda en `web/public/`.**
@@ -590,7 +596,7 @@ Cuando un item se cierra, se mueve a la sección **Resueltos** al final con la f
   | Ciudad en la tarjeta | "Quito, Ecuador" | **"Ambato, Ecuador"** — Francisco opera desde Ambato, Tungurahua (es lo que declaran el JSON-LD y `/privacidad`) |
   | CTA de la tarjeta | "Agenda tu asesoría" | **el CTA vigente del manual v2.0** — "Agenda tu asesoría" es el copy viejo |
 
-- **Próximo paso:** producir la fase 2 partiendo del SVG de P3, corrigiendo las dos cosas de la tabla antes de generar nada derivado. Un error en el mockup que se propaga a favicon, variantes y aplicaciones se multiplica y después hay que corregirlo en diez lugares.
+- **Próximo paso (fase 2, lo único abierto):** **papelería y mockups finales** — tarjeta, firma de correo, plantillas de redes. Los dos fixes de la tabla se aplican **ahí**: «Quito» → **Ambato** y el CTA viejo → el del manual v2.0. Ninguno de los dos textos entró a los assets de la fase 1, porque esta entrega es **solo símbolo**: no lleva una sola palabra nueva. Falta además la conversión de **texto a trazados**, que aplica a las piezas con wordmark de la papelería, no al pórtico (el símbolo es pura geometría, no tiene texto).
 
 ### P-53 — Cambiar `basicauth` por `basic_auth` en el Caddyfile (mantenimiento)
 
