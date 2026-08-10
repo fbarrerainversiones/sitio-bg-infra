@@ -155,8 +155,14 @@ const websiteSchema = {
     <!-- Theme color (barra navegador mobile) -->
     <meta name="theme-color" content="#08080d" />
 
-    <!-- Icons (favicon temporal de Astro hasta tener el real) -->
+    <!-- Iconos — portico P3 "Arquitectonica" (decision D-29).
+         El SVG es el principal: escala a cualquier densidad sin pixelarse.
+         El PNG de 32 es el fallback para navegadores que no toman SVG.
+         apple-touch-icon va a sangre sobre #08080d porque iOS aplica su
+         propia mascara de esquinas sobre la pieza que reciba. -->
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
 
     <!-- Performance hints -->
     <meta name="generator" content={Astro.generator} />
