@@ -452,6 +452,27 @@ a.btn-outline:hover {
    cadena de build, presente o futura. Verificado sobre el CSS emitido.
    ============================================================ */
 
+/* VIEWPORTS BAJOS — el visor deja de ser pegajoso.
+   No es una animacion, es layout: por eso vive fuera de la guardia de
+   movimiento. Dos casos reales, los dos con un telefono en horizontal:
+     - angosto (<768px): el header sticky (~77px) mas la banda del visor
+       (~176px) se comen la mitad del area de lectura.
+     - ancho (>=768px, p.ej. 932x430): entra por la rama desktop, donde la
+       columna pegajosa mide calc(100vh - 9rem) = 286px y el simbolo es
+       CUADRADO de hasta 320px: desborda.
+   Soltar el visor arregla los dos de una: el simbolo se va con el scroll y
+   el texto se lee entero. `height: auto` es lo que anula el alto fijo de
+   la rama desktop.
+   Esta regla vive FUERA de toda @layer, igual que el resto de global.css,
+   asi que le gana a las utilidades de Tailwind sin pelear especificidad
+   (el mismo mecanismo documentado en R-43, esta vez a favor). */
+@media (max-height: 35rem) {
+  .pc-visor {
+    position: static;
+    height: auto;
+  }
+}
+
 @media (prefers-reduced-motion: no-preference) {
   @supports selector(:has(*)) {
 
