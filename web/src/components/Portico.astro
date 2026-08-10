@@ -1,0 +1,50 @@
+---
+/**
+ * Portico P3 "Arquitectonica" — el simbolo de la marca (decision D-29).
+ *
+ * Misma geometria que `web/public/favicon.svg`, sin el cuadrado de fondo:
+ * aca el fondo ya es oscuro. Un solo componente para header y footer, para
+ * que el simbolo no se bifurque en dos copias que despues se desincronizan.
+ *
+ * El color va HARDCODEADO a #c9a84c, no con una utilidad `text-*`: este
+ * simbolo vive dentro de un <a>, y las reglas base de enlaces de
+ * `global.css` estan FUERA de toda @layer (ver R-43). Fijar el color en el
+ * atributo es la mitigacion ya establecida del proyecto y no depende de
+ * quien gane la cascada.
+ *
+ * El tamano se controla desde afuera con las utilidades de ancho y alto de
+ * Tailwind; los atributos width/height son solo el fallback si no llega
+ * ninguna clase. (Ojo al redactar: la secuencia de asterisco y barra cierra
+ * este bloque de comentario y rompe el build.)
+ *
+ * Decorativo: el <a> que lo contiene ya lleva su propio aria-label, asi que
+ * va aria-hidden para no duplicar el nombre accesible.
+ */
+interface Props {
+  class?: string;
+}
+
+const { class: className = "" } = Astro.props;
+---
+
+<svg
+  xmlns="http://www.w3.org/2000/svg"
+  viewBox="0 0 100 100"
+  width="32"
+  height="32"
+  class={`shrink-0 ${className}`}
+  fill="none"
+  stroke="#c9a84c"
+  stroke-width="5.4"
+  stroke-linecap="butt"
+  stroke-linejoin="miter"
+  aria-hidden="true"
+  focusable="false"
+>
+  <path d="M15.4 39.7 L50 16 L84.6 39.7 Z" />
+  <line x1="28.4" y1="46.2" x2="28.4" y2="80.8" />
+  <line x1="42.4" y1="46.2" x2="42.4" y2="80.8" />
+  <line x1="57.6" y1="46.2" x2="57.6" y2="80.8" />
+  <line x1="71.6" y1="46.2" x2="71.6" y2="80.8" />
+  <line x1="15.4" y1="84" x2="84.6" y2="84" />
+</svg>

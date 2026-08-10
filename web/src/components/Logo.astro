@@ -1,4 +1,17 @@
 ---
+import Portico from "./Portico.astro";
+
+/**
+ * Lockup de marca: portico P3 (D-29) + wordmark tipografico.
+ *
+ * El wordmark sigue siendo TEXTO HTML, no imagen: se selecciona, se lee con
+ * lector de pantalla y escala con la tipografia. El portico entra como SVG
+ * inline a su izquierda.
+ *
+ * En movil el icono baja a 24 px y en desktop sube a 32. Lo que se achica es
+ * el icono, nunca el layout: el header en pantallas de 320 px lleva logo +
+ * boton de menu y el simbolo no puede empujar al boton fuera de la pantalla.
+ */
 interface Props {
   href?: string;
   showDescriptor?: boolean;
@@ -16,21 +29,32 @@ const sizeClasses = {
   md: "text-2xl md:text-3xl",
   lg: "text-3xl md:text-4xl",
 };
+
+// El icono acompana al wordmark: mismo salto de tamano en el breakpoint.
+const iconClasses = {
+  sm: "w-5 h-5 md:w-6 md:h-6",
+  md: "w-6 h-6 md:w-8 md:h-8",
+  lg: "w-7 h-7 md:w-10 md:h-10",
+};
 ---
 
 <a
   href={href}
   aria-label="Barrera Global - Arquitectura Financiera - Inicio"
-  class="inline-flex flex-col items-start group no-underline"
+  class="inline-flex items-center gap-2.5 md:gap-3 group no-underline"
 >
-  <span
-    class={`font-display font-semibold leading-tight tracking-tight text-tx transition-colors group-hover:text-gd ${sizeClasses[size]}`}
-  >
-    Barrera <span class="text-gd">Global</span>
-  </span>
-  {showDescriptor && (
-    <span class="font-mono text-[10px] md:text-xs uppercase tracking-widest text-tx-muted mt-1">
-      Arquitectura Financiera
+  <Portico class={iconClasses[size]} />
+
+  <span class="inline-flex flex-col items-start">
+    <span
+      class={`font-display font-semibold leading-tight tracking-tight text-tx transition-colors group-hover:text-gd ${sizeClasses[size]}`}
+    >
+      Barrera <span class="text-gd">Global</span>
     </span>
-  )}
+    {showDescriptor && (
+      <span class="font-mono text-[10px] md:text-xs uppercase tracking-widest text-tx-muted mt-1">
+        Arquitectura Financiera
+      </span>
+    )}
+  </span>
 </a>

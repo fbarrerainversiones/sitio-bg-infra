@@ -1,4 +1,6 @@
 ---
+import Portico from "./Portico.astro";
+
 const CURRENT_YEAR = new Date().getFullYear();
 
 const WHATSAPP_AURORA = "593998027819";
@@ -23,12 +25,23 @@ const REDES = [
     <div class="grid grid-cols-1 md:grid-cols-4 gap-12 md:gap-8">
 
       <div>
-        <p class="font-display text-2xl text-tx font-semibold mb-1">
-          Barrera <span class="text-gd">Global</span>
-        </p>
-        <p class="font-mono text-[10px] uppercase tracking-widest text-tx-muted mb-4">
-          Arquitectura Financiera
-        </p>
+        {/* Mismo lockup que el header: portico + wordmark. El icono va en un
+            flex junto al bloque de texto para que el descriptor siga alineado
+            con el wordmark; el mb-4 se mueve al contenedor y la separacion con
+            el parrafo de abajo queda igual que antes.
+            Se comenta con {} y no con <!-- -->: los comentarios HTML SI llegan
+            al build y esta nota es interna. */}
+        <div class="flex items-center gap-2.5 mb-4">
+          <Portico class="w-8 h-8" />
+          <div>
+            <p class="font-display text-2xl text-tx font-semibold mb-1">
+              Barrera <span class="text-gd">Global</span>
+            </p>
+            <p class="font-mono text-[10px] uppercase tracking-widest text-tx-muted">
+              Arquitectura Financiera
+            </p>
+          </div>
+        </div>
         <p class="font-body text-sm text-tx-muted leading-relaxed">
           Asesoría especializada en seguros de vida, salud e inversión en Ecuador.
           Patrimonio que crece. Capital protegido.
