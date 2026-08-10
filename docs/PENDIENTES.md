@@ -2,7 +2,7 @@
 
 > **Lista viva única.** Todos los cabos sueltos del proyecto en un solo archivo. Se actualiza con cada sesión que cierre un item o detecte uno nuevo.
 
-**Última actualización:** 9 de agosto de 2026, noche — **EL SITIO ES PÚBLICO Y YA TIENE SÍMBOLO PROPIO**. La producción del logo P3 (fase 1 de **P-52**) quedó **desplegada y verificada en producción**. Altas de la noche: **P-54** (experiencia visual del home, 4 fases), **P-55** (recuadro opcional del `logo.svg`) y **P-56** (aprobar misión/visión/valores del Manual v3.0). Queda registrada la lección de caché: el Purge de Cloudflare va **después** del deploy, nunca antes. Antes, esa misma tarde (Sesión 13). Se ejecutó el switch: `barreraglobal.com` y `www` sirven el sitio real. Altas de esta tanda: **P-52** (producción del logo P3, decisión **D-29**) y **P-53** (renombrar `basicauth` → `basic_auth`, con método inode-safe). **P-51 queda ABIERTO**: la casilla `privacidad@` está configurada pero sin prueba de recepción, y Francisco decidió lanzar igual — configurar sin probar sigue sin contar. Antes, esa misma mañana: **P-39 CERRADO como R-18** (el abogado aprobó las tres páginas legales y el recuadro "DISCLAIMER OPERATIVO" de `/privacidad` se retiró, commit `6772a51`) y **P-42 CERRADO como R-17**: nginx ya sirve la 404 premium — `error_page 404 /404.html;` en `infra/nginx.conf`, commit `8c7c18a`, aplicado con rebuild de la imagen y verificado en el navegador sobre staging. El 5 de agosto: merge de `publicacion-v1` a `main` y **staging completo y navegable**. P-39 ampliado con la **inconsistencia de redacción del "trámite"** entre páginas de presentación y páginas legales. Reconciliación anti-fantasma: **P-42** afirmaba que `404.astro` no existía y sí existe desde Sesión 10; **P-06** mandaba editar un texto que ya no está en Footer ni en index; **P-23** citaba 551 KB de foto cuando P-44 la dejó en 54,8 KB. El 04/08: **política de privacidad v3** con el dictamen verbal del abogado, **P-48 CERRADO** (R-16), P-39 pasa a esperar el visto bueno **escrito**, alta de **P-51**. El 03/08: P-43 cerrado como R-15, P-37 entregado v1, P-36 parcial, alta de P-48, P-49 y P-50)
+**Última actualización:** 10 de agosto de 2026, mediodía — **DÍA 1 DEL SITIO PÚBLICO: SE CERRARON LOS TRES ÍTEMS ABIERTOS DEL LANZAMIENTO**. **P-51 → R-19**: la casilla `privacidad@` quedó **PROBADA** (Cloudflare 1 recibido / 1 entregado; el correo llegó al Gmail de Francisco a las 11:53, en Spam, se aplicó «No es spam») — era el **último gate operativo** y ya no existe. **P-55 → R-20**: Francisco decidió **SÍ** al recuadro oscuro del `logo.svg` y quedó ejecutado (commit `fd8316b`), pendiente solo del deploy. **P-56 → R-21**: misión, visión y valores **aprobados**; el Manual de Marca pasó de v3.0 propuesta a **v3.1 FINAL** y se entregó al manager de marketing, con la **capa comercial del símbolo** (basamento = método, columnas = vida y salud, frontón = inversión) como narrativa oficial, anotada en **P-54**. Además, **P-54 F1 quedó CONSTRUIDA** en `main` (7 commits, `be196c5..69f83bd`) pero **NO desplegada**: rige **veda de infraestructura compartida** por la ventana de promoción a producción de Aurora. El deploy de F1 + P-55 sale junto, post-veda. Antes, el 9 de agosto por la noche — **EL SITIO ES PÚBLICO Y YA TIENE SÍMBOLO PROPIO**. La producción del logo P3 (fase 1 de **P-52**) quedó **desplegada y verificada en producción**. Altas de la noche: **P-54** (experiencia visual del home, 4 fases), **P-55** (recuadro opcional del `logo.svg`) y **P-56** (aprobar misión/visión/valores del Manual v3.0). Queda registrada la lección de caché: el Purge de Cloudflare va **después** del deploy, nunca antes. Antes, esa misma tarde (Sesión 13). Se ejecutó el switch: `barreraglobal.com` y `www` sirven el sitio real. Altas de esta tanda: **P-52** (producción del logo P3, decisión **D-29**) y **P-53** (renombrar `basicauth` → `basic_auth`, con método inode-safe). **P-51 queda ABIERTO**: la casilla `privacidad@` está configurada pero sin prueba de recepción, y Francisco decidió lanzar igual — configurar sin probar sigue sin contar. Antes, esa misma mañana: **P-39 CERRADO como R-18** (el abogado aprobó las tres páginas legales y el recuadro "DISCLAIMER OPERATIVO" de `/privacidad` se retiró, commit `6772a51`) y **P-42 CERRADO como R-17**: nginx ya sirve la 404 premium — `error_page 404 /404.html;` en `infra/nginx.conf`, commit `8c7c18a`, aplicado con rebuild de la imagen y verificado en el navegador sobre staging. El 5 de agosto: merge de `publicacion-v1` a `main` y **staging completo y navegable**. P-39 ampliado con la **inconsistencia de redacción del "trámite"** entre páginas de presentación y páginas legales. Reconciliación anti-fantasma: **P-42** afirmaba que `404.astro` no existía y sí existe desde Sesión 10; **P-06** mandaba editar un texto que ya no está en Footer ni en index; **P-23** citaba 551 KB de foto cuando P-44 la dejó en 54,8 KB. El 04/08: **política de privacidad v3** con el dictamen verbal del abogado, **P-48 CERRADO** (R-16), P-39 pasa a esperar el visto bueno **escrito**, alta de **P-51**. El 03/08: P-43 cerrado como R-15, P-37 entregado v1, P-36 parcial, alta de P-48, P-49 y P-50)
 **Documento maestro de referencia:** [`PLAN-MAESTRO-v2.md`](PLAN-MAESTRO-v2.md)
 
 ---
@@ -567,13 +567,15 @@ Cuando un item se cierra, se mueve a la sección **Resueltos** al final con la f
 
 ### P-51 — `privacidad@barreraglobal.com`: configurado, falta PROBAR recepción
 
-- **Estado:** 🟡 **EN CURSO — ABIERTO** (alta del 04/08/2026). Al 09/08/2026 la casilla está **CONFIGURADA**: la regla de Cloudflare Email Routing existe, está activa y tiene el destino cargado. Lo que falta es la **prueba de recepción**: al momento del switch, Email Routing seguía en estado **«Sincronizando»** y ningún correo enviado desde fuera se había confirmado como recibido. **Criterio de cierre intacto: CONFIGURAR SIN PROBAR NO CUENTA.** Se cierra cuando un correo enviado desde fuera llegue efectivamente a la bandeja de Francisco.
+- **Estado:** ✅ **CERRADO el 10/08/2026** — ver **R-19** en Resueltos. **El correo de prueba llegó.** Cloudflare Email Routing reporta **1 recibido / 1 entregado** y el mensaje aterrizó en el Gmail de Francisco a las **11:53**, en la carpeta **Spam**; se le aplicó **«No es spam»**. Evidencia: captura de Francisco. El criterio de cierre se cumplió tal como estaba escrito —no se cerró por estar configurado, se cerró por estar **probado**—, y con eso muere el último gate operativo del lanzamiento.
+- **Estado anterior (para que no se relea mal el histórico):** 🟡 EN CURSO — ABIERTO desde el 04/08/2026. Al 09/08/2026 la casilla estaba **CONFIGURADA** pero sin prueba: Email Routing seguía en **«Sincronizando»**. **Criterio de cierre de entonces, cumplido hoy: CONFIGURAR SIN PROBAR NO CUENTA.**
 - **Decisión de Francisco registrada (09/08/2026):** **se lanzó el sitio con este ítem en curso.** El switch a público se ejecutó sin esperar la prueba de recepción, con la regla ya creada y sincronizando. Es una decisión consciente, no un descuido, y queda escrita acá para que nadie la reinterprete después: el ítem **NO se cierra** hasta que haya un correo probado.
 - **Criticidad:** **alta.** Ya no es pre-requisito del switch —el switch ya ocurrió— pero el sitio está público prometiendo por escrito un plazo de respuesta de 15 días sobre esa dirección. Mientras no esté probada, el riesgo es real y corre desde hoy.
 - **Bloquea a:** nada técnico. Es exposición legal viva mientras siga sin probarse.
 - **Owner:** **Francisco** (es tarea manual en Cloudflare; no se puede hacer desde este repo).
 - **Detalle:** la política de privacidad **v3** publica `privacidad@barreraglobal.com` como canal para ejercer derechos LOPDP, y lo hace **cuatro veces** (§1 contacto del responsable, §8 detalle de transferencias, §10 ejercicio de derechos con plazo de 15 días, §13 reclamos). **Esa casilla todavía no existe.** Publicar un canal de derechos que no recibe correo es peor que no publicarlo: se promete por escrito un plazo de respuesta de 15 días sobre una dirección que rebota. Hasta ahora el sitio usaba `fbarrera.inversiones@gmail.com` (D-20 / DM-05, ver **P-04**), que sigue siendo el contacto en `/terminos`, `/cookies` y el footer — con la v3 el sitio queda con **dos** direcciones distintas según la página.
-- **Próximo paso:** (1) ~~configurar Cloudflare Email Routing~~ **hecho el 09/08/2026**; (2) esperar a que Email Routing salga de «Sincronizando» y **enviar un correo de prueba desde fuera confirmando que llega** — es lo único que queda y es lo que cierra el ítem; (3) aprovechar el mismo paso para decidir si `/terminos`, `/cookies` y el footer se unifican a una dirección del dominio propio y cerrar **P-04**. **Es el pendiente número uno del proyecto hoy.**
+- **Próximo paso:** (1) ~~configurar Cloudflare Email Routing~~ **hecho el 09/08/2026**; (2) ~~enviar un correo de prueba desde fuera confirmando que llega~~ **hecho el 10/08/2026 a las 11:53 — cierra el ítem**; (3) **lo único que sobrevive de este ítem:** decidir si `/terminos`, `/cookies` y el footer se unifican a una dirección del dominio propio, que es **P-04** y sigue abierto por su cuenta.
+- **Cabo operativo que deja abierto el cierre:** el correo aterrizó en **Spam**. Se aplicó «No es spam», que educa a esa bandeja pero no arregla la reputación del dominio. Si `privacidad@` es el canal de derechos con plazo de 15 días, conviene revisar SPF/DKIM/DMARC del dominio antes de que un ejercicio de derechos real se pierda en una carpeta que nadie mira. No bloquea nada hoy; queda anotado acá para que no se olvide.
 
 ### P-52 — Producción final del logo P3 "Arquitectónica" (trazados, favicon, aplicación)
 
@@ -615,6 +617,15 @@ Cuando un item se cierra, se mueve a la sección **Resueltos** al final con la f
 - **Bloquea a:** nada. Ninguna fase bloquea a la siguiente salvo por los insumos que cada una necesita.
 - **Owner:** Claude (implementa) + Francisco (aprueba y entrega los insumos de F2 y F4).
 - **Principio que ordena las cuatro fases:** la geometría es **la oficial del repo** —`web/src/components/Portico.astro` y `web/public/logo.svg`—, no una versión dibujada de nuevo para la animación. Si el símbolo cambia, cambia en un solo lugar.
+- **Capa comercial del símbolo — narrativa OFICIAL de marca (Manual v3.1, 10/08/2026, cierre de P-56):** las partes del pórtico ya no son solo arquitectura, tienen lectura de negocio y esta es la versión sellada:
+
+  | Parte del pórtico | Qué significa comercialmente |
+  |---|---|
+  | **Basamento** | el **método** (el diagnóstico, lo que sostiene todo lo demás) |
+  | **Columnas** | **vida y salud** (las coberturas que sostienen) |
+  | **Frontón** | **inversión** (el patrimonio que corona) |
+
+  Esto es lo que **cualquier pieza futura debe respetar**: reels, papelería, F4, y cualquier reescritura del copy de la sección `#metodo`. Ojo con el desfase que ya existe: la sección F1 construida hoy usa la lectura **arquitectónica** («Luego, el respaldo» sobre las columnas, «Encima, la protección» sobre dintel y arquitrabe), que **no contradice** esta tabla pero tampoco la enuncia. Alinear ambas es decisión de copy de Francisco, no deuda técnica.
 
 | Fase | Qué | Estado / bloqueo |
 |---|---|---|
@@ -637,21 +648,21 @@ Cuando un item se cierra, se mueve a la sección **Resueltos** al final con la f
 
 ### P-55 — `logo.svg` con recuadro oscuro opcional para el panel de Google
 
-- **Estado:** ⚪ POR DECIDIR (alta del 09/08/2026, Sesión 13). **Es una línea de código; lo que falta es la decisión.**
+- **Estado:** ✅ **CERRADO el 10/08/2026** (commit `fd8316b`) — ver **R-20** en Resueltos. Francisco decidió **SÍ**: el recuadro va. Ejecutado el mismo día. **Queda pendiente solo el deploy**, que viaja junto con P-54 F1 cuando se levante la veda de Aurora (R-44: `logo.svg` se hornea en la imagen, el pull no alcanza).
 - **Criticidad:** baja.
 - **Bloquea a:** nada.
-- **Owner:** **Francisco** (decide), Claude (aplica).
+- **Owner:** ~~**Francisco** (decide)~~ decidido, Claude (aplicó).
 - **Detalle:** `web/public/logo.svg` es el pórtico limpio, sin fondo, y es el archivo que declara el JSON-LD en el campo `logo` de `InsuranceAgency`. Google puede levantarlo para el panel de conocimiento, donde el fondo suele ser **blanco**: el dorado `#c9a84c` sobre blanco da un contraste flojo (~2:1) y el pórtico se ve deslavado. La alternativa es agregarle el mismo `<rect width="100" height="100" rx="22" fill="#08080d"/>` que ya usa el favicon. **Contra:** deja de ser un logo "limpio" y el recuadro aparece en cualquier lugar que lo consuma, no solo en Google.
-- **Próximo paso:** Francisco decide entre las dos opciones. Si elige el recuadro, es agregar una línea y rebuild.
+- **Próximo paso:** ~~Francisco decide~~ **decidido y aplicado.** Lo único que resta es el **rebuild** en el deploy post-veda. `web/public/favicon.svg` no se tocó: ya traía su propio rect desde P-52.
 
 ### P-56 — Aprobar o ajustar misión, visión y valores del Manual de Marca v3.0
 
-- **Estado:** ⚪ POR DECIDIR (alta del 09/08/2026, Sesión 13). El Manual v3.0 se entregó con esos tres bloques en estado **PROPUESTA**, explícitamente pendientes del veredicto de Francisco.
+- **Estado:** ✅ **CERRADO el 10/08/2026** — ver **R-21** en Resueltos. **Francisco aprobó misión, visión y valores.** Con eso el Manual pasó de **v3.0 (propuesta)** a **v3.1 FINAL** y se entregó al manager de marketing. Los tres bloques dejan de ser propuesta y pasan a ser **fuente única de voz** para todo el copy que venga.
 - **Criticidad:** media. Es la capa de la que cuelga todo el copy futuro: guiones de reels, bio, textos de producto. Aprobar tarde significa reescribir después.
 - **Bloquea a:** el copy de las piezas nuevas (F4 de **P-54**, papelería de **P-52**) si se quiere que hablen con una voz ya definida.
 - **Owner:** **Francisco**, solo él. Misión, visión y valores no los redacta un auditor: los aprueba el dueño de la marca.
 - **Detalle:** el Manual de Marca v3.0 **vive fuera del repo** (lo entregó el auditor). Los tres bloques están marcados como propuesta, no como hecho consumado, justamente para que Francisco los ajuste con sus palabras antes de que se conviertan en la fuente de la que copian todos los textos.
-- **Próximo paso:** Francisco da el veredicto: aprobar tal cual, ajustar redacción o reescribir. Una vez cerrado, el manual pasa de propuesta a vigente y se cita como fuente única de voz.
+- **Próximo paso:** ~~Francisco da el veredicto~~ **dado el 10/08/2026: aprobados.** El manual v3.1 es la fuente vigente y se cita como tal. Lo que sigue no es de este ítem: es el **handoff formal al manager de marketing** y el reloj de 48 h que arranca con él.
 
 ---
 ## 9. Decisiones cerradas (referencia rápida)
@@ -837,6 +848,37 @@ Lista de items que fueron cerrados, con fecha. Sirve de memoria del proyecto.
 - **Cabo administrativo, no bloqueante:** el **respaldo escrito de una línea** está solicitado por WhatsApp y todavía no llegó al momento de cerrar. No se retiene el lanzamiento por él: por criterio del propio abogado, el dictamen formal solo se requiere si aparece una auditoría LOPDP. Cuando llegue, archivarlo junto a `docs/legal/`.
 - **Consecuencia para el lanzamiento:** con P-39 y P-42 cerrados, **P-51** (casilla `privacidad@barreraglobal.com` configurada **y probada**) quedó como único gate abierto. **Nota posterior del mismo día:** el switch a público se ejecutó esa misma tarde **con P-51 todavía abierto** —la casilla configurada pero sin prueba de recepción—, por decisión explícita de Francisco. Ver P-51.
 - **Commits relacionados:** `6772a51`.
+
+### R-19 — La casilla `privacidad@` probada de verdad (cierre de P-51)
+
+- **Cerrado:** 10 de agosto de 2026
+- **Estado al cerrar:** 🟢 RESUELTO
+- **Resumen:** el ítem estuvo abierto desde el 04/08 y sobrevivió al switch a público del 09/08 porque su criterio de cierre nunca se aflojó: **configurar sin probar no cuenta**. El 10/08 se probó. Cloudflare Email Routing reporta **1 recibido / 1 entregado**, y el correo enviado desde fuera llegó al Gmail de Francisco a las **11:53**. **Evidencia:** captura de pantalla de Francisco.
+- **Detalle que importa:** aterrizó en la carpeta **Spam**. Se le aplicó **«No es spam»**, que corrige el comportamiento de esa bandeja pero no la reputación del dominio.
+- **Por qué se cierra igual:** lo que el ítem exigía era demostrar que el canal **recibe**. Recibe: el correo entró al buzón, no rebotó. La carpeta de destino es un problema distinto, y queda anotado como cabo operativo en P-51 (revisar SPF/DKIM/DMARC antes de que un ejercicio de derechos real se pierda ahí).
+- **Consecuencia:** era el **último gate operativo del lanzamiento**. Con R-19, el sitio público ya no tiene ningún ítem del lanzamiento abierto: la política de privacidad publica cuatro veces una dirección que ahora está probada, con su plazo de 15 días respaldado por un canal que funciona.
+- **Commits relacionados:** ninguno — el cierre fue una acción en Cloudflare y en el correo, fuera del repo.
+
+### R-20 — Fondo oscuro del `logo.svg` para paneles claros (cierre de P-55)
+
+- **Cerrado:** 10 de agosto de 2026
+- **Estado al cerrar:** 🟢 RESUELTO
+- **Decisión de Francisco:** **SÍ**, va el recuadro. El ítem estaba en ⚪ POR DECIDIR desde el 09/08 y no era trabajo, era una decisión: se tomó y se ejecutó el mismo día.
+- **Resumen:** `web/public/logo.svg` es el archivo que el JSON-LD declara en el campo `logo` de `InsuranceAgency`, o sea el que Google puede levantar para el panel de conocimiento, donde el fondo suele ser blanco. El dorado `#c9a84c` sobre blanco da ~2:1 de contraste. Se le agregó el mismo `<rect width="100" height="100" rx="22" fill="#08080d"/>` que ya usaba el favicon, asumiendo la contra que el propio ítem tenía registrada: deja de ser un logo «limpio» y el recuadro aparece en cualquier consumidor, no solo en Google.
+- **Lo que NO cambió:** la geometría. Los 9 trazos conservan coordenadas, `stroke-width` 1.4, `linecap` square y `viewBox 0 0 100 100`. El rect es fondo, no estructura, así que **no** forma parte de lo que copia `PorticoConstruye.astro` (P-54 F1), que toma de ahí los 9 trazos y nada más. `web/public/favicon.svg` **no se tocó**: ya traía su propio rect desde P-52.
+- **Verificación:** build **12/12**; `public/logo.svg` idéntico a `dist/logo.svg`; 9 trazos intactos; el JSON-LD sigue apuntando a `https://barreraglobal.com/logo.svg`; cruce CSP **2 ↔ 2** sin huérfanos y **ningún hash cambiado**.
+- **Cabo abierto, no del ítem:** **no está en producción.** `logo.svg` viaja horneado en la imagen Docker, así que exige rebuild (R-44) y sale con el deploy de P-54 F1 cuando se levante la veda de Aurora.
+- **Commits relacionados:** `fd8316b`.
+
+### R-21 — Misión, visión y valores aprobados: el Manual pasa a v3.1 FINAL (cierre de P-56)
+
+- **Cerrado:** 10 de agosto de 2026
+- **Estado al cerrar:** 🟢 RESUELTO
+- **Resumen:** el Manual de Marca v3.0 se había entregado con misión, visión y valores explícitamente marcados como **PROPUESTA**, esperando el veredicto del dueño de la marca. Francisco los **aprobó** el 10/08. Con eso el manual pasó a **v3.1 FINAL** y se entregó al **manager de marketing**.
+- **Lo que sella el cierre:** los tres bloques dejan de ser propuesta y pasan a ser **fuente única de voz** para todo el copy que venga — guiones de reels, bio, papelería de P-52, F4 de P-54. Ya no hay excusa de «esperemos a que esté la voz definida»: está.
+- **Entrega adicional del mismo manual:** la **capa comercial del símbolo** (basamento = método, columnas = vida y salud, frontón = inversión) queda como narrativa oficial de marca. Anotada en **P-54** para que cualquier pieza futura la respete.
+- **Nota de alcance:** el manual **vive fuera del repo** (lo entregó el auditor). Lo que queda registrado acá es la decisión y su fecha, no el documento.
+- **Commits relacionados:** ninguno en código — el cierre es una aprobación, y su rastro documental es esta entrada más la bitácora de Sesión 14.
 
 ---
 **Fin del documento PENDIENTES.md.**
