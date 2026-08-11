@@ -3,6 +3,8 @@ import Layout from "../layouts/Layout.astro";
 import Header from "../components/Header.astro";
 import Footer from "../components/Footer.astro";
 import PorticoConstruye from "../components/PorticoConstruye.astro";
+import { Picture } from "astro:assets";
+import fotoFrancisco from "../assets/francisco-barrera.jpg";
 
 const WHATSAPP_AURORA = "593998027819";
 const WHATSAPP_MESSAGE = encodeURIComponent(
@@ -69,12 +71,31 @@ const DESCRIPTION = "Asesoría especializada en seguros de vida, salud e inversi
           <div class="md:col-span-5 hero-entrance-delay-2 hidden md:block">
             <div class="photo-glow">
               <div class="photo-frame">
-                <img
-                  src="/images/francisco-barrera.jpg"
+                {/* P-44 — AVIF/WebP + srcset via astro:assets. El fallback JPG
+                    lo emite el propio <Picture>.
+
+                    `pictureAttributes` con `block` NO es decorativo: el <picture>
+                    que se interpone es `display: inline` por defecto, y la regla
+                    `.photo-frame img { width: 100% }` de global.css mide contra
+                    su padre, que ahora es el <picture>. Sin `block`, ese padre
+                    no ocupa el ancho y la foto se encoge.
+
+                    SIN `fetchpriority="high"` a proposito: esta foto vive en un
+                    contenedor `hidden md:block`, o sea que en movil NO se pinta
+                    nunca. Marcarla de prioridad alta forzaria una descarga de
+                    prioridad alta de algo invisible, compitiendo con el LCP real
+                    del movil, que es justo el perfil que el objetivo de 1,8 s
+                    mide. Ver el reporte de sesion. */}
+                <Picture
+                  src={fotoFrancisco}
+                  formats={["avif", "webp"]}
+                  widths={[500, 1000]}
+                  sizes="500px"
                   alt="Francisco Barrera, Asesor Productor de Seguros"
-                  width="500"
-                  height="500"
+                  width={500}
+                  height={500}
                   loading="eager"
+                  pictureAttributes={{ class: "block" }}
                 />
               </div>
             </div>

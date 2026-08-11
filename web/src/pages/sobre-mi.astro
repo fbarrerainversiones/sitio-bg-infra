@@ -2,6 +2,8 @@
 import Layout from "../layouts/Layout.astro";
 import Header from "../components/Header.astro";
 import Footer from "../components/Footer.astro";
+import { Picture } from "astro:assets";
+import fotoFrancisco from "../assets/francisco-barrera.jpg";
 
 const WHATSAPP_AURORA = "593998027819";
 const WHATSAPP_MESSAGE = encodeURIComponent(
@@ -27,12 +29,29 @@ const DESCRIPTION = "Francisco Javier Barrera Bonilla. Ingeniero de sistemas y A
           <!-- Foto Francisco -->
           <div class="md:col-span-5 reveal">
             <div class="relative aspect-[4/5] overflow-hidden rounded-sm border border-gd-muted">
-              <img
-                src="/images/francisco-barrera.jpg"
+              {/* P-44 — AVIF/WebP + srcset via astro:assets.
+
+                  El <picture> hereda `w-full h-full` porque el <img> lleva
+                  `h-full`: sin eso mediria contra un padre inline de alto
+                  automatico y el recorte 4/5 se rompe.
+
+                  SIGUE EN eager + fetchpriority="high", NO en lazy: en esta
+                  pagina la foto es el primer elemento de la grilla, o sea que
+                  en movil (grid-cols-1) abre la pagina y es el elemento LCP.
+                  Ponerla en lazy es el antipatron que Lighthouse marca como
+                  "LCP image was lazily loaded". Ver el reporte de sesion. */}
+              <Picture
+                src={fotoFrancisco}
+                formats={["avif", "webp"]}
+                widths={[400, 720, 1000]}
+                sizes="(min-width: 768px) 440px, 100vw"
                 alt="Francisco Barrera, Asesor Productor de Seguros en Ambato, Ecuador"
+                width={1000}
+                height={1000}
                 class="w-full h-full object-cover"
                 loading="eager"
                 fetchpriority="high"
+                pictureAttributes={{ class: "block w-full h-full" }}
               />
               <div class="absolute inset-0 bg-gradient-to-t from-bg-elev-1/30 to-transparent"></div>
             </div>
