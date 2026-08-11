@@ -2,6 +2,7 @@
 import Layout from "./Layout.astro";
 import Header from "../components/Header.astro";
 import Footer from "../components/Footer.astro";
+import { Picture } from "astro:assets";
 
 /**
  * ProductLayout — plantilla reutilizable de pagina de producto (Fase 3).
@@ -29,6 +30,9 @@ interface Props {
   heroSubtitle: string; // subtitulo corto del hero
   whatsappMessage: string; // texto del mensaje de WhatsApp (atribucion)
   slug: string;         // slug del producto (referencia interna)
+  heroImage: ImageMetadata;  // import desde src/assets/productos
+  heroImageAlt: string;      // alt descriptivo es-EC de esa imagen
+  heroPosicion?: string;     // object-position, si el encuadre movil lo pide
 }
 
 const {
@@ -40,7 +44,66 @@ const {
   heroSubtitle,
   whatsappMessage,
   slug,
+  heroImage,
+  heroImageAlt,
+  heroPosicion,
 } = Astro.props;
+
+/**
+ * CABECERA VISUAL — una sola implementacion para las SEIS paginas de producto.
+ * Vive aca y no en cada pagina justamente para que no existan seis variantes
+ * que se desincronicen: si el tratamiento cambia, cambia una vez.
+ *
+ * La escalera de anchos se ADAPTA al ancho real de cada fuente, por dos
+ * motivos opuestos:
+ *   - Hacia arriba: Astro genera lo que se le pida, tambien por encima del
+ *     original, y pedirle 1920 a una imagen de 1024 devuelve un upscale
+ *     borroso que ademas pesa mas que la fuente. Por eso se filtra.
+ *   - Hacia abajo: si la fuente mide 1536 y la escalera se cortara en 1024,
+ *     un desktop ancho con `sizes="100vw"` recibiria el peldano de 1024 y lo
+ *     estiraria igual. Por eso el ultimo peldano es el ancho NATIVO de la
+ *     fuente, topeado en 1920, que es donde deja de valer la pena.
+ * Resultado real de las seis: 2752 -> [640,1024,1600,1920];
+ * 1536 -> [640,1024,1536]; 1376 -> [640,1024,1376]; 1024 -> [640,1024].
+ */
+const ESCALERA = [640, 1024, 1600, 1920];
+const techo = Math.min(heroImage.width, 1920);
+const anchos = [...new Set([...ESCALERA.filter((w) => w < techo), techo])];
+
+const SITE = "https://barreraglobal.com";
+
+/**
+ * Schema.org Service + BreadcrumbList.
+ * Van en el LAYOUT y no en la pagina de auto, que es lo que pedia el encargo,
+ * porque «coherente con las paginas hermanas» solo se cumple si las seis lo
+ * emiten igual: hoy ninguna lo tenia. Son bloques `application/ld+json`, o
+ * sea DATOS y no script ejecutable: la CSP no los evalua y no exigen hash.
+ */
+const serviceSchema = {
+  "@context": "https://schema.org",
+  "@type": "Service",
+  name: productName,
+  serviceType: eyebrow,
+  description: description,
+  url: canonical,
+  provider: { "@id": `${SITE}/#organization` },
+  areaServed: { "@type": "Country", name: "Ecuador" },
+  availableChannel: {
+    "@type": "ServiceChannel",
+    serviceUrl: canonical,
+    availableLanguage: { "@type": "Language", name: "Español" },
+  },
+};
+
+const breadcrumbSchema = {
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  itemListElement: [
+    { "@type": "ListItem", position: 1, name: "Inicio", item: SITE },
+    { "@type": "ListItem", position: 2, name: "Productos", item: `${SITE}/#productos` },
+    { "@type": "ListItem", position: 3, name: productName, item: canonical },
+  ],
+};
 
 const WHATSAPP_AURORA = "593998027819";
 const WHATSAPP_URL = `https://wa.me/${WHATSAPP_AURORA}?text=${encodeURIComponent(whatsappMessage)}`;
@@ -99,9 +162,47 @@ const FAQ = [
 
   <main>
 
-    <!-- HERO PRODUCTO -->
-    <section class="relative py-24 md:py-32 overflow-hidden">
-      <div class="max-w-5xl mx-auto px-6">
+    {/* HERO PRODUCTO — cabecera visual con la imagen del producto.
+        La imagen es TEXTURA: opacidad 0.65 y brightness(0.7) segun el Brand
+        Book, con un velo encima que garantiza el contraste del titulo y los
+        CTA sobre el flanco izquierdo, que es donde vive el texto.
+
+        Va ABSOLUTA y fuera del flujo: la altura de la seccion la sigue
+        fijando el padding del contenido, asi que la imagen no puede empujar
+        nada al cargar. CLS 0 por construccion, no por suerte.
+
+        Es el LCP de la pagina, y la unica imagen de la pagina: por eso lleva
+        eager + fetchpriority="high" sin competir con nadie.
+
+        Comentario con {} y NO con <!-- -->: los comentarios HTML SI llegan al
+        build, y este texto es interno. Misma razon que la nota de
+        vida-termino.astro. */}
+    <section class="relative py-24 md:py-32 overflow-hidden border-b border-gd-muted">
+
+      {/* `fallbackFormat="jpeg"` NO es cosmetico. Cuatro de las seis fuentes
+          son PNG, y sin esto Astro emite el fallback tambien en PNG a cada
+          ancho de la escalera: un solo producto llegaba a 6,2 MB de PNG que
+          NINGUN navegador con AVIF o WebP va a pedir nunca. Con JPEG el
+          fallback baja dos ordenes de magnitud y el peso de la imagen Docker
+          deja de ser absurdo. */}
+      <Picture
+        src={heroImage}
+        formats={["avif", "webp"]}
+        fallbackFormat="jpeg"
+        widths={anchos}
+        sizes="100vw"
+        alt={heroImageAlt}
+        width={heroImage.width}
+        height={heroImage.height}
+        class="ph-img"
+        style={heroPosicion ? `object-position:${heroPosicion}` : undefined}
+        loading="eager"
+        fetchpriority="high"
+        pictureAttributes={{ class: "ph-capa" }}
+      />
+      <div class="ph-velo" aria-hidden="true"></div>
+
+      <div class="relative z-10 max-w-5xl mx-auto px-6">
 
         <p class="hero-entrance font-mono text-xs text-gd uppercase tracking-widest mb-6">
           {eyebrow}
@@ -274,4 +375,7 @@ const FAQ = [
   </main>
 
   <Footer />
+
+  <script type="application/ld+json" set:html={JSON.stringify(serviceSchema)} />
+  <script type="application/ld+json" set:html={JSON.stringify(breadcrumbSchema)} />
 </Layout>
