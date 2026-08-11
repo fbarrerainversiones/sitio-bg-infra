@@ -2,7 +2,9 @@
 import Layout from "./Layout.astro";
 import Header from "../components/Header.astro";
 import Footer from "../components/Footer.astro";
+import BloqueFAQ from "../components/BloqueFAQ.astro";
 import { Picture } from "astro:assets";
+import { enlaceWhatsApp, tokenDeSlug } from "../lib/whatsapp";
 
 /**
  * ProductLayout — plantilla reutilizable de pagina de producto (Fase 3).
@@ -33,6 +35,25 @@ interface Props {
   heroImage: ImageMetadata;  // import desde src/assets/productos
   heroImageAlt: string;      // alt descriptivo es-EC de esa imagen
   heroPosicion?: string;     // object-position, si el encuadre movil lo pide
+  /**
+   * Proceso y FAQ PROPIOS del producto. Si no se pasan, la pagina recibe los
+   * genericos del ramo, que es lo que tenian las seis hasta hoy.
+   * Existen para que un producto pueda profundizar sin duplicar secciones:
+   * /seguros/auto trae los suyos y las otras cinco siguen con los de la casa.
+   * Es el mecanismo que hace replicable el patron en los otros cinco.
+   */
+  proceso?: { n: string; t: string; d: string }[];
+  /**
+   * Nota propia del producto dentro de la seccion de proceso, arriba del
+   * disclaimer del Art. 11.6. Existe para politicas de la CASA —cosas que
+   * valen para Barrera Global y no para una aseguradora en particular—, que
+   * no caben ni en un paso ni en la letra pequena de un tercero.
+   */
+  procesoNota?: string;
+  faq?: { q: string; a: string }[];
+  faqKicker?: string;
+  faqTitulo?: string;
+  faqTituloDestacado?: string;
 }
 
 const {
@@ -47,6 +68,12 @@ const {
   heroImage,
   heroImageAlt,
   heroPosicion,
+  proceso,
+  procesoNota,
+  faq,
+  faqKicker,
+  faqTitulo,
+  faqTituloDestacado,
 } = Astro.props;
 
 /**
@@ -73,14 +100,23 @@ const anchos = [...new Set([...ESCALERA.filter((w) => w < techo), techo])];
 const SITE = "https://barreraglobal.com";
 
 /**
- * Schema.org Service + BreadcrumbList.
- * Van en el LAYOUT y no en la pagina de auto, que es lo que pedia el encargo,
- * porque «coherente con las paginas hermanas» solo se cumple si las seis lo
- * emiten igual: hoy ninguna lo tenia. Son bloques `application/ld+json`, o
- * sea DATOS y no script ejecutable: la CSP no los evalua y no exigen hash.
+ * Schema.org — UN SOLO bloque con @graph.
+ *
+ * Antes eran DOS bloques `ld+json` separados, cada uno repitiendo su propio
+ * `@context`. Se unifican en un `@graph`: un solo contexto, un solo bloque, y
+ * lugar donde sumar nodos sin volver a duplicarlo. (El encargo de la Sesion 17
+ * daba por hecho que el @graph ya existia; no existia, y por eso se construye
+ * aca en vez de "extenderlo".)
+ *
+ * Son bloques `application/ld+json`, o sea DATOS y no script ejecutable: la
+ * CSP no los evalua y no exigen hash.
+ *
+ * El FAQPage se arma desde el MISMO array que pinta la FAQ visible, asi que el
+ * texto declarado y el texto que lee un humano no pueden divergir. Es la
+ * condicion que exige el propio schema y la unica forma de que no se vuelva
+ * mentira en la primera edicion de copy.
  */
 const serviceSchema = {
-  "@context": "https://schema.org",
   "@type": "Service",
   name: productName,
   serviceType: eyebrow,
@@ -96,7 +132,6 @@ const serviceSchema = {
 };
 
 const breadcrumbSchema = {
-  "@context": "https://schema.org",
   "@type": "BreadcrumbList",
   itemListElement: [
     { "@type": "ListItem", position: 1, name: "Inicio", item: SITE },
@@ -105,15 +140,22 @@ const breadcrumbSchema = {
   ],
 };
 
-const WHATSAPP_AURORA = "593998027819";
-const WHATSAPP_URL = `https://wa.me/${WHATSAPP_AURORA}?text=${encodeURIComponent(whatsappMessage)}`;
+/**
+ * El marcador de atribucion se DERIVA del slug, no se pasa a mano: los seis
+ * slugs dan exactamente los seis marcadores acordados al pasarlos a
+ * mayusculas, asi que no hay tabla que se pueda desincronizar ni pagina que
+ * se pueda olvidar de declararlo.
+ */
+const tokenPagina = tokenDeSlug(slug);
+const WHATSAPP_URL = enlaceWhatsApp(whatsappMessage, tokenPagina);
 
 // Path del icono de WhatsApp (mismo que en el resto del sitio)
 const WA_PATH =
   "M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z";
 
-// Proceso neutral de cotizacion (igual para todos los productos)
-const PROCESO = [
+// Proceso neutral de cotizacion. Es el POR DEFECTO: un producto puede traer
+// el suyo con la prop `proceso` y esta lista no se usa en esa pagina.
+const PROCESO_POR_DEFECTO = [
   {
     n: "01",
     t: "Conversamos",
@@ -136,8 +178,9 @@ const PROCESO = [
   },
 ];
 
-// Preguntas frecuentes SOLO de proceso (nada de datos de producto)
-const FAQ = [
+// Preguntas frecuentes SOLO de proceso. Tambien es el POR DEFECTO: un producto
+// puede traer las suyas con la prop `faq`.
+const FAQ_POR_DEFECTO = [
   {
     q: "¿Cómo se calcula la prima?",
     a: "Caso por caso, según tu perfil (edad, coberturas que elijas y otros factores del asegurado). No publicamos precios genéricos: cada cotización es personal (Art. 11.6 SCVS).",
@@ -155,10 +198,29 @@ const FAQ = [
     a: "Aurora, un asistente automatizado, atiende primero por WhatsApp y escala a Francisco cuando se requiere análisis humano. Tus datos se tratan conforme a la LOPDP.",
   },
 ];
+
+// Lo que realmente se pinta: lo propio del producto si lo trae, si no lo de casa.
+const PROCESO = proceso ?? PROCESO_POR_DEFECTO;
+const FAQ = faq ?? FAQ_POR_DEFECTO;
+
+// FAQPage armado desde el MISMO array que pinta BloqueFAQ: no pueden divergir.
+const faqSchema = {
+  "@type": "FAQPage",
+  mainEntity: FAQ.map((item) => ({
+    "@type": "Question",
+    name: item.q,
+    acceptedAnswer: { "@type": "Answer", text: item.a },
+  })),
+};
+
+const grafo = {
+  "@context": "https://schema.org",
+  "@graph": [serviceSchema, breadcrumbSchema, faqSchema],
+};
 ---
 
 <Layout title={title} description={description} canonical={canonical}>
-  <Header />
+  <Header token={tokenPagina} />
 
   <main>
 
@@ -254,7 +316,36 @@ const FAQ = [
           </h2>
         </div>
 
-        <div class="reveal space-y-6 font-body text-base md:text-lg text-tx-muted leading-relaxed">
+        {/* SIN `.reveal`, Y ES DELIBERADO. NO VOLVER A PONERLO.
+
+            El IntersectionObserver de Layout.astro usa `threshold: 0.15` con
+            `rootMargin: '0px 0px -50px 0px'`. Un observer con umbral 0,15 NO
+            PUEDE dispararse nunca sobre un elemento mas alto que
+            (alto_del_viewport - 50) / 0,15, porque su intersectionRatio maximo
+            —lo visible sobre lo total— jamas llega a 0,15. Y `.reveal` deja el
+            elemento en `opacity: 0` hasta que el observer le ponga `.visible`.
+
+            Este div envuelve el <slot /> ENTERO, o sea todo el cuerpo de la
+            pagina. Mientras el slot traia tres parrafos (vida-termino: 311
+            caracteres) el problema no existia. /seguros/auto mete 6.783
+            caracteres, una tabla, tres tarjetas y tres <details>: varios miles
+            de pixeles. Con eso, el umbral deja de alcanzarse en cualquier
+            telefono de menos de ~800 px de alto y la pagina se publica EN
+            BLANCO bajo el hero, sin un solo error en consola.
+
+            Limites reales: a 640 px de viewport el techo son 3.933 px; a 800 px,
+            5.000 px. Lighthouse emula 823 px —techo 5.153 px— y por eso lo daba
+            por bueno mientras un telefono comun no veia nada.
+
+            Se quita el `.reveal` en vez de subir el umbral porque una animacion
+            de aparicion sobre un contenedor de miles de pixeles no significa
+            nada aunque funcione, y porque el cuerpo de una pagina de producto
+            no deberia depender de JavaScript para ser visible: es justo el
+            contenido que buscadores y asistentes tienen que poder leer.
+
+            Las demas `.reveal` de este layout envuelven bloques acotados
+            (encabezados, la grilla del proceso, el CTA) y no corren el riesgo. */}
+        <div class="space-y-6 font-body text-base md:text-lg text-tx-muted leading-relaxed">
           <slot />
         </div>
 
@@ -275,7 +366,14 @@ const FAQ = [
           </h2>
         </div>
 
-        <div class="reveal grid grid-cols-1 md:grid-cols-2 gap-10 md:gap-x-16 md:gap-y-12">
+        {/* SIN `.reveal`, por la misma razon que el bloque de la FAQ.
+            Esta grilla tambien es un `map()` sobre un array que cada producto
+            puede sobreescribir con la prop `proceso`: altura sin techo.
+            Hoy pasa raspando —3.362 px al 200% de texto, con un ratio de
+            0,1755 contra el minimo de 0,15—, o sea con un 17% de margen. Un
+            producto con siete pasos en vez de cinco lo tumba. Se aplica la
+            regla y no la excepcion. */}
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-10 md:gap-x-16 md:gap-y-12">
           {PROCESO.map((step) => (
             <div class="space-y-3">
               <div class="flex items-center gap-3 mb-2">
@@ -287,6 +385,12 @@ const FAQ = [
             </div>
           ))}
         </div>
+
+        {procesoNota && (
+          <p class="reveal font-body text-base text-tx mt-12 max-w-3xl leading-relaxed">
+            {procesoNota}
+          </p>
+        )}
 
         <p class="reveal font-mono text-xs text-tx-disabled mt-12 max-w-3xl leading-relaxed">
           Las primas se calculan caso por caso según perfil del asegurado.
@@ -300,24 +404,12 @@ const FAQ = [
     <section id="preguntas" class="scroll-mt-24 border-t border-gd-muted py-24 md:py-32">
       <div class="max-w-3xl mx-auto px-6">
 
-        <div class="reveal mb-12">
-          <p class="font-mono text-xs text-gd uppercase tracking-widest mb-4">
-            Preguntas frecuentes
-          </p>
-          <h2 class="text-4xl md:text-5xl font-display font-semibold text-tx leading-tight">
-            Sobre el
-            <span class="text-gd">proceso.</span>
-          </h2>
-        </div>
-
-        <div class="reveal space-y-8">
-          {FAQ.map((item) => (
-            <div class="border-l-2 border-gd-muted pl-6">
-              <h3 class="font-display text-xl md:text-2xl font-semibold text-tx mb-2">{item.q}</h3>
-              <p class="font-body text-base text-tx-muted leading-relaxed">{item.a}</p>
-            </div>
-          ))}
-        </div>
+        <BloqueFAQ
+          preguntas={FAQ}
+          kicker={faqKicker}
+          titulo={faqTitulo}
+          tituloDestacado={faqTituloDestacado}
+        />
 
         <p class="reveal font-body text-sm text-tx-muted mt-12 pt-8 border-t border-gd-muted leading-relaxed max-w-2xl">
           ¿Tienes una pregunta específica sobre este producto? La respuesta
@@ -374,8 +466,7 @@ const FAQ = [
 
   </main>
 
-  <Footer />
+  <Footer token={tokenPagina} />
 
-  <script type="application/ld+json" set:html={JSON.stringify(serviceSchema)} />
-  <script type="application/ld+json" set:html={JSON.stringify(breadcrumbSchema)} />
+  <script type="application/ld+json" set:html={JSON.stringify(grafo)} />
 </Layout>

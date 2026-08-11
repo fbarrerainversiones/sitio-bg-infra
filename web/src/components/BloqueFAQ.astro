@@ -1,0 +1,83 @@
+---
+/**
+ * Bloque de preguntas frecuentes — reutilizable.
+ *
+ * Lo usa ProductLayout para las SEIS páginas de producto, así que existe una
+ * sola forma de pintar una FAQ en el sitio.
+ *
+ * POR QUE IMPORTA QUE SEA UN SOLO COMPONENTE: el schema FAQPage exige que el
+ * texto declarado sea IDÉNTICO al visible. Con el render y el schema comiendo
+ * del MISMO array, no pueden divergir. Si cada página pintara su FAQ a mano,
+ * la primera edición de copy que no tocara el schema lo volvería mentira.
+ * El JSON-LD lo emite ProductLayout desde ese mismo array; acá solo se pinta.
+ *
+ * Cada respuesta es answer-first: la primera oración responde, el resto matiza.
+ */
+interface Pregunta {
+  q: string;
+  a: string;
+}
+
+interface Props {
+  preguntas: Pregunta[];
+  kicker?: string;
+  titulo?: string;
+  tituloDestacado?: string;
+}
+
+const {
+  preguntas,
+  kicker = "Preguntas frecuentes",
+  titulo = "Sobre el",
+  tituloDestacado = "proceso.",
+} = Astro.props;
+---
+
+<div class="reveal mb-12">
+  <p class="font-mono text-xs text-gd uppercase tracking-widest mb-4">
+    {kicker}
+  </p>
+  <h2 class="font-display font-semibold text-tx leading-tight">
+    {titulo}
+    <span class="text-gd">{tituloDestacado}</span>
+  </h2>
+</div>
+
+{/* SIN `.reveal`, Y NO SE VUELVE A PONER.
+
+    Este div envuelve un `map()` sobre un array que cada pagina puede
+    sobreescribir: su altura NO tiene techo. Es la misma clase de bug que se
+    saco del <slot /> de ProductLayout en la Sesion 17, y sobrevivio aca
+    porque aquel arreglo se aplico a un archivo y no a la clase.
+
+    Medido en Chrome sobre el build, viewport 360x640, /seguros/auto con sus
+    seis preguntas:
+      texto 100%  1.663 px  ok        texto 150%  4.167 px  FALLA
+      texto 130%  2.995 px  ok        texto 200%  8.264 px  FALLA
+    El techo es (640-50)/0,15 = 3.933 px.
+    Y hay un camino que no necesita ninguna preferencia especial: a 320x256
+    CSS px —la condicion de prueba de WCAG 2.1 SC 1.4.10 Reflow, o sea zoom de
+    pagina al 400%— mide 1.819 px contra un techo de 1.373 px y tambien falla.
+
+    Cuando falla, las seis preguntas quedan en opacity:0 para siempre: un hueco
+    en blanco bajo su propio titulo, sin un error en consola, con el JSON-LD de
+    FAQPage emitiendose completo y el texto presente en el DOM. Ni el build ni
+    Lighthouse —que emula 823 px de alto— lo notan.
+
+    Rompe WCAG 2.1 SC 1.4.4 Resize Text (AA): al 200% se pierde un bloque
+    entero de contenido, y justo para los usuarios de texto grande y zoom.
+
+    El `.reveal` del encabezado de arriba SI se queda: es un bloque corto y
+    fijo. La regla es la altura sin techo, no la animacion. */}
+<div class="space-y-8">
+  {preguntas.map((item) => (
+    <div class="border-l-2 border-gd-muted pl-6">
+      <h3 class="font-display font-semibold text-tx mb-2 leading-tight">
+        {item.q}
+      </h3>
+      <p class="font-body text-base text-tx-muted leading-relaxed">
+        {item.a}
+      </p>
+    </div>
+  ))}
+</div>
