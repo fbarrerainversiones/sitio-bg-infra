@@ -1,0 +1,88 @@
+---
+import { getImage } from "astro:assets";
+
+/**
+ * Fondo de video con el tratamiento visual del Brand Book.
+ * UNA sola implementacion para F2 (hero del home) y F3 (/sobre-mi): si el
+ * tratamiento cambia, cambia en un lugar.
+ *
+ * El componente emite CUATRO capas absolutas y nada mas. Quien lo usa pone la
+ * seccion contenedora con `relative` y `overflow-hidden`, y su propio
+ * contenido con `z-10` encima.
+ *
+ * CERO JavaScript: no hay <script>, no hay manejadores. Los hashes CSP de
+ * infra/nginx.conf no se tocan.
+ *
+ * EL POSTER ES EL LCP. Por eso no se sirve el JPG de origen sino una version
+ * optimizada por astro:assets: `getImage()` devuelve la URL ya procesada y
+ * hasheada, que ademas cae bajo `expires 1y` en nginx por vivir en /_astro/.
+ * Formato WebP y no AVIF a proposito: el atributo `poster` acepta UNA sola URL
+ * y no negocia formato, asi que si el navegador no entendiera AVIF se quedaria
+ * sin poster y con un rectangulo negro. WebP lo entiende todo lo que reproduce
+ * video hoy.
+ *
+ * REDUCED-MOTION, Y EL LIMITE HONESTO DE HACERLO SIN JS:
+ * en `prefers-reduced-motion: reduce` el <video> se oculta y aparece <img> con
+ * el MISMO poster y el MISMO tratamiento, asi que quien pidio reducir
+ * movimiento ve una imagen fija con los mismos velos. La URL es identica a la
+ * del atributo `poster`, o sea que es la misma descarga, no una segunda.
+ * Lo que NO se puede hacer sin JavaScript: impedir que el video se DESCARGUE
+ * y se reproduzca de fondo. `autoplay` esta en el markup de forma
+ * incondicional y, segun MDN, `autoplay` anula `preload`. Cambiarlo exigiria
+ * un <script>, que esta prohibido en este proyecto porque moveria los hashes
+ * CSP. Queda documentado como limite conocido, no como descuido.
+ *
+ * `media` en <source> NO sirve para esto: MDN lo marca explicitamente como
+ * "not allowed" cuando el padre es <video> o <audio> — solo funciona dentro
+ * de <picture>. Se verifico antes de descartarlo.
+ */
+interface Props {
+  /** Ruta publica del mp4, servida tal cual desde web/public/videos/ */
+  video: string;
+  /** Import de la imagen desde src/assets: la optimiza astro:assets */
+  poster: ImageMetadata;
+  /** Ancho al que se genera el poster. */
+  ancho?: number;
+}
+
+const { video, poster, ancho = 1024 } = Astro.props;
+
+/**
+ * 1024 de ancho y calidad 40, no mas. El poster es el LCP y a 1280/q62 pesaba
+ * 111,7 KB, que es demasiado para lo primero que pinta un movil. Se puede
+ * bajar tanto porque esta imagen NUNCA se ve limpia: vive bajo opacidad 0.65,
+ * saturate(0.5), brightness(0.85) y dos velos encima. La compresion que se
+ * notaria en una foto de producto aca es invisible.
+ */
+const posterOpt = await getImage({
+  src: poster,
+  format: "webp",
+  width: ancho,
+  quality: 40,
+});
+---
+
+<video
+  class="bv-video"
+  autoplay
+  muted
+  loop
+  playsinline
+  preload="metadata"
+  poster={posterOpt.src}
+  aria-hidden="true"
+  tabindex="-1"
+>
+  <source src={video} type="video/mp4" />
+</video>
+
+<img
+  class="bv-poster"
+  src={posterOpt.src}
+  alt=""
+  aria-hidden="true"
+  decoding="async"
+/>
+
+<div class="bv-velo-lateral" aria-hidden="true"></div>
+<div class="bv-velo-inferior" aria-hidden="true"></div>

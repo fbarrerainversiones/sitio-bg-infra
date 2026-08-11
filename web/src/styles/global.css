@@ -409,6 +409,161 @@ a.btn-outline:hover {
 }
 
 /* ============================================================
+   CABECERA VISUAL DE PRODUCTO (11/08/2026)
+   ============================================================
+   La usan las SEIS paginas de producto desde ProductLayout.astro. Una sola
+   implementacion: si el tratamiento cambia, cambia aca.
+
+   La imagen es TEXTURA, el copy manda (Brand Book): opacidad 0.65 dentro del
+   rango 0.6-0.7 que pide el manual, mas brightness(0.7).
+
+   El velo es doble y no decorativo. El horizontal garantiza contraste sobre
+   el flanco IZQUIERDO, que es donde caen el kicker, el h1 y los CTA; el
+   vertical mata la imagen contra el fondo de la pagina para que la cabecera
+   no termine en un corte seco.
+
+   `.ph-capa` es el <picture>, que va absoluto y fuera del flujo: la altura de
+   la seccion la sigue fijando el padding del contenido, asi que la imagen no
+   puede empujar layout al cargar.
+   ============================================================ */
+
+.ph-capa {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.ph-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  opacity: 0.65;
+  filter: brightness(0.7);
+}
+
+.ph-velo {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background:
+    linear-gradient(90deg, rgba(8, 8, 13, 0.9), rgba(8, 8, 13, 0.5) 60%, rgba(8, 8, 13, 0.25)),
+    linear-gradient(to bottom, rgba(8, 8, 13, 0.35), transparent 45%, var(--bg));
+}
+
+/* ============================================================
+   FONDO DE VIDEO — F2 (hero del home) y F3 (/sobre-mi)  (11/08/2026)
+   ============================================================
+   Componente: web/src/components/FondoVideo.astro
+   Tratamiento visual del Brand Book, en un solo lugar.
+
+   Las cuatro capas son ABSOLUTAS y `pointer-events: none`: no participan del
+   flujo, asi que no pueden empujar nada al cargar (CLS 0 por construccion) ni
+   robarle un clic a los CTA que van encima.
+
+   El velo inferior tira hacia `--bv-fondo`, que por defecto es `--bg`. Las
+   secciones montadas sobre fondo elevado lo redefinen con `.bv-en-elev`, para
+   que el degradado muera contra SU fondo y no contra uno que no existe ahi.
+   ============================================================ */
+
+.bv-video,
+.bv-poster {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.bv-video {
+  opacity: 0.65;
+  filter: saturate(0.5) brightness(0.85);
+}
+
+/* Solo entra en escena con reduced-motion. Misma URL que el atributo `poster`
+   del video, asi que no es una segunda descarga. */
+.bv-poster {
+  display: none;
+}
+
+.bv-velo-lateral,
+.bv-velo-inferior {
+  position: absolute;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.bv-velo-lateral {
+  inset: 0;
+  background: linear-gradient(90deg, rgba(8, 8, 13, 0.85), transparent);
+}
+
+.bv-velo-inferior {
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 40%;
+  background: linear-gradient(to bottom, transparent, var(--bv-fondo, var(--bg)));
+}
+
+.bv-en-elev {
+  --bv-fondo: var(--bg-elev-1);
+}
+
+/* MOVIL: el velo lateral no alcanza.
+   El gradiente a 90 grados esta calibrado para desktop, donde el texto ocupa
+   la franja izquierda. A 360px el texto ocupa el 93 % del ancho, asi que su
+   mitad derecha cae en la parte transparente del gradiente y el parrafo del
+   hero baja de 4,5:1 de contraste. Debajo de md el velo se vuelve VERTICAL y
+   se apoya donde de verdad esta el texto: abajo. */
+@media (max-width: 47.99rem) {
+  .bv-velo-lateral {
+    background: linear-gradient(
+      to bottom,
+      rgba(8, 8, 13, 0.35),
+      rgba(8, 8, 13, 0.75) 45%,
+      rgba(8, 8, 13, 0.92)
+    );
+  }
+}
+
+/* TITULO DEL HERO CON VIDEO — y por que necesita clase propia.
+   `h1 { font-size: var(--text-5xl) }` vive en este mismo archivo, FUERA de
+   toda @layer (ver el bloque de tipografia por defecto), asi que le gana a
+   `text-4xl md:text-6xl` de Tailwind, que viven en @layer utilities. Las
+   utilidades se generan y quedan INERTES: el h1 se pintaba a 48px en todos
+   los anchos, sin importar lo que dijera la clase.
+   Es la misma deuda de R-43, pero sobre `font-size` en vez de sobre el color
+   de un enlace, y esa superficie no estaba documentada.
+   La mitigacion es la ya establecida por el proyecto y NO toca las capas, que
+   R-43 prohibe mover hasta P-47: una regla propia, sin capa y con mas
+   especificidad, igual que `.btn-outline`. */
+.hero-titulo {
+  font-size: var(--text-4xl);
+}
+
+@media (min-width: 48rem) {
+  .hero-titulo {
+    font-size: var(--text-6xl);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bv-video {
+    display: none;
+  }
+  .bv-poster {
+    display: block;
+    opacity: 0.65;
+    filter: saturate(0.5) brightness(0.85);
+  }
+}
+
+/* ============================================================
    P-54 F1 — «EL PORTICO QUE SE CONSTRUYE» (10/08/2026)
    CSS puro, cero JavaScript nuevo.
    ============================================================
