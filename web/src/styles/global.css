@@ -513,4 +513,142 @@ a.btn-outline:hover {
       filter: drop-shadow(0 0 4px rgba(201, 168, 76, 0.45));
     }
   }
+
+  /* ============================================================
+     NIVEL 1 — DIBUJADO LIGADO AL SCROLL, BIDIRECCIONAL (11/08/2026)
+     ============================================================
+     Feedback de Francisco sobre F1 v1: el portico se dibuja una sola vez
+     al bajar y al volver a subir ya no se rearma. Es correcto que pase:
+     el observer de Layout.astro hace `unobserve` en cuanto marca
+     `.visible`, asi que el estado es de ida y no vuelve. Para ligarlo al
+     scroll hace falta una fuente de progreso CONTINUA, no un booleano.
+
+     Esa fuente son las **view timelines** de los propios bloques de texto.
+     Sigue siendo CSS puro: cero JavaScript nuevo, cero <script>, los dos
+     hashes CSP intactos.
+
+     LOS TRES NIVELES, de mejor a peor soporte:
+       NIVEL 1 (este)  animation-timeline -> el dibujado avanza y
+                       retrocede con el scroll. Hoy, Chromium.
+       NIVEL 2 (arriba) :has() + .visible -> el one-shot de v1, tal cual.
+                       Firefox estable, Safari. NO SE TOCA una linea.
+       NIVEL 3 (base)  sin :has() o con reduced-motion -> portico completo
+                       y estatico.
+     Los tres viven dentro de @media (prefers-reduced-motion:
+     no-preference), asi que quien pide reducir movimiento cae al nivel 3
+     tambien aca: el nivel 1 no lo puede rescatar.
+
+     POR QUE `timeline-scope` NO ES OPCIONAL:
+     por defecto una timeline nombrada solo la puede consumir un
+     DESCENDIENTE DIRECTO del elemento que la declara (MDN, timeline-scope).
+     Las timelines las declaran los bloques de texto y quien las consume
+     son los <path>, que viven en el subarbol HERMANO del visor. Sin
+     `timeline-scope` en el ancestro comun, el nombre sencillamente no se
+     resuelve y no pasa nada.
+
+     POR QUE LA GUARDIA PRUEBA **DOS** PROPIEDADES Y NO UNA:
+     el bloque no funciona sin `animation-timeline` NI sin `timeline-scope`,
+     y son features separadas que no llegaron juntas: `animation-timeline`
+     entro en Chromium 115 y `timeline-scope` en 116. Probando solo la
+     primera, un Chromium 115 entra al bloque, los nombres --pc-tN no
+     resuelven, las animaciones no corren... pero el `transition: none` de
+     mas abajo SI se aplica y le saca al nivel 2 su suavizado de 400ms: el
+     trazo apareceria de golpe. La ventana es de UNA version de hace tres
+     anos y solo en Chromium, pero cerrarla cuesta una condicion mas. Se
+     cierra. Todo motor con cuota real (Chromium 116+, Safari 26+,
+     Firefox 156+) tiene las dos, asi que para ellos no cambia nada.
+
+     POR QUE LONGHANDS Y NO EL SHORTHAND `animation`:
+     `animation-timeline` es un valor RESET-ONLY del shorthand: escribir
+     `animation: ...` lo devuelve a `auto` y mata la ligadura al scroll.
+     Con longhands no hay orden que pueda traicionar.
+
+     COMO SE NEUTRALIZA v1 ACA DENTRO (regla 3 del encargo):
+       - `transition: none` sobre el trazo y sobre el portico.
+       - la regla `:has(.visible)` del nivel 2 sigue existiendo, pero es
+         una declaracion normal y una ANIMACION le gana en la cascada
+         siempre. Con `animation-fill-mode: both` la animacion tambien
+         esta en efecto FUERA de su rango, asi que gana incluso antes de
+         empezar y despues de terminar. No hay ventana en la que el
+         `stroke-dashoffset: 0` de v1 se cuele.
+
+     RANGO: `entry`. Los bloques miden 52vh (movil) / 60vh (desktop), o
+     sea que son MAS CORTOS que el viewport; para ese caso `entry` va de
+     «el bloque asoma por abajo» (0%) a «el bloque esta completamente a la
+     vista» (100%), y su tamano es el alto del bloque. Es exactamente el
+     tramo en el que el visitante esta leyendo ese paso.
+     ============================================================ */
+  @supports (animation-timeline: view()) and (timeline-scope: --pc-t1) {
+
+    /* 1. Cada bloque de texto publica su propia linea de tiempo. */
+    .pc-paso-1 { view-timeline-name: --pc-t1; }
+    .pc-paso-2 { view-timeline-name: --pc-t2; }
+    .pc-paso-3 { view-timeline-name: --pc-t3; }
+    .pc-paso-4 { view-timeline-name: --pc-t4; }
+    .pc-cierre { view-timeline-name: --pc-t5; }
+
+    /* 2. Y la seccion las pone al alcance del SVG, que es hermano. */
+    .pc-seccion {
+      timeline-scope: --pc-t1, --pc-t2, --pc-t3, --pc-t4, --pc-t5;
+    }
+
+    /* 3. Estado y animacion de los trazos.
+          El `--pc-oculto` se vuelve a declarar aca en vez de heredarlo del
+          nivel 2: este bloque se basta solo, sin depender de que el otro
+          @supports haya entrado.
+          Ojo con lo que NO esta aca: no hay `stroke-dashoffset`. El estado
+          oculto no lo pone una declaracion sino el `animation-fill-mode:
+          both`, que mantiene el `from` del keyframe en efecto ANTES de que
+          empiece el rango. Esa misma pieza es la que hace que la animacion
+          le gane siempre al `stroke-dashoffset: 0` del nivel 2, que sigue
+          existiendo: una animacion en efecto vence a cualquier declaracion
+          normal, y con `both` esta en efecto tambien fuera del rango. No
+          queda ventana por donde se cuele el valor de v1. */
+    .pc-trazo {
+      --pc-oculto: 1;
+      stroke-dasharray: 1 1.2;
+      transition: none;
+      animation-name: pc-dibujar;
+      animation-duration: auto;
+      animation-timing-function: linear;
+      animation-fill-mode: both;
+      animation-range: entry 15% entry 85%;
+    }
+
+    /* 4. Cada etapa cuelga de la linea de tiempo de SU bloque de texto. */
+    .pc-etapa-1 .pc-trazo { animation-timeline: --pc-t1; }
+    .pc-etapa-2 .pc-trazo { animation-timeline: --pc-t2; }
+    .pc-etapa-3 .pc-trazo { animation-timeline: --pc-t3; }
+    .pc-etapa-4 .pc-trazo { animation-timeline: --pc-t4; }
+
+    /* 5. Encadenado dentro de la etapa. Es el equivalente scrubbed de los
+          transition-delay de 90/180/270ms del nivel 2: aca el retardo no
+          se mide en tiempo sino en recorrido. */
+    .pc-etapa .pc-trazo:nth-child(2) { animation-range: entry 20% entry 90%; }
+    .pc-etapa .pc-trazo:nth-child(3) { animation-range: entry 25% entry 95%; }
+    .pc-etapa .pc-trazo:nth-child(4) { animation-range: entry 30% entry 100%; }
+
+    /* 6. El halo del cierre, tambien ligado al scroll. */
+    .pc-portico {
+      transition: none;
+      animation-name: pc-halo;
+      animation-duration: auto;
+      animation-timing-function: linear;
+      animation-fill-mode: both;
+      animation-timeline: --pc-t5;
+      animation-range: entry 35% entry 100%;
+    }
+
+    /* El `from` toma el valor de la custom property, no un `1` pelado:
+       asi el minificador no lo puede tipar como longitud (ver arriba). */
+    @keyframes pc-dibujar {
+      from { stroke-dashoffset: var(--pc-oculto); }
+      to   { stroke-dashoffset: 0; }
+    }
+
+    @keyframes pc-halo {
+      from { filter: drop-shadow(0 0 0 rgba(201, 168, 76, 0)); }
+      to   { filter: drop-shadow(0 0 4px rgba(201, 168, 76, 0.45)); }
+    }
+  }
 }
