@@ -1,0 +1,568 @@
+================================================================================
+REPORTE SESION 15 — 11 de agosto de 2026
+Sitio Barrera Global (sitio-bg-infra) — trabajo LOCAL bajo veda de Aurora
+================================================================================
+
+HEAD AL INICIO DE LA SESION : 7104909e13c65037a7f41361cb852909d4f1b64e
+                              (7104909 — "docs(continuidad): snapshot cierre dia 1")
+git pull origin main        : "Already up to date."
+Working tree al inicio      : limpio
+pwsh                        : 7.6.4
+
+REGLA NO-COMMIT RESPETADA: cero `git commit`, cero `git push`. Todo lo que sigue
+vive en el WORKING TREE, esperando la revision de Francisco.
+
+VEDA DE AURORA RESPETADA: cero SSH, cero VPS, cero comandos remotos. No se toco
+`infra/nginx.conf`. Los dos hashes CSP quedaron IDENTICOS.
+
+
+================================================================================
+BLOQUE A — F1 v2: EL PORTICO LIGADO AL SCROLL, BIDIRECCIONAL
+================================================================================
+
+--------------------------------------------------------------------------------
+A.1 — DIAGNOSTICO (leido de los archivos reales, antes de editar)
+--------------------------------------------------------------------------------
+
+QUE DISPARA HOY EL DIBUJADO (v1)
+
+  Layout.astro:184-195  un unico IntersectionObserver para todo el sitio.
+                        threshold 0.15, rootMargin '0px 0px -50px 0px'.
+                        Agrega `.visible` y hace `observer.unobserve(entry.target)`
+                        EN LA MISMA PASADA (linea 189).
+                        >>> ESA LINEA ES LA CAUSA RAIZ DEL FEEDBACK DE FRANCISCO:
+                            el estado es de ida y no vuelve. No es un bug, es un
+                            booleano de un solo sentido. Ligarlo al scroll no se
+                            arregla ajustando el observer: hace falta una fuente
+                            de progreso CONTINUA.
+
+  global.css:498-503    el selector que hoy dibuja:
+                          .pc-seccion:has(.pc-paso-N.visible) .pc-etapa-N .pc-trazo
+                          { stroke-dashoffset: 0 }
+                        (cinco selectores, uno por etapa, agrupados)
+
+  global.css:512-514    el halo:
+                          .pc-seccion:has(.pc-cierre.visible) .pc-portico
+                          { filter: drop-shadow(0 0 4px rgba(201,168,76,.45)) }
+
+CUSTOM PROPERTIES EXISTENTES
+
+  --pc-oculto : 1       global.css:481, dentro de `.pc-trazo`, dentro del
+                        @supports selector(:has(*)). Existe por una sola razon,
+                        documentada en el comentario de las lineas 444-452: escrito
+                        como `stroke-dashoffset: 1` pelado, Lightning CSS lo emite
+                        como `1px`. Es la UNICA custom property del bloque P-54.
+
+  No hay ninguna otra. El resto del bloque usa valores literales.
+
+QUE RANGO DE SCROLL CUBRE HOY CADA ETAPA  (v1: ninguno — son puntos, no rangos)
+
+  Cada etapa se dispara en un INSTANTE, no a lo largo de un rango: el instante en
+  que su bloque de texto cruza el umbral del observer (15% visible, menos 50px de
+  margen inferior). Despues no vuelve a evaluarse nunca — `unobserve`.
+
+    etapa-1 BASAMENTO            <- instante en que .pc-paso-1 cruza el umbral
+    etapa-2 COLUMNAS             <- idem .pc-paso-2
+    etapa-3 DINTEL+ARQUITRABE    <- idem .pc-paso-3
+    etapa-4 FRONTON              <- idem .pc-paso-4
+    halo (cierre)                <- idem .pc-cierre
+
+  Los bloques miden min-h-[52vh] en movil y md:min-h-[60vh] en desktop
+  (PorticoConstruye.astro:155 y :169), o sea que son MAS CORTOS que el viewport.
+  Ese dato decide el rango que se usa en el nivel 1 (ver A.2).
+
+ESTRUCTURA DEL DOM QUE CONDICIONA TODO EL DISENO
+
+  section.pc-seccion
+    div.max-w-6xl
+      div.reveal                      <- encabezado
+      div (bloque en movil, grid en md)
+        div.pc-visor                  <- STICKY. contiene svg.pc-portico
+          svg > g.pc-etapa-N > path.pc-trazo   x9
+        div.md:col-span-7
+          div.pc-paso.pc-paso-1..4    <- los que scrollean
+          div.pc-paso.pc-cierre
+
+  >>> El visor y los pasos son SUBARBOLES HERMANOS. Ese hecho, y no otro, es lo
+      que obliga a usar `timeline-scope` (ver A.2).
+  >>> El visor es STICKY: una vez que entra ya no se mueve. Por eso el reloj del
+      relato tienen que ser los TEXTOS, nunca el SVG.
+
+
+--------------------------------------------------------------------------------
+A.2 — DISENO: LOS TRES NIVELES DE DEGRADACION
+--------------------------------------------------------------------------------
+
+Los tres viven dentro de @media (prefers-reduced-motion: no-preference), asi que
+quien pide reducir movimiento cae al nivel 3 en todos los casos.
+
+NIVEL 1 — SCRUBBED, BIDIRECCIONAL          @supports (animation-timeline: view())
+                                                 and (timeline-scope: --pc-t1)
+
+  Mecanismo: cada bloque de texto publica su propia VIEW TIMELINE
+  (--pc-t1..--pc-t5) y cada etapa del SVG cuelga de la timeline de SU bloque.
+  El progreso del scroll ES el progreso de la animacion: bajar construye, subir
+  desconstruye. Cero JavaScript.
+
+  DECISIONES QUE NO SALIERON DE LA MEMORIA SINO DE MDN:
+
+  (a) `timeline-scope` NO ES OPCIONAL. MDN, timeline-scope: por defecto una
+      timeline nombrada "can only be set as the controlling timeline of a DIRECT
+      DESCENDANT element". Nuestros <path> estan en el subarbol HERMANO del que
+      declara las timelines. Sin `timeline-scope` en el ancestro comun, el nombre
+      no resuelve y NO PASA NADA — falla en silencio, que es la peor forma de
+      fallar. Va en `.pc-seccion`, que es ancestro de los dos subarboles.
+
+  (b) LONGHANDS, NUNCA EL SHORTHAND. MDN, animation-timeline: es un valor
+      "reset-only" del shorthand `animation`. Escribir `animation: pc-dibujar
+      linear both` DEVOLVERIA animation-timeline a `auto` y mataria la ligadura
+      al scroll. Se usan solo longhands, y se verifico sobre el emitido que el
+      minificador no los colapso (0 declaraciones `animation:` sobre pc-*).
+
+  (c) RANGO `entry`. MDN, timeline range names: para un sujeto MAS CORTO que el
+      scrollport —que es nuestro caso, 52vh/60vh— `entry` va de "el bloque asoma
+      por el borde inferior" (0%) a "el bloque esta completamente visible" (100%),
+      y su tamano es el alto del bloque. Es exactamente el tramo en que el
+      visitante esta leyendo ese paso. Se descarto `cover` (incluye entrada Y
+      salida: la etapa se desdibujaria mientras el texto todavia se lee) y
+      `contain` (degenerado para elementos cercanos al alto del viewport).
+
+  (d) LA GUARDIA PRUEBA DOS PROPIEDADES, NO UNA. `animation-timeline` entro en
+      Chromium 115 y `timeline-scope` en 116. Probando solo la primera, un
+      Chromium 115 ENTRA al bloque, los nombres no resuelven, las animaciones no
+      corren, pero el `transition: none` del nivel 1 SI se aplica y le saca al
+      nivel 2 su suavizado. Ver A.4, hallazgos 1 y 2.
+
+  Mapa de rangos (el equivalente scrubbed de los transition-delay de v1: aca el
+  retardo no se mide en tiempo sino en RECORRIDO):
+
+    trazo 1 de cada etapa   entry 15%  ->  entry  85%
+    trazo 2                 entry 20%  ->  entry  90%
+    trazo 3                 entry 25%  ->  entry  95%
+    trazo 4                 entry 30%  ->  entry 100%
+    halo (.pc-portico)      entry 35%  ->  entry 100%   sobre --pc-t5
+
+  NEUTRALIZACION DE v1 DENTRO DEL NIVEL 1 (exigida por el encargo):
+    - `transition: none` sobre `.pc-trazo` y sobre `.pc-portico`. Misma
+      especificidad que las reglas de v1 (0,1,0) pero POSTERIOR en el emitido:
+      gana el orden. Verificado.
+    - La regla `:has(.visible){stroke-dashoffset:0}` de v1 sigue existiendo, y
+      no hace falta borrarla: una ANIMACION EN EFECTO le gana a cualquier
+      declaracion normal, sin importar especificidad. Y con
+      `animation-fill-mode: both` la animacion esta en efecto TAMBIEN fuera de
+      su rango — antes y despues. No queda ventana por donde se cuele el 0 de v1.
+      Esa misma pieza es la que provee el estado oculto inicial, que por eso NO
+      se declara en el nivel 1.
+
+NIVEL 2 — ONE-SHOT (v1)                        @supports selector(:has(*))
+
+  NO SE TOCO UNA SOLA LINEA. Verificado sobre el emitido: las 10 marcas de v1
+  siguen textuales (ver A.3). Es lo que ven hoy Firefox estable y Safari < 26.
+
+NIVEL 3 — ESTATICO            sin :has(), o prefers-reduced-motion: reduce
+
+  El `.pc-trazo` no recibe dasharray ni dashoffset de ningun nivel, asi que
+  quedan en sus valores iniciales (`none` y `0`): el trazo se pinta COMPLETO.
+  Degrada a la pieza terminada, nunca a una pieza rota. Sin cambios respecto de
+  como estaba.
+
+
+--------------------------------------------------------------------------------
+A.3 — QA DEL BLOQUE A (todo medido sobre el CSS/HTML EMITIDO en dist)
+--------------------------------------------------------------------------------
+
+BUILD                          12/12 paginas, sin errores.
+
+CSP — CRUCE BIDIRECCIONAL      hashes en build: 2   hashes en nginx.conf: 2
+  sha256-aOPTArMuUPr5ybUMJpH+mtSGicP8zlnwwFwZYYhokv4=  ESTA en nginx  (12 apariciones)
+  sha256-Qra3eTJV60gng4dzuHtxcR7XY8lE1nLbTAAJ5T7jyto=  ESTA en nginx  (12 apariciones)
+  Cero huerfanos en ambas direcciones. NINGUN HASH CAMBIO.
+  atributos on* en dist : 0
+  <script src> en dist  : 0
+  (o sea: cero JavaScript nuevo, como exigia el encargo)
+
+ANIDAMIENTO DE LOS NIVELES     contado por llaves sobre el emitido, no a ojo:
+  @media(prefers-reduced-motion:no-preference)  abre en offset 44663
+  @supports selector(:has(*))          nivel 2  offset 44708   DENTRO: si
+  @supports (animation-timeline...)    nivel 1  offset 45407   DENTRO: si
+  el @media cierra en offset 46671
+  nivel 2 antes que nivel 1: si (el orden importa: el nivel 1 pisa)
+
+NIVEL 2 INTACTO                las 10 marcas de v1, textuales en el emitido:
+  stroke-dashoffset:var(--pc-oculto);transition:stroke-dashoffset .4s ease-out  OK
+  transition-delay:90ms / .18s / .27s                                           OK
+  .pc-paso-1.visible / -2 / -3 / -4 / .pc-cierre.visible                        OK
+  transition:filter .6s ease-out                                                OK
+
+CUSTOM PROPERTY                --pc-oculto:1  SIN unidad                        OK
+                               el keyframe usa var(--pc-oculto)                 OK
+                               no aparece --pc-oculto:1px                       OK
+
+PIEZAS DEL NIVEL 1             timeline-scope con los 5 nombres                 OK
+                               view-timeline-name --pc-t1 .. --pc-t5            OK
+                               animation-timeline --pc-t1 .. --pc-t5            OK
+                               animation-fill-mode:both / animation-duration:auto OK
+                               @keyframes pc-dibujar / pc-halo                  OK
+                               guardia doble emitida:
+                               @supports (animation-timeline:view()) and (timeline-scope:--pc-t1)
+                               declaraciones `animation:` (shorthand) sobre pc-*: 0
+
+REGRESION DE SESION 14         top-16 en markup y en CSS                        OK
+  (la rendija de ~9.6px)       top-[5.5rem] NO reaparece                        OK
+                               @media(max-height:35rem) sigue                   OK
+
+ALCANCE                        clases pc-* en el fuente: 2 archivos
+                               (global.css, PorticoConstruye.astro)
+                               paginas del dist con pc-*: SOLO index.html
+                               ninguna otra pagina afectada.
+
+TRANSFORMACIONES DEL MINIFICADOR, revisadas una por una:
+  `animation-range: entry 30% entry 100%`  ->  `entry 30%`
+      LOSSLESS. Un <timeline-range-name> suelto como start implica ese mismo
+      rango al 100% como end (MDN lo documenta con `cover 20%`).
+  `animation-range: entry 35% entry 100%`  ->  `entry 35%`   idem.
+  `drop-shadow(0 0 0 rgba(201,168,76,0))`  ->  `drop-shadow(0 0 #c9a84c00)`
+      LOSSLESS. El tercer 0 es el blur y su valor por defecto es 0. Interpola
+      igual hacia `drop-shadow(0 0 4px #c9a84c73)`.
+  `--pc-oculto: 1`                          ->  `--pc-oculto:1`   intacto, sin unidad.
+  Ningun longhand animation-* se colapso en el shorthand.
+
+--------------------------------------------------------------------------------
+A.4 — JOURNAL DE AUDITORIA ADVERSARIAL (COMPLETO)
+--------------------------------------------------------------------------------
+
+5 lentes independientes + un refutador por hallazgo. 9 agentes, 0 errores.
+El journal se leyo UNA SOLA VEZ, con el workflow ya cerrado — es la leccion de
+Sesion 14, donde se reporto sobre un journal a medio llenar.
+
+RESULTADO: 4 hallazgos crudos, 0 confirmados. Los 4 refutados.
+Lentes sin hallazgos: reduced-motion, minificador. (Las dos preguntas mas
+delicadas del encargo no encontraron nada.)
+
+HALLAZGO 1 — lente doble-animacion — severidad baja — REFUTADO
+  Claim: la guardia probaba `animation-timeline: view()` pero no `timeline-scope`,
+  del que depende todo el bloque. En Chromium 115 la guardia pasa, los nombres no
+  resuelven, y el `transition: none` del nivel 1 igual se aplica y mata el
+  suavizado de 400ms del nivel 2.
+  Refutacion: mecanismo correcto y verificado (compat: animation-timeline Chromium
+  115, timeline-scope 116; Firefox y Safari los traen juntos), pero la ventana es
+  UNA version de Chromium de julio 2023 y la degradacion es cosmetica: el portico
+  se sigue construyendo por `:has()`, solo pierde el ease.
+
+HALLAZGO 2 — lente cascada-r43 — severidad baja — REFUTADO
+  El MISMO hueco, encontrado por una lente independiente. Refutado con el mismo
+  argumento de cuota, y con una nota: "sumar `and (timeline-scope: --x)` al
+  @supports es gratis y correcto".
+
+  >>> DECISION MIA, CONTRA LAS DOS REFUTACIONES: SE APLICO EL FIX.
+      Dos lentes independientes convergieron; los dos refutadores confirmaron que
+      el mecanismo es real y describieron el fix como gratuito; y yo estaba
+      escribiendo ese bloque en ese mismo momento, que es justo la condicion que
+      el segundo refutador ponia para aplicarlo. Refutar por cuota de mercado no
+      es lo mismo que refutar por incorreccion. La guardia quedo:
+        @supports (animation-timeline: view()) and (timeline-scope: --pc-t1)
+      Costo: una condicion. Para todo motor con cuota real (Chromium 116+,
+      Safari 26+, Firefox 156+) no cambia absolutamente nada.
+
+HALLAZGO 3 — lente cascada-r43 — severidad baja — REFUTADO
+  Claim: el comentario decia que el nivel 1 "se basta solo" pero omite
+  `stroke-dashoffset`, que solo existe en el nivel 2.
+  Refutacion: el bloque SI se basta solo — el estado oculto lo provee
+  `animation-fill-mode: both`, que mantiene el `from` en efecto antes del rango.
+  ACEPTADA. Pero el hallazgo dejo ver que el comentario podia confundir a quien
+  lo leyera despues, asi que se reescribio para explicitar de donde sale el estado
+  oculto y por que la animacion le gana siempre a v1.
+
+HALLAZGO 4 — lente movil-rendija — severidad MEDIA — REFUTADO
+  Claim: en viewports de <=35rem de alto (telefono en horizontal) la regla
+  `position: static` suelta el visor; el dibujado ocurre con el portico ya fuera
+  de pantalla y, al ser bidireccional, subiendo el portico aparece VACIO. Con v1
+  quedaba completo porque el observer hace unobserve. Regresion para esa clase
+  de dispositivos.
+  Refutacion (con aritmetica sobre 640x360): las etapas 2, 3 y 4 YA se dibujan
+  fuera de pantalla con el nivel 2 —cuando .pc-paso-2 cruza el umbral del
+  observer, 0 px del simbolo son visibles bajo el header—, asi que el defecto es
+  anterior y viene de la decision de soltar el visor, no del bloque nuevo.
+  Bajando, el nivel 1 es marginalmente MEJOR (etapa-2 arranca con ~49px del SVG
+  todavia visibles, contra 0 del nivel 2). El unico delta real es el rebobinado
+  al subir, que es EXACTAMENTE la funcionalidad pedida, aplicada de forma
+  uniforme en todos los viewports. Y el fix propuesto consistiria en desactivar
+  ahi justo la bidireccionalidad que se encargo.
+  ACEPTADA. No se gatea el nivel 1 por altura.
+
+--------------------------------------------------------------------------------
+A.5 — GUION DE VERIFICACION MANUAL PARA FRANCISCO
+--------------------------------------------------------------------------------
+
+    cd C:\Users\panch\projects\sitio-bg-infra
+    npm run build --prefix web
+    npm run preview --prefix web
+    -> http://localhost:4321/  y bajar hasta la seccion "El metodo"
+
+QUE DEBE VER AL BAJAR (Chrome o Edge, que es donde corre el nivel 1)
+  El portico NO aparece de golpe: se dibuja siguiendo el dedo/rueda. Si frena a
+  mitad de un paso, el trazo queda A MEDIO DIBUJAR y se queda ahi. Ese es el
+  cambio: antes el trazo tenia vida propia de 400ms; ahora la manija es el scroll.
+  Orden: los 2 trazos del basamento -> las 4 columnas (encadenadas, una detras de
+  otra) -> dintel y arquitrabe -> el fronton -> el halo dorado en el cierre.
+
+QUE DEBE VER AL SUBIR  <<< ES LO QUE PIDIO Y ES LA PRUEBA DE FUEGO
+  El portico SE DESARMA en orden inverso. Sube y baja media pantalla varias veces
+  sobre el mismo paso: el trazo debe ir y venir pegado al scroll, sin saltos y
+  sin quedarse trabado. Si se dibuja pero al subir NO se borra, el nivel 1 no
+  esta corriendo y estas viendo el nivel 2.
+
+COMO DISTINGUIR NIVEL 1 DE NIVEL 2 SIN ABRIR DEVTOOLS
+  Nivel 1 (Chrome/Edge 116+, Safari 26+): va y viene con el scroll.
+  Nivel 2 (Firefox estable, Safari viejo): se dibuja una vez, con su animacion de
+  400ms, y ya no se borra. Las dos son correctas. Si tenes Firefox a mano, vale
+  la pena mirarlo ahi para confirmar que el fallback sigue intacto.
+
+QUE VERIA UN NAVEGADOR SIN SOPORTE, O ALGUIEN CON "REDUCIR MOVIMIENTO"
+  El portico COMPLETO, quieto, desde el primer momento. Nunca una pieza a medias.
+  Para probarlo: Windows > Configuracion > Accesibilidad > Efectos visuales >
+  Efectos de animacion: DESACTIVADO. Recarga y baja: el simbolo tiene que estar
+  entero y no moverse.
+
+REVISAR TAMBIEN
+  - El telefono (o DevTools a 360px de ancho): la banda del simbolo pegada bajo
+    el header, sin ninguna rendija por donde se vea pasar el texto.
+  - El telefono en HORIZONTAL: el simbolo se suelta y se va con el scroll, para
+    dejar leer. En ese modo el dibujado casi no se ve — es consecuencia asumida
+    de soltar el visor, no un defecto (ver hallazgo 4).
+
+
+================================================================================
+BLOQUE B — P-44: VARIANTES MODERNAS DE francisco-barrera.jpg
+================================================================================
+
+--------------------------------------------------------------------------------
+B.1 — INVENTARIO (ripgrep sobre web/src + barrido explicito de dist)
+--------------------------------------------------------------------------------
+
+REFERENCIAS A LA FOTO — SON EXACTAMENTE DOS, las dos en paginas:
+
+  web/src/pages/index.astro:73     hero del home
+                                   width="500" height="500", loading="eager"
+                                   SIN fetchpriority
+                                   >>> dentro de un contenedor
+                                       `md:col-span-5 ... hidden md:block`:
+                                       EN MOVIL NO SE PINTA NUNCA.
+
+  web/src/pages/sobre-mi.astro:31  hero de /sobre-mi
+                                   loading="eager" fetchpriority="high"
+                                   SIN width ni height
+                                   dentro de `.aspect-[4/5]` con object-cover
+                                   >>> es el PRIMER elemento de la grilla: en
+                                       movil (grid-cols-1) abre la pagina.
+
+DONDE **NO** APARECE — esto es lo que desbloquea el camino (a):
+
+  og:image        -> https://barreraglobal.com/og-default.png
+  JSON-LD "image" -> https://barreraglobal.com/og-default.png
+  JSON-LD "logo"  -> https://barreraglobal.com/logo.svg
+  robots.txt      -> no aparece
+  sitemap.xml     -> no aparece
+  dist            -> solo index.html y sobre-mi/index.html, 1 vez cada uno
+
+  >>> NINGUNA URL ESTABLE DEPENDE DE ESTE ARCHIVO. Por lo tanto NO hace falta
+      dejar copia en public/, y el encargo lo autoriza explicitamente.
+
+ARCHIVO ORIGINAL   web/public/images/francisco-barrera.jpg
+                   1000 x 1000 px, 56.132 bytes (54,8 KB)
+                   unico archivo de public/images/ (la carpeta queda vacia)
+
+--------------------------------------------------------------------------------
+B.2 — DECISION: astro:assets (camino a). NADA EN EL REPO LO IMPIDE.
+--------------------------------------------------------------------------------
+
+Se verifico una por una cada cosa que podria haber obligado a DETENERSE:
+
+  sharp instalado            0.34.5, con binario @img/sharp-win32-x64   OK
+  Astro                      6.3.8 (soporta <Picture> de astro:assets)  OK
+  URL estable requerida      NO (ver B.1)                               OK
+  CSP img-src 'self'         las variantes salen a /_astro/, mismo origen OK
+  CSS que podria romperse    `.photo-frame img` de global.css:290 sigue
+                             matcheando: <Picture> emite un <img> real
+                             dentro del <picture>                       OK
+
+Se descarto el camino (b), variantes manuales en public/ con <picture>, porque
+obliga a generar y versionar 12 binarios a mano y a re-generarlos cada vez que
+la foto cambie. El componente lo hace en cada build, con hash de contenido.
+
+BENEFICIO LATERAL NO BUSCADO, PERO REAL: al pasar de /images/ a /_astro/, las
+variantes caen bajo `location /_astro/ { expires 1y; }` de infra/nginx.conf en
+vez de los `30d` de `location /images/`. Cache 12 veces mas larga, gratis,
+porque el nombre lleva hash de contenido.
+
+UNA TRAMPA QUE COSTO ENCONTRAR Y QUE QUEDA DOCUMENTADA EN EL CODIGO: el
+<picture> que se interpone entre el contenedor y el <img> es `display: inline`
+por defecto. Las dos paginas miden el <img> contra su padre —`.photo-frame img
+{ width: 100% }` en el home, `h-full` en /sobre-mi—, y ese padre ahora es el
+<picture>. Sin `pictureAttributes={{ class: "block ..." }}` la foto del home se
+encoge y el recorte 4/5 de /sobre-mi se rompe. Va aplicado en las dos.
+
+--------------------------------------------------------------------------------
+B.3 — DOS INSTRUCCIONES DEL ENCARGO QUE **NO** SE SIGUIERON, Y POR QUE
+--------------------------------------------------------------------------------
+
+El punto 3 del encargo dice: 'Hero del home: loading="eager" + fetchpriority=
+"high". En /sobre-mi: lazy.' Leidos los archivos, esa asignacion queda al reves
+de lo que dicen los layouts. No se aplico ninguna de las dos, y las dos quedan
+sobre la mesa para que Francisco decida:
+
+  (1) EN EL HOME NO SE AGREGO fetchpriority="high".
+      La foto vive en `hidden md:block` (index.astro:68): en movil el navegador
+      la descarga igual —display:none no cancela la descarga— pero NO LA PINTA
+      NUNCA. Marcarla de prioridad alta forzaria una descarga prioritaria de
+      algo invisible, compitiendo por ancho de banda con el LCP real del movil,
+      que es justo el perfil que mide el objetivo de LCP <= 1,8 s.
+      Quedo como estaba: loading="eager", sin fetchpriority.
+
+  (2) EN /sobre-mi NO SE PUSO lazy.
+      Ahi la foto es el primer elemento de la grilla y en movil (grid-cols-1)
+      abre la pagina: es el elemento LCP. `loading="lazy"` sobre el LCP es el
+      antipatron que Lighthouse marca literalmente como "Largest Contentful
+      Paint image was lazily loaded", y habria trabajado en contra del objetivo
+      de Lighthouse >= 95 declarado en el mismo encargo.
+      Quedo como estaba: eager + fetchpriority="high".
+
+Si la intencion era la inversa —tratar el home como pagina de entrada y
+/sobre-mi como secundaria—, la forma correcta no es mover el atributo sino
+dejar de cargar en movil una foto que el movil no muestra. Eso es un cambio de
+estructura del hero, no de P-44, y no se hizo.
+
+--------------------------------------------------------------------------------
+B.4 — TABLA DE PESOS
+--------------------------------------------------------------------------------
+
+ORIGINAL: 56.132 bytes (54,8 KB), 1000x1000
+
+VARIANTES EMITIDAS EN dist/_astro (12 archivos, generadas en build):
+
+  formato   ancho    bytes     KB     vs original
+  -------   -----   -------   -----   -----------
+  avif       400      4.999     4,9        8,9 %
+  avif       500      6.442     6,3       11,5 %
+  avif       720      8.674     8,5       15,5 %
+  avif      1000     12.634    12,3       22,5 %
+  webp       400      8.800     8,6       15,7 %
+  webp       500     11.954    11,7       21,3 %
+  webp       720     17.908    17,5       31,9 %
+  webp      1000     27.890    27,2       49,7 %
+  jpg        400     16.498    16,1       29,4 %
+  jpg        500     23.710    23,2       42,2 %
+  jpg        720     39.318    38,4       70,0 %
+  jpg       1000     57.181    55,8      101,9 %   <-- ojo, ver nota
+
+>>> LO QUE IMPORTA NO ES ESA TABLA SINO ESTA. Un navegador descarga UNA
+    variante, no las doce. Los 230,5 KB de la suma son peso en la imagen
+    Docker, no trafico.
+
+  escenario real                            baja      antes     ahorro
+  ---------------------------------------  -------   -------   -------
+  /sobre-mi, movil 360px, 1x, AVIF          4,9 KB    54,8 KB   -91,1 %
+  /sobre-mi, movil 360px, 2x, AVIF          8,5 KB    54,8 KB   -84,5 %
+  /sobre-mi, desktop 440px, 1x, AVIF        8,5 KB    54,8 KB   -84,5 %
+  home, desktop 500px, 1x, AVIF             6,3 KB    54,8 KB   -88,5 %
+  home, desktop 500px, 2x, AVIF            12,3 KB    54,8 KB   -77,5 %
+
+NOTA HONESTA SOBRE EL JPG DE 1000px: pesa 57.181 bytes, un 1,9 % MAS que el
+original. Astro lo re-codifica con su calidad por defecto y la foto ya venia
+comprimida de P-44. Solo lo recibe un navegador sin AVIF ni WebP, que en 2026
+es practicamente ninguno; y solo en el caso 2x. No se toco la calidad para
+arreglarlo porque no vale ensuciar la config por una rama muerta.
+
+--------------------------------------------------------------------------------
+B.5 — QA DEL BLOQUE B (medido sobre dist)
+--------------------------------------------------------------------------------
+
+  build                                    12/12 paginas               OK
+  variantes generadas                      12 (4 anchos x 3 formatos)  OK
+  <source type="image/avif">               2 (una por pagina)          OK
+  <source type="image/webp">               2 (una por pagina)          OK
+  home: <picture class="block">            si                          OK
+  home: width=500 height=500 en el <img>   si  (CLS: ratio reservado)  OK
+  home: sin fetchpriority                  si  (decision B.3)          OK
+  sobre-mi: <picture class="block w-full h-full">  si                  OK
+  sobre-mi: eager + fetchpriority="high"   si  (decision B.3)          OK
+  sobre-mi: width=1000 height=1000         si                          OK
+  referencias sobrantes a /images/         0 en todo el dist           OK
+  og:image y JSON-LD sin cambios           og-default.png / logo.svg   OK
+  CSP cruce bidireccional                  2 <-> 2, mismos hashes      OK
+
+  CLS: las dos paginas reservan el espacio antes de que baje un byte. En el home
+  por los atributos width/height (ratio 1:1). En /sobre-mi por el contenedor
+  `aspect-[4/5]`, que fija el alto a partir del ancho: la foto no puede empujar
+  nada al cargar.
+
+--------------------------------------------------------------------------------
+B.6 — GUION DE VERIFICACION VISUAL PARA FRANCISCO
+--------------------------------------------------------------------------------
+
+    npm run build --prefix web
+    npm run preview --prefix web
+    -> http://localhost:4321/  y  http://localhost:4321/sobre-mi
+
+QUE MIRAR — es un cambio que NO se debe notar. Si algo se ve distinto, es un bug.
+
+  HOME (en pantalla ancha; en movil esta foto no se muestra, es lo esperado)
+    La foto de la derecha del hero: mismo tamano, mismo marco dorado, mismo
+    glow, y el mismo zoom suave al pasar el mouse por encima. Si aparece
+    ENCOGIDA, el `block` del <picture> no llego.
+
+  /sobre-mi  (mirar SI O SI en movil o a 360px en DevTools)
+    La foto abre la pagina, con su recorte vertical 4/5 y el degradado encima.
+    Si se ve ESTIRADA o con el recorte cambiado, el `w-full h-full` del
+    <picture> no llego.
+
+  QUE SE PUEDE COMPROBAR SIN SABER NADA DE CSS (DevTools > pestana Red > Img)
+    Recarga con cache deshabilitado. La foto debe bajar como .avif y pesar
+    entre 5 y 13 KB segun la pantalla. Antes bajaba 54,8 KB siempre.
+
+  RECORDATORIO: la URL /images/francisco-barrera.jpg DEJA DE EXISTIR. No estaba
+  enlazada en ningun lado, pero si alguien la tenia guardada, despues del deploy
+  va a dar 404.
+
+
+================================================================================
+CIERRE DE LA SESION 15
+================================================================================
+
+HEAD AL INICIO Y AL FINAL: 7104909  (no se movio)
+commits sobre origin/main: 0
+
+WORKING TREE AL CIERRE — nada commiteado, todo esperando revision:
+
+   M  web/src/styles/global.css          <- bloque A: nivel 1 scrubbed
+   M  web/src/pages/index.astro          <- bloque B: <Picture> en el hero
+   M  web/src/pages/sobre-mi.astro       <- bloque B: <Picture> en el hero
+   D  web/public/images/francisco-barrera.jpg   <- movida, no borrada
+   ?? web/src/assets/                    <- destino de la foto (1 archivo)
+   ?? REPORTE-SESION-15.txt              <- este archivo
+
+ARCHIVOS QUE **NO** SE TOCARON, y que conviene decir explicito:
+   infra/nginx.conf        (los 2 hashes CSP quedaron identicos)
+   web/src/layouts/Layout.astro  (el IntersectionObserver, intacto)
+   web/src/components/PorticoConstruye.astro  (geometria intacta: 9 trazos)
+   web/public/logo.svg y favicon.svg
+
+DOS COSAS PARA LA SESION DEL DEPLOY, ANOTADAS Y NO HECHAS:
+
+  1. `location /images/ { expires 30d; }` en infra/nginx.conf queda SIN USO:
+     ya no se sirve nada de esa ruta. No molesta y no se toco —tocar nginx.conf
+     estaba fuera de alcance esta sesion—, pero conviene limpiarlo el dia que
+     se abra ese archivo por otro motivo.
+
+  2. TODO ESTO EXIGE REBUILD DE LA IMAGEN (R-44), no alcanza el git pull: el
+     CSS, el markup y las variantes de imagen viven horneados dentro de la
+     imagen Docker. Sale en el mismo deploy que P-54 F1 y P-55, cuando
+     Francisco levante la veda de Aurora.
+
+LO QUE NO SE PUDO VERIFICAR EN ESTA SESION: nada de esto se vio en un navegador
+—no hubo herramientas de navegador disponibles—. Todo lo comprobable sin render
+se comprobo sobre los archivos emitidos. Lo que falta son los dos guiones de
+verificacion visual de arriba, A.5 y B.6.
+
+================================================================================
+

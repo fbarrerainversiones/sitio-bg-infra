@@ -1,0 +1,825 @@
+================================================================================
+REPORTE SESION 16 — 11 de agosto de 2026
+Sitio Barrera Global (sitio-bg-infra) — trabajo LOCAL bajo veda de Aurora
+================================================================================
+
+HEAD al abrir              : 7104909  (working tree con la Sesion 15 sin commitear)
+HEAD tras el Paso 0        : 00b3189
+commits sobre origin/main  : 2  (los DOS de la Sesion 15, y nada mas)
+Veda de Aurora             : RESPETADA. Cero SSH, cero VPS, cero comandos remotos.
+pwsh                       : 7.6.4
+
+TODO lo producido HOY queda SIN COMMITEAR, en working tree, para que Francisco
+lo apruebe y el auditor lo re-audite.
+
+
+================================================================================
+0. GATES: LO QUE RESPONDIO FRANCISCO
+================================================================================
+
+GATE 1 — Rotulos del portico
+  RESPUESTA: se quedan, ALINEADOS AL MANUAL v3.1.
+  Aplicado en el Paso 6: 01 Metodo · 02 Vida y salud · 03 Proteccion ·
+  04 Inversion. Cambio de cuatro cadenas. Geometria, timelines y estructura de
+  F1 v2 intactas.
+
+GATE 2 — Auto en el home
+  RESPUESTA: opcion b. /seguros/auto existe y se enlaza desde el dropdown del
+  header y el sitemap, pero el home conserva sus tres grupos. No se toco la
+  grilla de productos.
+
+GATE 3 — Checklist visual de la Sesion 15
+  RESPUESTA: "Confirmado, los 6 puntos pasan".
+  Recien con eso se hicieron los dos commits:
+    86507e6  F1 v2: portico ligado al scroll con view timelines (3 niveles)
+    00b3189  P-44: foto principal en astro:assets (AVIF/WebP + srcset)
+
+GATE 4 — Hero del home (lo abri yo, no estaba en el encargo)
+  El Brand Book pedia "texto abajo-izquierda, max-width 520px" y el hero era
+  una grilla 7/5 centrada con la foto de Francisco a la derecha. No conviven.
+  RESPUESTA: Brand Book completo, texto abajo-izquierda, SIN foto en el hero
+  del home. La foto sigue viva en /sobre-mi.
+
+
+================================================================================
+1. >>> EL HALLAZGO QUE HABRIA ROTO EL DEPLOY <<<
+================================================================================
+
+La CSP de infra/nginx.conf declaraba `default-src 'none'` y NO declaraba
+`media-src`. Por especificacion, `media-src` no tiene valor propio: cae en
+`default-src`. O sea que valia 'none'.
+
+CONSECUENCIA SI ESTO SE DESPLEGABA ASI: el navegador habria BLOQUEADO
+/videos/hero2.mp4 y /videos/sobre-mi-loop.mp4. F2 y F3 —el trabajo central de
+esta sesion— habrian llegado a produccion MUERTOS: el visitante veria el poster
+estatico para siempre y el error solo aparece en la consola. Otro fallo en
+silencio, de la misma familia que el hash CSP que no cuadra o el `sed -i` sobre
+un bind-mount.
+
+FIX: se agrego `media-src 'self';` a la politica.
+  - Los DOS hashes sha256 NO se tocaron. Verificado: siguen siendo los mismos y
+    el cruce con el build da 2 <-> 2 con 13 apariciones cada uno.
+  - Es la unica modificacion a infra/nginx.conf de la sesion.
+  - Como todo lo que vive en ese archivo, EXIGE REBUILD (R-44).
+
+Lo encontre verificando yo mismo la pregunta que le habia encargado a la lente
+de CSP de la auditoria, antes de que la auditoria terminara.
+
+
+================================================================================
+2. PASO 1 — VERIFICACION E INGESTA DE ASSETS
+================================================================================
+
+SHA256 — LOS CUATRO COINCIDEN (comparacion case-insensitive):
+  hero2.mp4            COINCIDE
+  hero-poster.jpg      COINCIDE
+  sobre-mi-loop.mp4    COINCIDE
+  sobre-mi-poster.jpg  COINCIDE
+
+LAS 6 IMAGENES DE PRODUCTO — nombres y extensiones exactos, todas apaisadas:
+  vida-termino.png          2752 x 1536   ratio 1,79   3.940.924 bytes
+  vida-indexada.png         2752 x 1536   ratio 1,79   3.643.328 bytes
+  salud-nacional.jpg        1376 x  768   ratio 1,79     755.010 bytes
+  salud-internacional.png   1024 x  576   ratio 1,78     868.879 bytes
+  auto.png                  1536 x  864   ratio 1,78   1.745.687 bytes
+  inversion.png             1536 x  864   ratio 1,78   2.130.366 bytes
+
+RECORTE DE LAS FRANJAS NEGRAS DE vida-termino.png
+  Deteccion programatica con sharp: se escanean los CUATRO bordes y solo se
+  recortan filas/columnas consecutivas DESDE el borde. En cuanto aparece una
+  que no es negra, para. Asi no puede comerse contenido interior.
+  Umbral: ningun canal RGB por encima de 12/255.
+
+    antes    2752 x 1536   ratio 1,7917
+    recorte  arriba 164 px · abajo 141 px · izquierda 0 · derecha 0
+    despues  2752 x 1231   ratio 2,2356
+
+  VERIFICACION DE QUE NO SE COMIO CONTENIDO — perfil de brillo por fila
+  (el valor es el canal mas alto de toda la fila):
+    fila 150 = 6    fila 160 = 12   fila 163 = 10   <- franja negra
+    fila 164 = 14   fila 165 = 22   fila 166 = 105  fila 168 = 194  <- contenido
+    fila 1394 = 28  <- ultima con contenido
+    fila 1395 = 11  fila 1400 = 2   fila 1535 = 10  <- franja negra
+  El corte es limpio: el contenido real arranca de golpe en la 166 y termina
+  en la 1394. Se conservan dos filas de transicion casi negras (164 y 165) a
+  proposito: sobrar por el lado seguro no cuesta nada.
+  Re-escaneo posterior: 0 franjas en los cuatro bordes.
+
+  EFECTO SECUNDARIO QUE HAY QUE DECIR: el archivo ENGORDO de 3.940.924 a
+  5.950.211 bytes (+51 %) pese a perder el 20 % de las filas. sharp re-codifica
+  el PNG y no iguala al optimizador que produjo el original; recomprimir al
+  maximo esfuerzo (compressionLevel 9, effort 10) solo recupero 102 KB. NO
+  afecta un solo byte servido: el archivo es FUENTE, y lo que se sirve son las
+  variantes AVIF/WebP que Astro genera a partir de el.
+
+  Las otras 5 imagenes se escanearon tambien: 0 franjas en todas.
+
+
+================================================================================
+3. PASO 2 — F2: VIDEO HERO EN EL HOME
+================================================================================
+
+DIAGNOSTICO PREVIO (leido, no recordado)
+  index.astro:26  hero = section relative min-h-[85vh] flex items-center
+                  overflow-hidden, con grilla 12 columnas: texto en col-span-7
+                  centrado verticalmente, foto en col-span-5 `hidden md:block`.
+  Layout.astro    sin cambios; el unico <script> del sitio sigue siendo el
+                  IntersectionObserver, intacto.
+
+DECISION DE ARQUITECTURA: un componente, no dos copias
+  web/src/components/FondoVideo.astro emite CUATRO capas absolutas y nada mas.
+  Lo usan el hero del home y el de /sobre-mi. Si el tratamiento del Brand Book
+  cambia, cambia en un lugar. Quien lo usa pone la seccion `relative
+  overflow-hidden` y su contenido con z-10.
+
+EL POSTER, QUE ES EL LCP
+  No se sirve el JPG de origen sino una version optimizada con getImage() de
+  astro:assets, verificado contra la documentacion oficial de Astro:
+    await getImage({ src, format, width, quality })  ->  .src
+  Formato WebP y NO AVIF, a proposito: el atributo `poster` acepta UNA sola URL
+  y no negocia formato; si el navegador no entendiera AVIF se quedaria sin
+  poster y con un rectangulo negro. WebP lo entiende todo lo que reproduce
+  video hoy.
+    hero-poster       489,1 KB  ->  59,5 KB  (WebP, 1024px, q40)
+    sobre-mi-poster   254,2 KB  ->  25,0 KB  (WebP, 1024px, q40)
+  Se puede comprimir tanto porque esta imagen NUNCA se ve limpia: vive bajo
+  opacidad 0.65, saturate(0.5), brightness(0.85) y dos velos.
+
+TRATAMIENTO DEL BRAND BOOK, COMPLETO
+  video    opacity .65 · filter saturate(.5) brightness(.85) · object-fit cover
+  velo 1   linear-gradient(90deg, rgba(8,8,13,.85), transparent)
+  velo 2   40 % de alto, hacia var(--bv-fondo) — que por defecto es --bg y las
+           secciones sobre fondo elevado redefinen con `.bv-en-elev`, para que
+           el degradado muera contra SU fondo y no deje un escalon de color.
+  texto    esquina inferior izquierda, max-width 520px (`items-end` + pt-40)
+
+  El h1 bajo 520px paso de text-5xl/7xl a text-4xl/6xl. A 72px, "Patrimonio
+  que crece." se partia en dos lineas dentro de esa caja y sumaba cuatro lineas
+  de titular. Es lo unico que se toco del copy: ni una palabra cambio.
+
+REDUCED-MOTION, CON SU LIMITE DICHO SIN ADORNO
+  Lo que SI se logro sin JavaScript: en `prefers-reduced-motion: reduce` el
+  <video> se oculta y aparece un <img> con el MISMO poster y el MISMO
+  tratamiento. La URL es identica a la del atributo `poster`, o sea la misma
+  entrada de cache y no una segunda descarga.
+  Lo que NO se puede hacer sin JavaScript: impedir que el video se DESCARGUE y
+  se reproduzca de fondo. `autoplay` esta en el markup de forma incondicional y
+  MDN lo dice explicito: "autoplay overrides preload". Cambiarlo exige un
+  <script>, que moveria los hashes CSP.
+
+  TECNICA QUE VERIFIQUE Y DESCARTE: `<source media="(prefers-reduced-motion:
+  no-preference)">` habria resuelto las dos cosas de una. MDN es tajante: el
+  atributo `media` es "Not allowed if the parent is <audio> or <video>" — solo
+  funciona dentro de <picture>. Se comprobo antes de descartarlo, no despues.
+
+
+================================================================================
+4. PASO 3 — F3: /sobre-mi CINEMATOGRAFICA
+================================================================================
+
+El hero recibe sobre-mi-loop.mp4 con el mismo componente y el mismo patron de
+accesibilidad. NO se toco una palabra del texto, ni la estructura, ni la foto,
+ni la credencial SCVS: lo unico que cambia es lo que hay DETRAS.
+La seccion lleva `bv-en-elev` porque va sobre `bg-bg-elev-1`.
+
+
+================================================================================
+5. PASO 4 — /seguros/auto DESDE CERO
+================================================================================
+
+DIAGNOSTICO: se leyeron ProductLayout.astro completo y vida-termino.astro
+completo. El CTA se replica identico al patron: lo emite el propio layout, no
+la pagina.
+
+COPY: ES BORRADOR, PENDIENTE DE APROBACION DE FRANCISCO.
+  Cuatro parrafos. El alcance "cobertura unicamente en el Ecuador" va DOS
+  veces y en lugar prominente: en el heroSubtitle y como primera frase del
+  primer parrafo, con el encuadre "es el primer dato y no la letra chica".
+  Restricciones respetadas: cero cifras, primas o porcentajes (Art. 11.6);
+  cero "mejor precio", descuentos o promesas (Art. 12.12); cero aseguradoras.
+  Ninguna cobertura se presenta como garantizada: se describe que ATIENDE un
+  seguro vehicular en general y se remite a la poliza y a la conversacion.
+  El disclaimer del Art. 11.6 lo emite ProductLayout, igual que en las cinco
+  hermanas: no se duplica.
+
+SCHEMA — UNA DESVIACION DELIBERADA, EXPLICADA
+  El encargo pedia "Service + BreadcrumbList coherentes con las paginas
+  hermanas". Las hermanas NO TENIAN NINGUNO: ProductLayout solo heredaba los
+  tres JSON-LD de Layout.astro. Agregarselo solo a auto habria sido justamente
+  lo contrario de coherente. Se agrego AL LAYOUT, asi que las SEIS lo emiten
+  igual. Verificado: Service:True y BreadcrumbList:True en las seis.
+  Son bloques `application/ld+json`, o sea datos: la CSP no los evalua y no
+  exigen hash.
+
+ENLACES
+  Header: auto entra al dropdown como "Seguro vehicular", en la posicion que le
+    corresponde, y el comentario que documentaba D1 se actualizo para registrar
+    que la decision del 11/08 lo supera.
+  Footer: NO SE TOCO, y es lo correcto. El footer no lista productos
+    individualmente: solo enlaza /#productos. "Segun patron" era no tocarlo.
+  Home: sin cuarto grupo, por el Gate 2.
+  sitemap.xml: /seguros/auto agregada a mano con lastmod 2026-08-11, y el
+    comentario de cabecera actualizado de 11 a 12 URLs.
+
+
+================================================================================
+6. PASO 5 — CABECERAS VISUALES DE LAS 6 PAGINAS DE PRODUCTO
+================================================================================
+
+UNA implementacion, en ProductLayout.astro. No seis variantes.
+Props nuevas: heroImage (ImageMetadata), heroImageAlt, heroPosicion (opcional).
+
+LA ESCALERA DE ANCHOS SE ADAPTA A CADA FUENTE, por dos motivos opuestos:
+  - Hacia arriba: Astro genera lo que se le pida, TAMBIEN por encima del
+    original. Pedirle 1920 a una imagen de 1024 devuelve un upscale borroso que
+    ademas pesa mas que la fuente.
+  - Hacia abajo: si la fuente mide 1536 y la escalera se cortara en 1024, un
+    desktop ancho con sizes="100vw" recibiria el peldano de 1024 y lo estiraria
+    igual. Por eso el ultimo peldano es el ancho NATIVO, topeado en 1920.
+  Resultado real, verificado en el srcset emitido:
+    vida-termino, vida-indexada (2752)  ->  640, 1024, 1600, 1920
+    auto, inversion (1536)              ->  640, 1024, 1536
+    salud-nacional (1376)               ->  640, 1024, 1376
+    salud-internacional (1024)          ->  640, 1024
+  Cero upscaling en las seis.
+
+TRATAMIENTO: la imagen es TEXTURA, el copy manda.
+  opacidad 0.65 (dentro del rango 0.6-0.7 del Brand Book) + brightness(0.7),
+  con un velo doble: uno horizontal que garantiza contraste sobre el flanco
+  IZQUIERDO —donde caen kicker, h1 y CTA— y uno vertical que mata la imagen
+  contra el fondo para que la cabecera no termine en un corte seco.
+  La capa va ABSOLUTA: la altura de la seccion la sigue fijando el padding del
+  contenido, asi que la imagen no puede empujar layout. CLS 0 por construccion.
+
+LCP: eager + fetchpriority="high" SOLO en la imagen de cabecera. Verificado en
+las seis: 1 <img>, 1 loading="eager", 1 fetchpriority="high", 0 lazy. No hay
+otra imagen en esas paginas con la que competir.
+
+OBJECT-POSITION: se expuso la prop pero NO se uso en ninguna. Hice la
+aritmetica del recorte a 360px para las seis (con cover, un asset de ratio 1,78
+en una caja mas alta recorta a los LADOS, no arriba) y el sujeto queda centrado
+y visible en todas. Poner valores arbitrarios "por las dudas" habria sido peor
+que no ponerlos.
+
+ALT TEXT: escrito despues de MIRAR cada imagen, no de suponerla. Genere
+miniaturas con sharp y las revise una por una.
+  vida-termino         "Casa moderna de dos plantas al anochecer, con los
+                        ventanales iluminados desde adentro"
+  vida-indexada        "Ciudad al atardecer vista a traves del ventanal de un
+                        piso alto"
+  salud-nacional       "Habitacion de clinica con ventanal y vista a la
+                        cordillera de los Andes al atardecer"
+  salud-internacional  "Habitacion de clinica con ventanal y vista nocturna al
+                        skyline de una gran ciudad"
+  auto                 "Frente de un automovil con las luces encendidas y una
+                        carretera de montana al fondo"
+  inversion            "Fachada de columnas y fronton de un edificio neoclasico
+                        bajo luz dorada"
+  (en el codigo van con sus tildes correctas; aca se transcriben sin acentos
+   por el encoding de este .txt)
+
+El copy existente de las cinco paginas NO se toco. Solo se les agrego el import
+de su imagen y las dos props.
+
+
+================================================================================
+7. PASO 6 — ROTULOS DEL PORTICO
+================================================================================
+
+Cambio minimo, cuatro cadenas, por el Gate 1:
+  01 · Basamento           ->  01 · Metodo
+  02 · Columnas            ->  02 · Vida y salud
+  03 · Dintel y arquitrabe ->  03 · Proteccion
+  04 · Fronton             ->  04 · Inversion
+Los `titulo` y `detalle` son copy aprobado y NO se tocaron. Geometria,
+timelines y estructura de F1 v2, intactas.
+
+NOTA: el `aria-label` del SVG sigue diciendo "desde el basamento hasta el
+fronton". Es deliberado: describe el DIBUJO para un lector de pantalla, no el
+copy comercial. Si Francisco lo quiere alineado tambien, es una cadena mas.
+
+
+================================================================================
+8. UN DEFECTO QUE INTRODUJE Y CORREGI EN LA MISMA SESION
+================================================================================
+
+Escribi los comentarios de las secciones nuevas con `<!-- -->`. Los comentarios
+HTML SI LLEGAN AL BUILD — el propio repo lo tenia documentado en
+vida-termino.astro:27-30 y no lo mire antes de escribir. Estaba publicando
+parrafos de razonamiento interno ("Decision de Francisco", "CLS 0 por
+construccion", el tratamiento del Brand Book) en las 13 paginas del sitio
+publico. Lo detecte investigando por que `fetchpriority` aparecia dos veces en
+paginas con una sola imagen: la segunda aparicion estaba dentro de mi propio
+comentario.
+Corregido: los tres pasaron a `{/* */}`. Verificado en el HTML emitido: 0
+apariciones de "Brand Book", "CLS 0" y "Decision de Francisco".
+
+
+================================================================================
+9. TABLA DE PESOS
+================================================================================
+
+LO QUE DESCARGA UN MOVIL DE 360px POR PAGINA (AVIF, 1x)
+  pagina                        baja        fuente        ahorro
+  ---------------------------  ---------   ----------   --------
+  /seguros/auto                  8,4 KB    1.704,8 KB    -99,5 %
+  /seguros/vida-termino         17,6 KB    5.810,8 KB    -99,7 %
+  /seguros/vida-indexada        10,4 KB    3.557,9 KB    -99,7 %
+  /seguros/salud-nacional       14,1 KB      737,3 KB    -98,1 %
+  /seguros/salud-internacional  15,4 KB      848,5 KB    -98,2 %
+  /inversion                    11,2 KB    2.080,4 KB    -99,5 %
+
+POSTER DE CADA VIDEO (es el elemento LCP de esas dos paginas)
+  home        hero-poster       489,1 KB fuente  ->  59,5 KB WebP
+  /sobre-mi   sobre-mi-poster   254,2 KB fuente  ->  25,0 KB WebP
+
+VIDEOS (se sirven tal cual desde /videos/, Astro no los procesa)
+  hero2.mp4            7,20 MB
+  sobre-mi-loop.mp4    5,33 MB
+
+VARIANTES EMITIDAS, POR FORMATO (las referenciadas)
+  avif   22 archivos    598,6 KB
+  webp   24 archivos  1.204,5 KB
+  jpeg   21 archivos  2.463,9 KB   (fallback, solo para navegadores sin AVIF/WebP)
+  jpg     3 archivos    110,3 KB
+
+DOS COSAS DE PESO QUE ENCONTRE Y ARREGLE
+  (a) fallbackFormat="jpeg". Cuatro de las seis fuentes son PNG y, sin esto,
+      Astro emitia el fallback tambien en PNG a cada ancho: un solo producto
+      llegaba a 6,2 MB de PNG que ningun navegador con AVIF o WebP pide jamas.
+      El total de imagenes en /_astro paso de 50,43 MB a 18,67 MB.
+  (b) El poster bajo de 1280/q62 a 1024/q40: 111,7 KB -> 59,5 KB en el home.
+
+UNA COSA DE PESO QUE **NO** ARREGLE, Y QUE HAY QUE DECIDIR
+  14,39 MB de /_astro son HUERFANOS: Astro emite ademas el ORIGINAL de cada
+  imagen de producto y NINGUNA pagina lo referencia. Verificado archivo por
+  archivo contra todo el HTML y el CSS del build.
+      vida-termino.png          5.810,8 KB
+      vida-indexada.png         3.557,9 KB
+      inversion.png             2.080,4 KB
+      auto.png                  1.704,8 KB
+      salud-internacional.png     848,5 KB
+      salud-nacional.jpg          737,3 KB
+  Ocurre porque ninguno de los anchos pedidos coincide con el ancho nativo.
+  RECOMENDACION, no ejecutada: estas seis son FOTOGRAFIAS guardadas como PNG.
+  Convertirlas a JPEG de alta calidad bajaria el peso del repo en ~11 MB y el
+  de los huerfanos a ~1,5 MB, sin cambiar un pixel de lo que se sirve. NO lo
+  hice porque el encargo verifico "nombres y extensiones exactos" y renombrar
+  los assets que entrego Francisco no es una decision mia.
+
+Peso total del dist: 166 archivos, 32,92 MB (incluye los 12,5 MB de videos).
+
+
+================================================================================
+10. LIGHTHOUSE LOCAL (npm run preview, sobre el build final)
+================================================================================
+
+Objetivos: Perf/A11y/BP/SEO >= 95 · LCP <= 1,80 s · CLS <= 0,050
+
+MOVIL (perfil por defecto: Moto G Power, 4G lento simulado)
+  pagina           Perf  A11y  BP   SEO  |  LCP     CLS     FCP     TBT
+  ---------------  ----  ----  ---  ---  |  ------  ------  ------  ----
+  /                  99    92  100  100  |  1,96 s  0,000   1,66 s   0 ms
+  /sobre-mi          97    91  100  100  |  2,12 s  0,000   1,97 s   0 ms
+  /seguros/auto      99    91  100  100  |  1,82 s  0,000   1,67 s   0 ms
+
+DESKTOP
+  /                 100    91  100  100  |  0,43 s  0,000   0,43 s   0 ms
+  /sobre-mi         100    91  100  100  |  0,50 s  0,000   0,46 s   0 ms
+  /seguros/auto     100    91  100  100  |  0,42 s  0,000   0,42 s   0 ms
+
+CLS: 0,000 en las SEIS mediciones. El objetivo era <= 0,050.
+Performance, Best Practices y SEO: cumplen en las seis.
+
+DOS OBJETIVOS NO SE CUMPLEN, Y HAY QUE DECIRLO:
+
+  (1) LCP MOVIL: 1,82 / 1,96 / 2,12 s contra el objetivo de 1,80 s.
+      /seguros/auto queda a 0,02 s; el home a 0,16 s; /sobre-mi a 0,32 s.
+      DIAGNOSTICO: no es culpa del peso de las imagenes. El delta FCP -> LCP es
+      de solo 0,15-0,30 s, o sea que el cuello esta en el FCP (1,66-1,97 s), no
+      en lo que se pinta. TTFB: 3-4 ms. El unico recurso que bloquea render es
+      el CSS, 11.913 bytes, ~155 ms. Lo que queda es la carga de fuentes
+      self-hosted: global.css importa DIEZ archivos de Fontsource (Cormorant
+      400/500/600/700, Outfit 300/400/500/600/700, JetBrains Mono variable).
+      El elemento LCP es el <video> (su poster) en el home y /sobre-mi, y la
+      imagen de cabecera en /seguros/auto.
+      SIGUIENTE PALANCA, no ejecutada: subsetting y preload de fuentes, o
+      recortar pesos tipograficos. Toca Layout.astro —donde vive el <script>
+      con hash CSP— y no estaba en el encargo. Es trabajo de una sesion propia.
+
+  (2) ACCESIBILIDAD: 91-92 contra el objetivo de 95.
+      NO ES UNA REGRESION DE ESTA SESION. Las tres paginas fallan por lo mismo,
+      y todo esta en el FOOTER, que no se toco:
+        · color-contrast: `text-tx-disabled` (#6b6964) sobre #0f0f15 da 3,48:1
+          y sobre #08080d da 3,64:1. WCAG AA pide 4,5:1 para texto de 12 px.
+          Cuatro nodos por pagina.
+        · link-in-text-block: el enlace a /cookies del footer legal tiene 2,39:1
+          de contraste contra el texto que lo rodea (dorado #c9a84c sobre
+          #6b6964) y no lleva subrayado que lo distinga. Minimo: 3:1.
+      Ya le pasa a las 12 paginas que estan HOY en produccion.
+      FIX, no ejecutado: aclarar el token --tx-disabled hasta pasar 4,5:1 y
+      subrayar ese enlace. Es un cambio de token que afecta a TODO el sitio y
+      cambia el aspecto de todos los textos legales: es decision de Francisco,
+      no de una sesion de video.
+
+
+================================================================================
+11. QA ESTRUCTURAL
+================================================================================
+
+  build                                    13/13 paginas          OK
+  (subio de 12 a 13 por /seguros/auto)
+
+  CSP cruce bidireccional                  2 <-> 2                OK
+    sha256-aOPTArMuUPr5ybUMJpH+mtSGicP8zlnwwFwZYYhokv4=  13 apariciones
+    sha256-Qra3eTJV60gng4dzuHtxcR7XY8lE1nLbTAAJ5T7jyto=  13 apariciones
+    cero huerfanos en ambas direcciones · NINGUN HASH CAMBIO
+  bloques application/ld+json (datos)      51                     OK
+  atributos on* en dist                    0                      OK
+  <script src> en dist                     0                      OK
+  (o sea: <video>, <picture> y getImage no introdujeron una linea de JS)
+
+  [PENDIENTE en el build                   0                      OK
+  <Pendiente> o [PENDIENTE en auto.astro   0                      OK
+  (los 12 <Pendiente> del fuente son los bloques COMENTADOS preexistentes de
+   las 5 hermanas, dentro de {/* */}, mas la documentacion del propio
+   componente. Ninguno llega al build. Regla 6 respetada.)
+
+  sitemap.xml                              12 URLs, con /seguros/auto  OK
+  Service + BreadcrumbList                 en las 6 de producto   OK
+  imports muertos                          0                      OK
+  referencias a /images/ (fuente y build)  0                      OK
+  upscaling de imagenes                    0                      OK
+
+
+================================================================================
+12. AUDITORIA ADVERSARIAL — JOURNAL COMPLETO
+================================================================================
+
+5 lentes + un refutador por hallazgo. 28 agentes, 0 errores, ~26 minutos.
+El journal se leyo UNA SOLA VEZ, con el workflow ya cerrado (leccion S-14).
+RESULTADO: 23 hallazgos crudos, 5 CONFIRMADOS, 18 refutados.
+
+>>> LOS 5 CONFIRMADOS — 3 CORREGIDOS, 2 ELEVADOS A DECISION DE FRANCISCO <<<
+
+C1 — index.astro:47 — media — CORREGIDO
+  El `text-4xl md:text-6xl` del h1 del hero era LETRA MUERTA. La regla
+  `h1 { font-size: var(--text-5xl) }` de global.css vive fuera de toda @layer y
+  le gana a las utilidades de Tailwind, que viven en @layer utilities. El h1 se
+  pintaba a 48px en TODOS los anchos. El auditor lo midio en Chrome headless:
+  fontSize 48px identico en 320x568, 360x640, 932x430 y 1440x900, y localizo el
+  cierre de `@layer utilities` en el offset 40135 contra la regla `h1` en 40618.
+  Es la deuda de R-43 sobre `font-size` en vez de sobre el color de un enlace, y
+  esa superficie NO estaba documentada en PENDIENTES ni en ERRORES.
+  Lo grave no es el aspecto —no es regresion, --text-5xl vale justo 48px y
+  produccion ya se ve asi— sino que el ajuste tipografico que JUSTIFICA el hero
+  rehecho no ocurria nunca. Mi propio reporte afirmaba "a 72px se partia en dos
+  lineas": falso, nunca se pinto a 72px.
+  FIX: clase propia `.hero-titulo`, sin capa, con mas especificidad que `h1`.
+  Es la mitigacion ya establecida (patron `.btn-outline`) y NO toca las capas,
+  que R-43 prohibe mover hasta P-47. Verificado: la regla sale en el offset
+  45843, despues del cierre de la capa.
+  PENDIENTE, no ejecutado: ProductLayout.astro pide `md:text-7xl` y tambien se
+  pinta 48px. Es la misma deuda en las 6 paginas de producto. No lo toque
+  porque el encargo decia no tocar el copy ni el diseno de esas paginas.
+
+C2 — auto.astro:31 — media — CORREGIDO
+  `eyebrow` y `productName` eran la misma cadena, asi que el hero imprimia
+  «Seguro vehicular / Seguro vehicular» pegado. Ademas el Service JSON-LD salia
+  con name == serviceType, unico caso del sitio, y el serviceType dejaba de
+  clasificar. Las 5 hermanas usan el GRUPO en el eyebrow.
+  FIX: eyebrow="Seguros generales" y title "Seguro vehicular · Seguros
+  generales · Barrera Global", que replica el patron de las hermanas.
+  Verificado: serviceType "Seguros generales", name "Seguro vehicular".
+  >>> "Seguros generales" es COPY y por lo tanto es BORRADOR como el resto de
+      la pagina: si Francisco prefiere otro nombre de grupo, es una cadena.
+
+C3 — ProductLayout — media — NO CORREGIDO, ES DECISION
+  Los 14,39 MB de originales huerfanos. Ya lo habia encontrado yo (seccion 9);
+  el auditor agrega un dato que yo no habia dicho: ademas de pesar en la imagen
+  Docker, quedan SERVIDOS PUBLICAMENTE bajo `expires 1y`. Cualquiera puede
+  descargar los PNG originales de 5,8 MB.
+  Sigue siendo decision de Francisco: convertir las 6 fotos de PNG a JPEG.
+
+C4 — FondoVideo / los dos mp4 — ALTA — NO CORREGIDO, ES DECISION DE ASSETS
+  >>> EL HALLAZGO MAS SERIO QUE NO PUEDO ARREGLAR YO <<<
+  Los dos mp4 estan codificados a ~3,78 Mbps a 1920x1080: bitrate de video
+  PROTAGONISTA. Pero aca son TEXTURA: en movil se ve el 25 % de su ancho, bajo
+  opacidad 0.65, saturate(0.5), brightness(0.85) y dos velos. En un 4G
+  ecuatoriano real (~5 Mbps) son ~12 segundos de radio a fondo solo para
+  cargar el home, y `autoplay` anula `preload="metadata"` (MDN), asi que el
+  navegador se los baja si o si.
+  POR QUE NO LO TOQUE: re-codificar cambiaria el SHA256 de unos archivos cuyo
+  hash el propio encargo me dio como CONTRATO DE VERIFICACION. Re-encodear en
+  silencio los assets que entrego Francisco no es una decision mia.
+  RECOMENDACION CONCRETA, para antes del deploy: re-codificar los dos loops a
+  ~1280x720 y 800-1200 kbps con el mismo recorte. Para una capa velada al 65 %
+  la diferencia es invisible y bajaria de 12,8 MB a ~2 MB. Sin JavaScript no
+  hay forma de servir un video distinto por viewport: `media` en <source> NO
+  esta permitido dentro de <video> (MDN), solo dentro de <picture>.
+
+C5 — global.css / .bv-velo-lateral — ALTA — CORREGIDO
+  El velo lateral es un gradiente a 90 grados calibrado para el hero de
+  desktop, donde el texto vive en la franja izquierda. A 360px el texto ocupa
+  el 93 % del viewport y su mitad derecha caia en la parte transparente del
+  gradiente: el parrafo del hero bajaba de 4,5:1 de contraste en zonas amplias.
+  FIX: debajo de md el velo se vuelve VERTICAL y se apoya donde de verdad esta
+  el texto —abajo—, con rgba(8,8,13) de .35 arriba a .92 abajo.
+
+>>> UN REFUTADO QUE REVERTI, Y ERA EL MAS PELIGROSO DE TODOS <<<
+
+R1 — Permissions-Policy: `autoplay=()` — declarado ALTA, REFUTADO por el
+     workflow, y el refutador SE EQUIVOCO.
+  Lo verifique yo contra MDN antes de aceptar la refutacion, porque olia igual
+  que el `media-src`. MDN, directiva autoplay:
+    · una allowlist vacia "grants permission to no origins" — el propio origen
+      INCLUIDO;
+    · "The autoplay attribute on <audio> and <video> elements will be ignored";
+    · el default, si la directiva se omite, es `self`.
+  O sea: los dos videos se habrian quedado CONGELADOS EN SU POSTER, sin
+  reproducir jamas. Es el SEGUNDO asesino silencioso del video de esta sesion,
+  independiente del `media-src` que faltaba, y bastaba cualquiera de los dos
+  para que F2 y F3 llegaran muertas a produccion.
+  FIX: `autoplay=(self)`, que es ademas el valor por defecto de la directiva.
+  La cabecera queda igual de restrictiva para terceros; las otras doce
+  funciones siguen en allowlist vacia.
+
+LOS 18 REFUTADOS — titulares, para que el auditor decida si reabre alguno
+  R2, R14, R15  los mp4 caen en `location /` con `expires -1`, sin politica de
+                cache propia. (Refutados por menores; pero si se re-codifican
+                los videos conviene aprovechar y darles su `location`.)
+  R3   el hero del home mide 815px en un viewport de 640 y los CTA quedan bajo
+       el pliegue; `pt-40` deja 172px de vacio arriba.
+  R4   /seguros/auto es un callejon: sus dos CTA mandan a /#productos, donde el
+       vehicular NO figura (consecuencia directa del Gate 2, opcion b).
+  R5   el copy enumera «un choque, un robo» sin condicionar; solo el tercer
+       item lleva «cubierto».
+  R6   «a las apuradas» y «la letra chica» como modismos rioplatenses.
+  R7   dos afirmaciones de mercado sin fuente en el ultimo parrafo.
+  R8   «Escribinos» (voseo) ahora se renderiza en 6 paginas en vez de 5.
+       Preexistente, en HEAD.
+  R9   «Sobre mi» sin tilde en header y footer. Preexistente en todo el sitio.
+  R10  el descriptor del pie enumera las lineas de negocio y deja fuera el
+       vehicular.
+  R11  «skyline» como anglicismo en un alt text que un lector de pantalla
+       pronuncia en voz alta.
+  R12  la documentacion del proyecto sigue diciendo que /seguros/auto esta
+       retirada (D1), mientras el working tree la repone.
+  R13  salud-internacional (1024px) con sizes="100vw" se estira en cualquier
+       viewport de mas de 1024px CSS.
+  R16  a 360px la cabecera de /seguros/auto pierde el sujeto: queda solo la
+       chapa del capo.
+  R17  en reduced-motion el video se oculta pero conserva `autoplay`: se
+       descarga y decodifica igual. (Es el limite que ya documente.)
+  R18  los 14,4 MB de huerfanos, visto desde otra lente.
+
+  MI LECTURA: R4, R5, R6, R7 y R16 son los que valen una segunda mirada.
+  R4 y R16 son consecuencias reales de decisiones tomadas hoy; R5, R6 y R7 son
+  copy, y el copy de auto ya esta declarado BORRADOR y pendiente de tu visto
+  bueno, asi que se resuelven en la misma pasada.
+
+
+================================================================================
+13. GUION DE VERIFICACION VISUAL
+================================================================================
+
+    npm run build --prefix web
+    npm run preview --prefix web
+
+OJO ANTES DE EMPEZAR: en `npm run preview` los videos SI se reproducen, porque
+las cabeceras de seguridad las pone nginx y no el preview. Las dos correcciones
+de cabecera (media-src y autoplay) solo se pueden comprobar DESPUES del deploy,
+en produccion, con la consola abierta. Si tras el deploy ves el poster fijo y
+un error de CSP o de Permissions-Policy en consola, el rebuild no tomo el
+nginx.conf nuevo.
+
+HOME  —  http://localhost:4321/
+  DESKTOP
+    · El video de fondo corre en loop, suave y sin audio. Se ve apagado a
+      proposito: opacidad 65 %, saturacion a la mitad.
+    · El texto esta ABAJO A LA IZQUIERDA, no centrado, dentro de una columna
+      angosta. La foto de Francisco YA NO ESTA en el hero: es lo que decidiste.
+    · El titular «Patrimonio que crece. / Capital protegido.» debe verse mas
+      GRANDE que antes (60px). Si se ve igual que en produccion, la clase
+      .hero-titulo no llego.
+    · Bajando: el portico se dibuja y ahora los rotulos dicen 01 Metodo ·
+      02 Vida y salud · 03 Proteccion · 04 Inversion.
+  MOVIL (DevTools a 360px)
+    · El texto del hero tiene que LEERSE COMODO sobre el video. Este es el fix
+      C5: si el parrafo se pierde contra una zona clara del video, no entro.
+    · El titular debe ocupar MENOS lineas que antes (36px, no 48px).
+  REDUCED-MOTION (DevTools > Rendering > prefers-reduced-motion: reduce)
+    · El video desaparece y queda una IMAGEN FIJA con los mismos velos. Nada se
+      mueve. El portico se ve completo y quieto.
+
+/sobre-mi
+    · Mismo video de fondo detras del hero, con la foto de Francisco ENCIMA:
+      la foto sigue siendo la protagonista. Ni una palabra del texto cambio.
+    · En movil, mirar que la foto y el video no compitan.
+
+LAS 6 PAGINAS DE PRODUCTO  (incluida la nueva /seguros/auto)
+    · Cada una abre con SU imagen de fondo, apagada, con el titulo y los CTA
+      encima y legibles.
+    · A 360px, mirar que el SUJETO de cada imagen siga visible. El auditor
+      marco /seguros/auto como el caso mas justo: a 360px podria quedar solo
+      la chapa del capo. Es el que mas conviene mirar.
+    · /seguros/auto: leer el copy entero. ES BORRADOR Y ESPERA TU VISTO BUENO.
+      Mira sobre todo si «Seguros generales» es el nombre de grupo que queres,
+      y si la frase de alcance «cobertura unicamente en el Ecuador» esta donde
+      la queres.
+    · Dropdown de Productos del header: ahora son seis, con «Seguro vehicular».
+
+
+================================================================================
+14. CIERRE
+================================================================================
+
+HEAD                       : 00b3189   (no se movio despues del Paso 0)
+commits sobre origin/main  : 2         (los dos de la Sesion 15, autorizados)
+commits de la Sesion 16    : 0
+
+ARCHIVOS NUEVOS (sin commitear)
+   web/src/components/FondoVideo.astro
+   web/src/pages/seguros/auto.astro
+   web/src/assets/hero-poster.jpg
+   web/src/assets/sobre-mi-poster.jpg
+   web/src/assets/productos/  (6 imagenes; vida-termino.png RECORTADA)
+   web/public/videos/         (hero2.mp4, sobre-mi-loop.mp4)
+   REPORTE-SESION-16.txt      (este archivo)
+   REPORTE-SESION-15.txt      (quedo sin commitear de la sesion anterior)
+
+ARCHIVOS MODIFICADOS (sin commitear)
+   infra/nginx.conf                     <- media-src 'self' + autoplay=(self)
+   web/src/layouts/ProductLayout.astro  <- cabecera visual + Service/Breadcrumb
+   web/src/styles/global.css            <- .bv-*, .ph-*, velo movil, .hero-titulo
+   web/src/pages/index.astro            <- hero con video, sin foto
+   web/src/pages/sobre-mi.astro         <- video de fondo en el hero
+   web/src/pages/seguros/vida-termino.astro
+   web/src/pages/seguros/vida-indexada.astro
+   web/src/pages/seguros/salud-nacional.astro
+   web/src/pages/seguros/salud-internacional.astro
+   web/src/pages/inversion.astro        <- las 5: import + heroImage/heroImageAlt
+   web/src/components/Header.astro      <- auto al dropdown
+   web/src/components/PorticoConstruye.astro <- rotulos a la capa comercial
+   web/public/sitemap.xml               <- +/seguros/auto
+
+LO QUE HAY QUE DECIDIR ANTES DE COMMITEAR
+   1. El copy de /seguros/auto, incluido «Seguros generales». Es BORRADOR.
+   2. Re-codificar los dos mp4 (C4). Es lo unico de severidad alta que quedo
+      sin resolver, y son 12,8 MB contra un 4G ecuatoriano.
+   3. Convertir las 6 fotos de producto de PNG a JPEG (C3): -11 MB de repo,
+      -13 MB de huerfanos servidos publicamente, cero cambio en lo que se ve.
+
+LO QUE HAY QUE RECORDAR EN EL DEPLOY
+   TODO esto exige REBUILD de la imagen, no basta el git pull (R-44), y ahora
+   con mas razon que nunca: los dos fixes de cabecera viven en infra/nginx.conf
+   y sin ellos los videos no cargan ni se reproducen. Sale en el mismo deploy
+   que P-54 F1, P-55 y P-44, cuando se levante la veda de Aurora.
+
+
+================================================================================
+15. CIERRE — ORDENES DEL 11/08 EJECUTADAS
+================================================================================
+
+>>> EL PUNTO 3 DEL ENCARGO LLEGO VACIO <<<
+El prompt de cierre trae, literal, el marcador sin rellenar:
+  «3. Copy de /seguros/auto: [ESCRIBE AQUI: "aprobado tal cual" o tus cambios
+      exactos].»
+NO hay veredicto de Francisco sobre el copy, y el silencio NO se interpreta
+como aprobacion. Se commiteo igual porque el commit es LOCAL y sin push, el
+archivo se declara borrador en su propio comentario, y Francisco pidio los
+commits por paso de forma explicita. El mensaje del commit lo dice en su
+primera linea. **NO SE PUSHEA NI SE DESPLIEGA /seguros/auto hasta que el copy
+tenga visto bueno.** Eso incluye el nombre de grupo "Seguros generales", que
+tambien es copy.
+
+--------------------------------------------------------------------------------
+15.1 — ORDEN 1: C4 RESUELTO. Contrato de hashes actualizado y verificado.
+--------------------------------------------------------------------------------
+  hero2.mp4          COINCIDE   1.992.920 bytes   1,90 MB   (antes 7,20 MB)
+  sobre-mi-loop.mp4  COINCIDE   1.600.446 bytes   1,53 MB   (antes 5,33 MB)
+  TOTAL /videos                 3.593.366 bytes   3,43 MB   (antes 12,80 MB)
+                                                            -73,0 %
+  Los DOS posters se comprobaron tambien: SIN CAMBIOS, como decia el encargo.
+
+--------------------------------------------------------------------------------
+15.2 — ORDEN 2: C3 EJECUTADO. Las 5 PNG a JPEG (mozjpeg q85, sin metadatos).
+--------------------------------------------------------------------------------
+  imagen                    PNG          JPEG        ahorro    dimensiones
+  ----------------------  -----------  ----------  --------  --------------
+  vida-termino            5.810,8 KB     393,4 KB   -93,2 %  2752x1231
+  vida-indexada           3.557,9 KB     290,1 KB   -91,8 %  2752x1536
+  inversion               2.080,4 KB     171,8 KB   -91,7 %  1536x864
+  auto                    1.704,8 KB      93,9 KB   -94,5 %  1536x864
+  salud-internacional       848,5 KB      74,7 KB   -91,2 %  1024x576
+  ----------------------  -----------  ----------  --------
+  TOTAL                  14.338,5 KB   1.048,4 KB   -92,7 %
+  (salud-nacional.jpg ya era JPEG: no se toco, 737,3 KB)
+
+  Verificado archivo por archivo: dimensiones EXACTAS conservadas, cero EXIF,
+  cero ICC. Los PNG se borraron solo despues de comprobar que el JPEG existia
+  con las mismas dimensiones. No queda ni un PNG en web/src/assets.
+
+  EFECTO EN EL BUILD
+    originales huerfanos servidos publicamente   14,39 MB  ->  1,72 MB  -88 %
+    peso total del dist                          32,92 MB  -> 11,02 MB  -66 %
+
+  NOTA DE PROCESO: las imagenes y los videos NUNCA estuvieron commiteados —eran
+  archivos sin trackear—, asi que no existe un commit de "conversion a JPEG":
+  entran al repo directamente en su forma final. Queda documentado dentro del
+  commit de cabeceras.
+
+--------------------------------------------------------------------------------
+15.3 — ORDEN 4: RE-QA
+--------------------------------------------------------------------------------
+  build                                  13/13 paginas                    OK
+  CSP cruce bidireccional                2 <-> 2, 13 apariciones c/u      OK
+    sha256-aOPTArMuUPr5ybUMJpH+mtSGicP8zlnwwFwZYYhokv4=
+    sha256-Qra3eTJV60gng4dzuHtxcR7XY8lE1nLbTAAJ5T7jyto=
+    cero huerfanos en ambas direcciones · NINGUN HASH CAMBIO en toda la sesion
+  atributos on* en dist                  0                                OK
+  <script src> en dist                   0                                OK
+  [PENDIENTE en dist                     0                                OK
+  [PENDIENTE en el fuente, fuera del propio componente Pendiente.astro: 0  OK
+  media-src 'self' en nginx.conf         presente                         OK
+  autoplay=(self) en nginx.conf          presente                         OK
+  PNG residuales en src/assets           0                                OK
+
+  PESOS DE LAS SEIS CABECERAS — fuente, lo que baja un movil de 360px, y anchos
+    pagina                        fuente     movil(AVIF 1x)   anchos generados
+    ---------------------------  ---------  --------------   ------------------
+    /seguros/vida-termino         393,4 KB       17,6 KB      640/1024/1600/1920
+    /seguros/vida-indexada        290,1 KB       10,5 KB      640/1024/1600/1920
+    /seguros/salud-nacional       737,3 KB       14,1 KB      640/1024/1376
+    /seguros/salud-internacional   74,7 KB       15,2 KB      640/1024
+    /seguros/auto                  93,9 KB        8,2 KB      640/1024/1536
+    /inversion                    171,8 KB       11,2 KB      640/1024/1536
+    Cero upscaling en las seis.
+
+  POSTERS (elemento LCP de home y /sobre-mi)
+    home        59,5 KB      /sobre-mi   25,0 KB
+
+  LIGHTHOUSE MOVIL (mismo perfil que la medicion anterior)
+    pagina           Perf  A11y  BP   SEO  |  LCP     CLS     FCP     TBT
+    ---------------  ----  ----  ---  ---  |  ------  ------  ------  ----
+    /                  98    92  100  100  |  1,98 s  0,000   1,68 s   0 ms
+    /seguros/auto      99    91  100  100  |  1,82 s  0,000   1,67 s   0 ms
+    (antes: / Perf 99 LCP 1,96 s · /seguros/auto Perf 99 LCP 1,82 s)
+
+  UN RESULTADO QUE HAY QUE LEER BIEN: re-codificar los videos NO movio el LCP.
+  Y es correcto que no lo mueva. El LCP de estas paginas nunca estuvo limitado
+  por el video sino por el FCP (1,67-1,68 s, contra un LCP de 1,82-1,98 s): el
+  cuello es el CSS que bloquea render y las diez fuentes self-hosted. Lo que si
+  cambio, y mucho, es el peso real que paga el visitante: la home bajo a
+  2.121 KiB totales, contra los ~7,4 MB que habria descargado antes. Nueve
+  megas menos de datos moviles por visita, aunque el numero de Lighthouse se
+  quede quieto.
+  Los dos objetivos que seguian sin cumplirse siguen igual y por las mismas
+  razones ya documentadas en la seccion 10: LCP movil por encima de 1,80 s
+  (palanca: fuentes) y accesibilidad 91-92 por dos fallas PREEXISTENTES del
+  footer, que ya afectan a las paginas hoy en produccion.
+
+--------------------------------------------------------------------------------
+15.4 — ORDEN 5: COMMITS GRANULARES. CERO PUSH.
+--------------------------------------------------------------------------------
+  09cc6fe773ab432573bc106a6a5d10db5eb525c2
+      feat(home): F2 video hero + las dos cabeceras que lo hacen funcionar
+      videos re-codificados, posters, FondoVideo.astro, global.css,
+      index.astro e infra/nginx.conf (media-src + autoplay). Incluye los
+      fixes C5 y C1 de la auditoria.
+
+  150a0eee67de67aa1cbd6bb12050b5cdef247fc2
+      feat(sobre-mi): F3 loop de oficina como capa visual del hero
+
+  3a99ffe5884a7ee76277cd38a11de90c1d017910
+      feat(producto): cabecera visual unica para las 6 paginas + Service y
+      Breadcrumb. Incluye las 6 imagenes ya en JPEG y el recorte de
+      vida-termino.
+
+  b0dbb85e4bd9b2c7f607debd4600ed18564dc88c
+      feat(producto): repone /seguros/auto — COPY EN BORRADOR, SIN APROBAR
+      Incluye el fix C2 (eyebrow), Header y sitemap.
+
+  3be8e08c7a75a085953485c0099083a7e23211a1
+      feat(home): rotulos del portico a la capa comercial del Manual v3.1
+
+  Sobre 00b3189, que eran los dos commits autorizados de la Sesion 15.
+  git push: NO EJECUTADO. origin/main sigue en 7104909.
+
+--------------------------------------------------------------------------------
+15.5 — LO QUE QUEDA ABIERTO
+--------------------------------------------------------------------------------
+  1. EL COPY DE /seguros/auto. Es lo unico que bloquea el push de b0dbb85.
+     Incluye decidir si "Seguros generales" es el nombre de grupo que va.
+  2. Los hallazgos refutados que igual valen una mirada: R4 (los CTA de auto
+     mandan a /#productos, donde el vehicular no figura), R16 (a 360px la
+     cabecera de auto podria perder el sujeto), y R5/R6/R7, que son copy y se
+     resuelven en la misma pasada que el punto 1.
+  3. LCP movil y accesibilidad: las dos palancas estan identificadas
+     (subsetting de fuentes; token --tx-disabled y subrayado del enlace del
+     footer) y las dos son sesiones propias.
+  4. El deploy. Exige REBUILD (R-44) y ahora es critico: sin el nginx.conf
+     nuevo los videos no cargan ni se reproducen.
+
+================================================================================
+
