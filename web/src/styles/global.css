@@ -243,6 +243,23 @@ a.btn-outline:hover {
   color: #08080d;
 }
 
+/* Enlace subrayado dentro de un parrafo.
+   La regla `a` de mas arriba fija `text-decoration: none` y vive FUERA de
+   toda @layer, asi que le gana a la utilidad `.underline` de Tailwind, que
+   vive en @layer utilities: ponerle esa clase a un <a> NO hace nada. Es la
+   misma deuda de R-43 que ya conociamos para el color, extendida a la
+   decoracion. Se mitiga como manda el patron de la casa —regla propia, sin
+   capa y con mas especificidad, igual que `.btn-outline`— y NO tocando las
+   capas, que R-43 prohibe mover hasta P-47.
+   Lo necesita el aviso de cookies del footer: ahi el enlace dorado sobre el
+   gris del parrafo da 1,85:1 y el criterio «Links rely on color» pide 3,00,
+   asi que por color no se cumple ni aclarando ni oscureciendo. La via que
+   WCAG acepta es que el enlace no dependa SOLO del color. */
+a.enlace-subrayado {
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
 /* Underline animado en links dorados */
 .link-underline {
   position: relative;

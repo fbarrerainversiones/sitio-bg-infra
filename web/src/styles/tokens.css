@@ -44,8 +44,15 @@
   /* Texto secundario (menos énfasis) */
   --tx-muted: #a8a59f;
 
-  /* Texto deshabilitado */
-  --tx-disabled: #6b6964;
+  /* Texto deshabilitado.
+     Aclarado de #6b6964 a #7d7b75 el 11/08/2026 por accesibilidad: el valor
+     anterior daba 3,64:1 sobre --bg y 3,48:1 sobre --bg-elev-1, y WCAG AA
+     pide 4,50:1 para texto de este tamano. Lighthouse lo marcaba en las 13
+     paginas. El nuevo da 4,72:1 y 4,51:1.
+     Se conservo la proporcion original entre canales (107/105/100) para no
+     mover el matiz calido: sube la luz, no el color. Es el gris MAS OSCURO
+     que cumple en los dos fondos, o sea el cambio visual mas chico posible. */
+  --tx-disabled: #7d7b75;
 
   /* ---------- TIPOGRAFIA ---------- */
 
