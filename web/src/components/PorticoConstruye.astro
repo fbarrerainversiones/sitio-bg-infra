@@ -42,30 +42,38 @@ const WHATSAPP_MESSAGE = encodeURIComponent(
 );
 const WHATSAPP_URL = `https://wa.me/${WHATSAPP_AURORA}?text=${WHATSAPP_MESSAGE}`;
 
-// Etapas del relato. El `n` y la `etiqueta` son la lectura arquitectónica de
-// cada tramo del símbolo; el resto es el copy aprobado.
+// Etapas del relato. Los `titulo` y `detalle` son el copy aprobado y no se
+// tocan.
+//
+// La `etiqueta` SI cambio el 11/08/2026, por decision de Francisco: pasa de la
+// lectura arquitectonica (Basamento, Columnas, Dintel y arquitrabe, Fronton) a
+// la CAPA COMERCIAL del Manual de Marca v3.1, que es narrativa oficial desde
+// el cierre de P-56: basamento = metodo, columnas = vida y salud,
+// fronton = inversion. Asi el rotulo nombra lo que el visitante compra y no la
+// parte del edificio. Es un cambio de cuatro cadenas: geometria, timelines y
+// estructura de F1 v2 quedan intactas.
 const ETAPAS = [
   {
     n: "01",
-    etiqueta: "Basamento",
+    etiqueta: "Método",
     titulo: "Primero, el diagnóstico.",
     detalle: "Entender tu situación real antes de proponer nada.",
   },
   {
     n: "02",
-    etiqueta: "Columnas",
+    etiqueta: "Vida y salud",
     titulo: "Luego, el respaldo.",
     detalle: "Estructura regulada e institucional que sostiene cada decisión.",
   },
   {
     n: "03",
-    etiqueta: "Dintel y arquitrabe",
+    etiqueta: "Protección",
     titulo: "Encima, la protección.",
     detalle: "El techo que cubre a tu familia y a tu patrimonio.",
   },
   {
     n: "04",
-    etiqueta: "Frontón",
+    etiqueta: "Inversión",
     titulo: "Y arriba, el patrimonio que crece.",
     detalle: "Acumulación diseñada a largo plazo.",
   },
