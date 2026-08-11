@@ -5,12 +5,13 @@ import Footer from "../components/Footer.astro";
 import PorticoConstruye from "../components/PorticoConstruye.astro";
 import FondoVideo from "../components/FondoVideo.astro";
 import heroPoster from "../assets/hero-poster.jpg";
+import { enlaceWhatsApp } from "../lib/whatsapp";
 
-const WHATSAPP_AURORA = "593998027819";
-const WHATSAPP_MESSAGE = encodeURIComponent(
-  "Hola, llego desde barreraglobal.com y quiero conversar."
+const TOKEN = "BG-HOME" as const;
+const WHATSAPP_URL = enlaceWhatsApp(
+  "Hola, llego desde barreraglobal.com y quiero conversar.",
+  TOKEN
 );
-const WHATSAPP_URL = `https://wa.me/${WHATSAPP_AURORA}?text=${WHATSAPP_MESSAGE}`;
 
 const TITLE = "Barrera Global · Asesoría en seguros, vida e inversión en Ecuador";
 const DESCRIPTION = "Asesoría especializada en seguros de vida, salud e inversión en Ecuador. Patrimonio que crece. Capital protegido.";
@@ -18,7 +19,7 @@ const DESCRIPTION = "Asesoría especializada en seguros de vida, salud e inversi
 
 <Layout title={TITLE} description={DESCRIPTION}>
 
-  <Header />
+  <Header token={TOKEN} />
 
   <main>
 
@@ -84,7 +85,7 @@ const DESCRIPTION = "Asesoría especializada en seguros de vida, salud e inversi
     <!-- EL METODO — «el portico que se construye» (P-54 F1).
          Va entre el hero y los productos: primero el relato de COMO se
          trabaja, recien despues QUE se ofrece. -->
-    <PorticoConstruye />
+    <PorticoConstruye token={TOKEN} />
 
     <!-- PRODUCTOS -->
     <section id="productos" class="scroll-mt-24 border-t border-gd-muted py-24 md:py-32">
@@ -253,7 +254,7 @@ const DESCRIPTION = "Asesoría especializada en seguros de vida, salud e inversi
 
         <div class="reveal">
           <p class="font-mono text-xs text-gd uppercase tracking-widest mb-4">
-            Sobre mi
+            Sobre mí
           </p>
           <h2 class="text-4xl md:text-5xl font-display font-semibold text-tx mb-12">
             Francisco Barrera.
@@ -336,7 +337,7 @@ const DESCRIPTION = "Asesoría especializada en seguros de vida, salud e inversi
 
   </main>
 
-  <Footer />
+  <Footer token={TOKEN} />
 
 </Layout>
 

@@ -1,13 +1,20 @@
 ---
 import Portico from "./Portico.astro";
+import { enlaceWhatsApp, type TokenBG } from "../lib/whatsapp";
+
+/** Mismo criterio que el Header: la pagina que lo monta le pasa su marcador. */
+interface Props {
+  token?: TokenBG;
+}
+
+const { token } = Astro.props;
 
 const CURRENT_YEAR = new Date().getFullYear();
 
-const WHATSAPP_AURORA = "593998027819";
-const WHATSAPP_MESSAGE = encodeURIComponent(
-  "Hola, llego desde barreraglobal.com y quiero conversar."
+const WHATSAPP_URL = enlaceWhatsApp(
+  "Hola, llego desde barreraglobal.com y quiero conversar.",
+  token
 );
-const WHATSAPP_URL = `https://wa.me/${WHATSAPP_AURORA}?text=${WHATSAPP_MESSAGE}`;
 
 const REDES = [
   { name: "Facebook", url: "https://www.facebook.com/profile.php?id=61583767980524", svg: "M9.101 23.691v-7.98H6.627v-3.667h2.474v-1.58c0-4.085 1.848-5.978 5.858-5.978.401 0 .955.042 1.468.103a8.68 8.68 0 0 1 1.141.195v3.325a8.623 8.623 0 0 0-.653-.036 26.805 26.805 0 0 0-.733-.009c-.707 0-1.259.096-1.675.309a1.686 1.686 0 0 0-.679.622c-.258.42-.374.995-.374 1.752v1.297h3.919l-.386 2.103-.287 1.564h-3.246v8.245C19.396 23.238 24 18.179 24 12.044c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.628 3.874 10.35 9.101 11.647Z" },
@@ -65,7 +72,7 @@ const REDES = [
           </li>
           <li>
             <a href="/sobre-mi" class="font-body text-sm text-tx-muted hover:text-gd transition-colors">
-              Sobre mi
+              Sobre mí
             </a>
           </li>
           <li>
@@ -155,10 +162,26 @@ const REDES = [
               JavaScript y cero storage: los hashes CSP no se tocan.
               El color del enlace lo pone la regla base `a` de global.css (sin
               capa): sale dorado. NO se le agrega una utilidad text-* porque
-              seria inerte — ver R-43. */}
+              seria inerte — ver R-43.
+
+              SUBRAYADO OBLIGATORIO, no decorativo. Lighthouse marcaba
+              «Links rely on color to be distinguishable»: el dorado #c9a84c
+              contra el gris del parrafo daba 2,40:1 y el criterio pide 3,00.
+              Con el gris aclarado a #7d7b75 el contraste entre ambos EMPEORA
+              a 1,85:1, asi que por color no se puede cumplir ni aclarando ni
+              oscureciendo. La via que WCAG acepta es la otra: que el enlace no
+              dependa SOLO del color.
+
+              Y NO se usa la utilidad `underline` de Tailwind: seria INERTE.
+              La regla `a { text-decoration: none }` de global.css vive fuera
+              de toda @layer y le gana. Es R-43 otra vez, ahora sobre la
+              decoracion y no sobre el color. Se usa `.enlace-subrayado`, que
+              es la mitigacion sancionada: regla propia, sin capa, con mas
+              especificidad. Comprobado con Lighthouse: con la utilidad el
+              criterio SEGUIA fallando. */}
           <p class="font-body text-xs text-tx-disabled">
             Este sitio solo utiliza cookies técnicas de seguridad ·
-            <a href="/cookies">Política de cookies</a>
+            <a href="/cookies" class="enlace-subrayado">Política de cookies</a>
           </p>
           <p class="font-body text-xs text-tx-disabled">
             © {CURRENT_YEAR} Barrera Global · Todos los derechos reservados

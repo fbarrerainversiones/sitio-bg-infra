@@ -2,12 +2,13 @@
 import Layout from "../layouts/Layout.astro";
 import Header from "../components/Header.astro";
 import Footer from "../components/Footer.astro";
+import { enlaceWhatsApp } from "../lib/whatsapp";
 
-const WHATSAPP_AURORA = "593998027819";
-const WHATSAPP_MESSAGE = encodeURIComponent(
+// Sin marcador: la lista acordada con Aurora tiene ocho tokens y /contacto no
+// esta entre ellos. El enlace sale con su mensaje propio y sin atribucion.
+const WHATSAPP_URL = enlaceWhatsApp(
   "Hola, llego desde la página de contacto de barreraglobal.com y quiero conversar."
 );
-const WHATSAPP_URL = `https://wa.me/${WHATSAPP_AURORA}?text=${WHATSAPP_MESSAGE}`;
 
 const TITLE = "Contacto · Barrera Global · Asesoría en seguros en Ecuador";
 const DESCRIPTION = "Conversa por WhatsApp o correo con Barrera Global. Asesoría en seguros de vida, salud e inversión en Ecuador. Sin presión, sin compromiso.";

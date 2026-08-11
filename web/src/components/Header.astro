@@ -1,5 +1,6 @@
 ---
 import Logo from "./Logo.astro";
+import { enlaceWhatsApp, type TokenBG } from "../lib/whatsapp";
 
 /**
  * Despliegue de "Productos" — CSS puro, cero JavaScript nuevo.
@@ -38,15 +39,28 @@ const PRODUCT_LINKS = [
 
 const NAV_LINKS: NavLink[] = [
   { href: "/#productos", label: "Productos", children: PRODUCT_LINKS },
-  { href: "/sobre-mi", label: "Sobre mi" },
+  // «Sobre mí» con tilde: es pronombre tónico tras preposición. La RUTA se
+  // queda en /sobre-mi, ASCII, y no se toca.
+  { href: "/sobre-mi", label: "Sobre mí" },
   { href: "/contacto", label: "Contacto" },
 ];
 
-const WHATSAPP_AURORA = "593998027819";
-const WHATSAPP_MESSAGE = encodeURIComponent(
-  "Hola, llego desde barreraglobal.com y quiero conversar."
+/**
+ * `token` lo pasa la pagina que monta el Header, para que el CTA del header
+ * —que suele ser el mas clicado— quede atribuido a la pagina desde la que se
+ * hizo clic y no a un generico. Las paginas que no tienen marcador propio
+ * (contacto, 404, legales) simplemente no lo pasan y el enlace sale sin el.
+ */
+interface Props {
+  token?: TokenBG;
+}
+
+const { token } = Astro.props;
+
+const WHATSAPP_URL = enlaceWhatsApp(
+  "Hola, llego desde barreraglobal.com y quiero conversar.",
+  token
 );
-const WHATSAPP_URL = `https://wa.me/${WHATSAPP_AURORA}?text=${WHATSAPP_MESSAGE}`;
 ---
 
 <header class="sticky top-0 z-50 w-full border-b border-gd-muted bg-bg/85 backdrop-blur-md">

@@ -2,12 +2,13 @@
 import Layout from "../layouts/Layout.astro";
 import Header from "../components/Header.astro";
 import Footer from "../components/Footer.astro";
+import { enlaceWhatsApp } from "../lib/whatsapp";
 
-const WHATSAPP_AURORA = "593998027819";
-const WHATSAPP_MESSAGE = encodeURIComponent(
+// Sin marcador, por la misma razon que /contacto: la lista acordada con Aurora
+// tiene ocho tokens y /404 no esta entre ellos.
+const WHATSAPP_URL = enlaceWhatsApp(
   "Hola, llego desde barreraglobal.com y quiero conversar."
 );
-const WHATSAPP_URL = `https://wa.me/${WHATSAPP_AURORA}?text=${WHATSAPP_MESSAGE}`;
 
 const TITLE = "Página no encontrada · Barrera Global";
 const DESCRIPTION =
@@ -45,7 +46,7 @@ const DESCRIPTION =
             Productos
           </a>
           <a href="/sobre-mi" class="link-underline font-body text-sm text-gd hover:text-gd-light transition-colors">
-            Sobre mi
+            Sobre mí
           </a>
           <a href="/contacto" class="link-underline font-body text-sm text-gd hover:text-gd-light transition-colors">
             Contacto

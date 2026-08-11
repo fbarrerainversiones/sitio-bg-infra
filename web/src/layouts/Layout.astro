@@ -1,5 +1,6 @@
 ---
 import "../styles/global.css";
+import { WHATSAPP_NUMERO } from "../lib/whatsapp";
 
 /**
  * Layout base del sitio.
@@ -46,7 +47,9 @@ const insuranceAgencySchema = {
   url: SITE_URL,
   logo: `${SITE_URL}/logo.svg`,
   image: ogImageURL,
-  telephone: "+593998027819",
+  // El mismo numero que los enlaces de WhatsApp, importado de la fuente unica:
+  // era la ultima copia a mano que quedaba en el sitio.
+  telephone: `+${WHATSAPP_NUMERO}`,
   email: "fbarrera.inversiones@gmail.com",
   address: {
     "@type": "PostalAddress",

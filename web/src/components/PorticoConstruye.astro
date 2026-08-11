@@ -36,11 +36,19 @@
  * y el hallazgo UTM de REPORTE-SESION-10.md).
  */
 
-const WHATSAPP_AURORA = "593998027819";
-const WHATSAPP_MESSAGE = encodeURIComponent(
-  "Hola, llego desde la sección El Método de barreraglobal.com y quiero conversar."
+import { enlaceWhatsApp, type TokenBG } from "../lib/whatsapp";
+
+/** Marcador de atribucion de la pagina que monta la seccion. */
+interface Props {
+  token?: TokenBG;
+}
+
+const { token } = Astro.props;
+
+const WHATSAPP_URL = enlaceWhatsApp(
+  "Hola, llego desde la sección El Método de barreraglobal.com y quiero conversar.",
+  token
 );
-const WHATSAPP_URL = `https://wa.me/${WHATSAPP_AURORA}?text=${WHATSAPP_MESSAGE}`;
 
 // Etapas del relato. Los `titulo` y `detalle` son el copy aprobado y no se
 // tocan.
