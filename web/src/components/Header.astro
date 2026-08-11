@@ -22,14 +22,16 @@ type NavLink = {
 };
 
 // Paginas de producto que cuelgan de "Productos".
-// Son 5: el seguro de auto quedo descartado por decision de Francisco
-// el 25/07/2026 (D1). Si algun dia lo aprueba, se recrea con copy propio
-// y se agrega aca. Ver docs/PENDIENTES.md, "Decisiones cerradas".
+// Son 6 desde el 11/08/2026: el seguro vehicular VOLVIO por decision de
+// Francisco, con el alcance acotado a "cobertura unicamente en el Ecuador".
+// Esa decision SUPERA a D1 (25/07/2026, commit 96f629c), que lo habia
+// retirado. Ver docs/PENDIENTES.md.
 const PRODUCT_LINKS = [
   { href: "/seguros/vida-termino", label: "Vida a término" },
   { href: "/seguros/vida-indexada", label: "Vida indexada" },
   { href: "/seguros/salud-nacional", label: "Salud nacional" },
   { href: "/seguros/salud-internacional", label: "Salud internacional" },
+  { href: "/seguros/auto", label: "Seguro vehicular" },
   { href: "/inversion", label: "Inversión" },
   { href: "/#productos", label: "Ver todos →" },
 ];

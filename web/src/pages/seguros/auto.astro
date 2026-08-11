@@ -1,0 +1,67 @@
+---
+import ProductLayout from "../../layouts/ProductLayout.astro";
+import heroImage from "../../assets/productos/auto.jpg";
+
+/**
+ * /seguros/auto — REPUESTA el 11/08/2026 por decision de Francisco.
+ *
+ * Esta pagina existio y se retiro el 25/07/2026 (decision D1, commit 96f629c).
+ * La decision de Francisco del 11/08/2026 SUPERA a D1: el seguro vehicular
+ * vuelve como producto, con el alcance acotado a "cobertura unicamente en el
+ * Ecuador", que va enunciado de forma prominente en el primer parrafo y
+ * repetido en el subtitulo del hero.
+ *
+ * COPY: es BORRADOR, pendiente de aprobacion de Francisco. Escrito bajo las
+ * mismas restricciones que el resto del sitio:
+ *   - Cero primas, cero cifras, cero porcentajes (Art. 11.6 SCVS).
+ *   - Cero "mejor precio", cero descuentos, cero promesas (Art. 12.12 SCVS).
+ *   - Cero nombres de aseguradoras.
+ *   - Nada de coberturas especificas presentadas como garantizadas: se habla
+ *     de lo que un seguro vehicular CONTEMPLA en general, y se remite a la
+ *     poliza y a la conversacion para lo que aplique a cada caso.
+ * El disclaimer del Art. 11.6 lo emite ProductLayout, igual que en las cinco
+ * paginas hermanas: no se duplica aca.
+ */
+---
+
+<ProductLayout
+  title="Seguro vehicular · Seguros generales · Barrera Global"
+  description="Seguro vehicular con cobertura únicamente en el Ecuador: protección para tu vehículo y para tu responsabilidad frente a terceros. Cotización personalizada, sin compromiso."
+  canonical="https://barreraglobal.com/seguros/auto"
+  eyebrow="Seguros generales"
+  productName="Seguro vehicular"
+  heroSubtitle="Protección para tu vehículo y para tu responsabilidad frente a terceros, con cobertura únicamente en el Ecuador."
+  whatsappMessage="Hola, llego desde la página de Seguro vehicular de barreraglobal.com y quiero conversar."
+  slug="auto"
+  heroImage={heroImage}
+  heroImageAlt="Frente de un automóvil con las luces encendidas y una carretera de montaña al fondo"
+>
+  <p>
+    El <span class="text-tx font-medium">seguro vehicular</span> que asesoro
+    tiene <span class="text-tx font-medium">cobertura únicamente en el
+    Ecuador</span>. Es el primer dato y no la letra chica: si manejas fuera del
+    país, esta no es la solución que necesitas y te lo digo antes de que
+    preguntes.
+  </p>
+  <p>
+    Dentro de ese alcance, un seguro vehicular atiende dos frentes que suelen
+    confundirse. Por un lado tu <span class="text-tx font-medium">vehículo</span>:
+    los daños que sufre por un choque, un robo o un evento cubierto. Por el
+    otro, tu <span class="text-tx font-medium">responsabilidad frente a
+    terceros</span>: lo que le debes a otra persona cuando el accidente afecta
+    su vehículo, sus bienes o su salud. Ese segundo frente es el que la mayoría
+    subestima, y es el que puede comprometer un patrimonio entero.
+  </p>
+  <p>
+    Qué entra exactamente en cada frente, qué queda excluido y bajo qué
+    condiciones no es algo que se pueda publicar en una página: depende del
+    vehículo, del uso que le das y de la póliza que se arme para tu caso. Lo
+    revisamos juntos antes de que firmes nada, y lo que no está cubierto te lo
+    señalo con el mismo énfasis que lo que sí.
+  </p>
+  <p>
+    Es la pieza más cotidiana de una arquitectura financiera y la que más se
+    contrata a las apuradas. Un vehículo se usa todos los días y es, para
+    muchas familias, el segundo activo después de la vivienda.
+  </p>
+</ProductLayout>

@@ -2,7 +2,8 @@
 <!--
   sitemap.xml — barreraglobal.com
 
-  11 URLs = las 12 paginas del build menos /404, que no se lista (es noindex).
+  12 URLs = las 13 paginas del build menos /404, que no se lista (es noindex).
+  Subio de 11 a 12 el 11/08/2026 con el alta de /seguros/auto.
   Cada <loc> replica EXACTAMENTE la etiqueta <link rel="canonical"> que emite
   su pagina: sin barra final, salvo la raiz.
 
@@ -49,6 +50,11 @@
   <url>
     <loc>https://barreraglobal.com/seguros/salud-internacional</loc>
     <lastmod>2026-08-03</lastmod>
+  </url>
+
+  <url>
+    <loc>https://barreraglobal.com/seguros/auto</loc>
+    <lastmod>2026-08-11</lastmod>
   </url>
 
   <url>
