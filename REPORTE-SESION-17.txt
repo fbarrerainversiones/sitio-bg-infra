@@ -1,0 +1,403 @@
+================================================================================
+REPORTE SESION 17 — 11 de agosto de 2026
+/seguros/auto: de borrador a definitiva, con datos curados reales
+================================================================================
+
+ESTADO INICIAL, VERIFICADO CONTRA LO ESPERADO
+  HEAD local            7b7c4c2   coincide
+  origin/main           7104909   coincide
+  commits sin pushear   8         coincide
+  working tree          limpio    coincide
+  pwsh 7.6.4 · git pull: "Already up to date."
+
+ESTADO FINAL
+  Working tree SIN COMMITEAR, como pedia el encargo. Cero push.
+  Build 13/13: no se creo ninguna pagina nueva, se reemplazo el contenido de
+  una que ya existia.
+
+
+================================================================================
+1. DIAGNOSTICO — DOS COSAS QUE EL ENCARGO DABA POR CIERTAS Y NO LO ERAN
+================================================================================
+
+(a) NO EXISTIA NINGUN @graph.
+    El encargo decia «extenderlo sin duplicar @context». Lo que habia eran DOS
+    bloques `ld+json` SEPARADOS en ProductLayout —Service y BreadcrumbList—,
+    cada uno repitiendo su propio `@context`, mas los tres bloques sueltos de
+    Layout.astro. Asi que no se extendio un @graph: se CONSTRUYO. Los dos
+    bloques se unificaron en uno con `@graph` y ahi entro FAQPage. Resultado:
+    un solo contexto, un solo bloque, y lugar donde sumar nodos despues.
+
+(b) EL PROCESO Y LA FAQ YA EXISTIAN EN EL LAYOUT, y el encargo pedia unos
+    propios para auto. Pintarlos en la pagina habria dejado DOS secciones
+    «Como funciona» y DOS «Preguntas frecuentes» en la misma pagina.
+    Solucion: `proceso` y `faq` pasan a ser PROPS OPCIONALES de ProductLayout.
+    Si un producto las trae, se usan las suyas; si no, las genericas del ramo.
+    Cero duplicacion, y es exactamente el mecanismo que hace replicable el
+    patron en los otros cinco productos.
+
+PATRON PREVIO DE <details> — SI EXISTIA, y se reutiliza.
+    `Header.astro:127` ya tenia un <details>/<summary> nativo para el menu
+    movil, con `list-none`, `[&::-webkit-details-marker]:hidden` y la flecha
+    que rota con `group-open`. LetraPequena.astro lo CALCA en vez de inventar
+    un segundo lenguaje de plegado. No habia ningun patron previo de FAQ ni de
+    tabla: esos se disenaron.
+
+
+================================================================================
+2. COMPONENTES NUEVOS — LOS TRES REUTILIZABLES
+================================================================================
+
+web/src/components/LetraPequena.astro
+    <details> nativo, cero JavaScript, colapsado por defecto.
+    La ETIQUETA REFERENCIAL vive DENTRO del componente, no en cada pagina: asi
+    es imposible publicar condiciones de producto sin ella. No depende de que
+    quien lo use se acuerde.
+
+web/src/components/TarjetaAseguradora.astro
+    Nombre en TEXTO. Tiene un slot `logo` PREVISTO Y DESACTIVADO: mientras
+    `mostrarLogo` sea false —y lo es por defecto— el slot no se renderiza
+    aunque alguien le pase contenido. El dia que llegue la autorizacion de uso
+    de marca se cambia una prop, no el componente.
+    NEUTRALIDAD POR FORMA, no por criterio: la tarjeta no tiene lugar donde
+    poner un puntaje, una estrella, un orden de preferencia ni un precio. La
+    restriccion del Art. 12.12 esta en la ESTRUCTURA del componente, no
+    confiada a quien escriba el copy.
+
+web/src/components/BloqueFAQ.astro
+    Una sola forma de pintar una FAQ en el sitio. Importa mas de lo que parece:
+    el schema FAQPage exige que el texto declarado sea IDENTICO al visible, y
+    con el render y el schema comiendo del MISMO array no pueden divergir. Si
+    cada pagina pintara su FAQ a mano, la primera edicion de copy que no tocara
+    el schema lo volveria mentira.
+
+
+================================================================================
+3. LA PAGINA
+================================================================================
+
+ORDEN: intro answer-first -> tabla del ramo -> las tres aseguradoras ->
+proceso (lo pinta el layout desde la prop) -> requisitos -> FAQ (idem) ->
+disclaimer -> CTA (del layout).
+
+INTRO ANSWER-FIRST — 49 palabras. Responde en la primera oracion.
+
+TABLA DEL RAMO — <table> real, con <caption> para lectores de pantalla, <th
+scope="col"> y <th scope="row">. Va en tabla y no en lista maquetada porque es
+lo que mejor extraen buscadores y asistentes, que es el objetivo declarado.
+Seis filas con el lenguaje simple del bloque comun.
+
+LAS TRES ASEGURADORAS — orden Sweaden, Generali, Chubb: es el orden en que el
+auditor entrego los datos y se conserva tal cual, sin reordenar por ningun
+criterio que pudiera leerse como preferencia. Cada una con su punto fuerte en
+una frase, sus distintivos y su letra pequena plegada.
+La frase que encabeza el bloque lo dice explicito: «ninguna es "la mejor" en
+abstracto: la que te conviene depende de tu vehiculo y de tu caso».
+
+FAQ — seis preguntas answer-first. La de precio responde SOLO con factores
+—marca, ano, valor, uso, zona, historial y dispositivo de rastreo— y deriva a
+cotizacion personalizada. Cero cifras.
+
+ALCANCE — se dice «seguro para vehiculos que circulan en el Ecuador» y una FAQ
+explica que la cobertura principal opera en el Ecuador y que algunas
+aseguradoras incluyen extensiones puntuales segun plan. NO se usa «unicamente»
+como absoluto: seria falso, porque dos de las tres tienen extensiones fuera del
+pais (Sweaden 200 km a paises vecinos, Chubb Pacto Andino).
+
+
+================================================================================
+4. >>> CRUCE DE WHITELIST — LA VERIFICACION CRITICA <<<
+================================================================================
+
+Metodo: se extrae del HTML EMITIDO de /seguros/auto —quitando los bloques
+ld+json y las etiquetas, o sea sobre el texto que de verdad lee una persona—
+toda cifra monetaria y todo porcentaje, y se cruza uno por uno contra el bloque
+curado del auditor.
+
+MONTOS ENCONTRADOS EN LA PAGINA           RESULTADO
+  $350                                     en la whitelist
+  $1.000                                   en la whitelist
+  $1.500                                   en la whitelist
+  $3.000                                   en la whitelist
+  $5.000                                   en la whitelist
+  $10.000                                  en la whitelist
+
+PORCENTAJES ENCONTRADOS EN LA PAGINA      RESULTADO
+  0%   1%   10%   15%   20%   30%   100%   todos en la whitelist
+
+  >>> CIFRAS FUERA DE LA WHITELIST: 0 <<<
+
+NOTA DE METODO, porque la primera pasada dio dos falsos positivos: el patron
+`\$\s?[\d][\d\.,]*` se tragaba la coma o el punto FINAL de la frase y reportaba
+«$10.000,» y «$5.000.» como cifras desconocidas. Corregido el patron para que
+un monto termine obligatoriamente en digito, el cruce da 0. Los dos casos eran
+puntuacion, no cifras.
+
+CERO PRIMAS. No hay una sola prima, cuota, forma de pago ni valor de vehiculo
+en la pagina, en ninguna forma: ni exacta, ni aproximada, ni «desde».
+
+GUARDIA DE DATOS PERSONALES — barrido de TODO el repo y el dist con los tres
+centinelas que entrego el auditor (una cedula, una placa y un nombre de pila,
+tomados de las cotizaciones de origen): CERO apariciones cada uno.
+  >>> Los centinelas NO se transcriben en este documento, y es a proposito.
+      En la primera version de este reporte se habian escrito literalmente
+      para dejar constancia de la verificacion, y eso los metia al repo —que
+      es PUBLICO— justamente a ellos, que son los datos que no pueden estar.
+      Un informe que dice «esto no esta en el repo» no puede lograrlo
+      escribiendolo. Se detecto en la Sesion 18, antes de commitear.
+
+ART. 12.12 — barrido sobre el texto visible:
+  «mejor precio» 0 · «descuento» 0 · «mas barat» 0 · «la mejor asegur» 0 ·
+  «recomendada» 0 · «ranking» 0
+
+
+================================================================================
+5. QA
+================================================================================
+
+  build                                    13/13 paginas             OK
+  CSP cruce bidireccional                  2 <-> 2, 13 apariciones   OK
+    sha256-aOPTArMuUPr5ybUMJpH+mtSGicP8zlnwwFwZYYhokv4=
+    sha256-Qra3eTJV60gng4dzuHtxcR7XY8lE1nLbTAAJ5T7jyto=
+    NINGUN HASH CAMBIO
+  atributos on* en dist                    0                         OK
+  <script src> en dist                     0                         OK
+  [PENDIENTE en dist                       0                         OK
+  <details> sin JavaScript                 4 en la pagina            OK
+    (3 de las tarjetas + 1 del menu movil del Header, que esta en todas)
+
+  JSON-LD
+    bloques en /seguros/auto               4 (3 de Layout + 1 @graph) OK
+    @graph                                 Service, BreadcrumbList, FAQPage
+    FAQPage                                6 preguntas
+    desajustes schema vs texto visible     0                         OK
+      (se comparo cada `name` y cada `acceptedAnswer.text` contra el texto
+       visible de la pagina, no contra el fuente)
+
+  SEO
+    canonical      https://barreraglobal.com/seguros/auto            OK
+    sitemap        12 URLs, /seguros/auto incluida                   OK
+      (una comprobacion anterior conto 13: la decimotercera aparicion de
+       «<loc>» esta dentro del comentario XML del propio sitemap, que explica
+       el formato. Son 12 URLs reales.)
+
+  LIGHTHOUSE MOVIL — /seguros/auto
+    Perf 99 · A11y 92 · BP 100 · SEO 100 | LCP 1,83 s · CLS 0,000 · FCP 1,53 s
+    peso total de la pagina: 131 KiB
+    (borrador anterior: Perf 99 · A11y 91 · LCP 1,82 s · CLS 0,000)
+    La pagina multiplico su contenido y sumo 4 KiB. CLS sigue en 0,000.
+    Las dos auditorias que fallan son las MISMAS dos de siempre y viven en el
+    FOOTER —contraste de `text-tx-disabled` y el enlace a /cookies sin
+    subrayado—: son preexistentes de todo el sitio, no de esta pagina.
+    LCP a 1,83 s contra el objetivo de 1,80 s, por el mismo motivo ya
+    documentado en la Sesion 16: el cuello es el FCP (1,53 s) y las fuentes
+    self-hosted, no esta pagina.
+
+
+================================================================================
+6. >>> EL DEFECTO QUE HABRIA PUBLICADO LA PAGINA EN BLANCO <<<
+================================================================================
+
+Lo encontro la lente movil de la auditoria, el refutador lo descarto, y el
+refutador se equivoco. Lo verifique yo contra los archivos reales.
+
+EL MECANISMO
+  `ProductLayout.astro:304` envolvia el <slot /> ENTERO —todo el cuerpo de la
+  pagina— en UN solo `<div class="reveal">`. La clase `.reveal` deja el
+  elemento en `opacity: 0` hasta que el IntersectionObserver de Layout.astro le
+  ponga `.visible`, y ese observer usa `threshold: 0.15`.
+
+  Un observer con umbral 0,15 NO PUEDE dispararse sobre un elemento mas alto
+  que (alto_del_viewport - 50) / 0,15, porque su intersectionRatio —lo visible
+  sobre lo TOTAL— nunca llega a 0,15. No es que tarde: no ocurre nunca.
+
+  LIMITES REALES
+    viewport 640 px  ->  el elemento debe medir menos de 3.933 px
+    viewport 667 px  ->  menos de 4.113 px
+    viewport 800 px  ->  menos de 5.000 px
+    viewport 823 px  ->  menos de 5.153 px   <- el que emula Lighthouse
+    viewport 915 px  ->  menos de 5.767 px
+
+  POR QUE NUNCA HABIA PASADO
+    La misma seccion en vida-termino tiene 311 caracteres de texto. En
+    /seguros/auto ahora tiene 6.783, mas una tabla de 7 filas, 3 tarjetas, 3
+    <details>, 17 parrafos, 19 vinetas y 6 encabezados: varios miles de pixeles.
+    22 veces mas contenido en el mismo contenedor.
+
+  CONSECUENCIA SI ESTO SE PUBLICABA
+    En cualquier telefono de menos de ~800 px de alto —o sea la mayoria— la
+    pagina entera bajo el hero se veia EN BLANCO. Sin un error en consola, sin
+    nada roto a la vista: solo vacio.
+
+  POR QUE LIGHTHOUSE NO LO VIO
+    Emula 412x823, o sea techo de 5.153 px, y el bloque quedaba apenas por
+    debajo. Paso raspando. Es el ejemplo perfecto de por que un 99 de
+    Performance no dice nada sobre si la pagina se ve.
+
+EL FIX
+  Se quita `.reveal` de ese contenedor. No se sube el umbral ni se parte el
+  slot, por dos razones:
+    - una animacion de aparicion sobre un contenedor de miles de pixeles no
+      significa nada aunque funcione;
+    - el cuerpo de una pagina de producto no deberia depender de JavaScript
+      para ser visible, y menos una pagina cuyo objetivo declarado es que la
+      extraigan buscadores y asistentes.
+  Verificado tras el fix: el slot ya no cuelga de ningun `.reveal` en las seis
+  paginas de producto. Las `.reveal` que quedan en el layout envuelven bloques
+  acotados —encabezados, la grilla del proceso, el CTA— y no corren el riesgo.
+
+RECOMENDACION QUE NO EJECUTE
+  Esto merece entrada propia en `docs/ERRORES-Y-APRENDIZAJES.md` con su regla:
+  «ningun `.reveal` puede envolver un bloque que pueda crecer sin techo; el
+  umbral de 0,15 lo vuelve invisible para siempre». El encargo de esta sesion
+  no incluia tocar ese documento y no lo toque.
+
+
+================================================================================
+7. AUDITORIA ADVERSARIAL — JOURNAL COMPLETO
+================================================================================
+
+5 lentes + un refutador por hallazgo. 39 agentes, 0 errores.
+El journal se leyo UNA sola vez, con el workflow cerrado.
+RESULTADO: 34 hallazgos crudos, 0 confirmados por el propio workflow.
+DE ESOS 34, YO REVERTI UNA REFUTACION: la del defecto del `.reveal` (seccion 6),
+que era el unico de consecuencia catastrofica.
+
+UN FALSO POSITIVO QUE FUE CULPA MIA, NO DE LA PAGINA
+  El hallazgo 6 acusaba a la letra pequena de Chubb de inventar «(minimo
+  aplicable sobre el valor asegurado)», atribuyendole una mecanica de Sweaden.
+  El refutador acepto ese hecho como cierto. NO LO ES: esa frase esta
+  TEXTUALMENTE en el bloque curado de Chubb. Lo que fallo fue el contexto que
+  yo le pase al workflow: comprimi la whitelist para que entrara, y en la
+  compresion se perdio ese parentesis. La pagina es verbatim; mi resumen no lo
+  era. Leccion: cuando el auditor cruza contra una fuente, hay que pasarle la
+  fuente COMPLETA, no un resumen.
+
+LO QUE SI VALE MIRAR DE LOS REFUTADOS, ordenado por lo que me parece que
+importa. Ninguno es un defecto tecnico; casi todos son decisiones de copy, que
+son de Francisco:
+
+  ALTA
+  · Generali solo emite para residentes de Imbabura, Pichincha, Cotopaxi,
+    Tungurahua y Chimborazo, y ese limite vive UNICAMENTE dentro del <details>
+    colapsado, mientras la pagina promete «tres aseguradoras». Un lector de
+    Guayas puede leer toda la pagina creyendo que tiene tres opciones. El dato
+    ESTA publicado y en el lugar donde el auditor lo puso, pero conviene
+    decidir si sube a la vista. NO lo movi: mover copy es decision tuya.
+
+  MEDIA — veracidad
+  · «Pacto Andino: extension de cobertura en paises de la Comunidad Andina»
+    sale sin limites, al lado de la extension de Sweaden que si lleva los suyos
+    («solo para danos propios»).
+  · La FAQ «¿Me cubre fuera del Ecuador?» no traslada que la extension de
+    Sweaden es SOLO para danos propios, o sea sin responsabilidad civil fuera
+    del pais. Es el matiz mas consecuente de esa FAQ.
+  · La definicion de responsabilidad civil de la tabla se limita a dano
+    material y omite lesiones o muerte de terceros.
+  · «Requisitos para cotizar y emitir» generaliza a las tres una lista que en
+    la fuente son requisitos de EMISION de Chubb.
+  · Al subsidio de canasta familiar de Sweaden y al contexto de Generali se les
+    agregaron matices de redaccion («durante la vigencia de la poliza»,
+    «constituida») que estan en la fuente pero que un revisor legal podria
+    querer aun mas literales.
+
+  MEDIA — presentacion
+  · El h3 del nombre de aseguradora y el h3 de seccion se pintan al mismo
+    tamano, asi que la jerarquia visual se aplana. Es la deuda R-43 sobre
+    font-size otra vez: las clases de tamano en h1..h6 son inertes.
+  · A 360px la primera columna de la tabla usa `whitespace-nowrap` y deja la
+    segunda en ~156px. «Amparo patrimonial» cae en varias lineas.
+  · El distintivo GEA de Generali es un parrafo de 332 caracteres colgando de
+    una sola vineta.
+
+  BAJA
+  · «la mejor» aparece literalmente, aunque en construccion NEGADA («ninguna es
+    "la mejor" en abstracto»).
+  · La sigla RASA no se desarrolla.
+  · La meta description mide 193 caracteres y se corta en el SERP.
+  · El BreadcrumbList declara /#productos como padre, pero esa seccion del home
+    no lista el vehicular. Es el mismo cabo R4 de la Sesion 16, consecuencia de
+    la opcion b.
+  · Las cinco hermanas ahora tambien emiten FAQPage, identico entre ellas.
+  · El sitemap solo movio el lastmod de /seguros/auto, aunque el HTML de las
+    cinco hermanas tambien cambio en este diff.
+
+
+================================================================================
+8. GUION DE VERIFICACION VISUAL
+================================================================================
+
+    npm run build --prefix web
+    npm run preview --prefix web
+    -> /seguros/auto
+
+LO PRIMERO Y MAS IMPORTANTE — EN EL TELEFONO, O EN DEVTOOLS A 360x640
+  Baja por la pagina. TIENE QUE VERSE TODO: la tabla, las tres tarjetas, los
+  requisitos, la FAQ. Si aparece el hero y despues NADA, el fix del `.reveal`
+  no entro y estas viendo el defecto de la seccion 6. Es el unico chequeo que
+  de verdad no se puede saltear.
+
+DESKTOP
+  · La tabla «Como te protege un seguro vehicular»: seis filas, legible.
+  · Las tres tarjetas en orden Sweaden, Generali, Chubb. Ninguna con logo: solo
+    el nombre tipografiado, que es lo correcto hasta tener autorizacion de uso
+    de marca.
+  · «Letra pequena referencial» cerrada en las tres. Al abrirla, aparece el
+    detalle y ABAJO la etiqueta «Condiciones referenciales a agosto de 2026…».
+    Esa etiqueta tiene que estar en las TRES.
+  · El proceso ahora tiene CINCO pasos, no cuatro: son los de auto, no los
+    genericos.
+  · La FAQ tiene SEIS preguntas y el titulo dice «Sobre el seguro vehicular».
+    Si dice «Sobre el proceso» y son cuatro, las props no llegaron.
+
+MOVIL, ademas
+  · Abre y cierra los tres <details> con el dedo: el area de toque tiene que
+    ser comoda.
+  · Mira si la tabla te obliga a hacer scroll horizontal DE LA PAGINA. Debe
+    poder desplazarse la tabla sola, no el documento.
+
+QUE LEER CON OJO DE DUENO DE LA MARCA
+  · El punto fuerte de Sweaden dice que el amparo patrimonial cubre conduccion
+    en estado de embriaguez. Esta VERBATIM del bloque curado y termina en
+    «segun el plan», pero es la frase de mayor riesgo de la pagina: decide si
+    la queres tal cual.
+  · La limitacion de provincias de Generali (ver seccion 7, ALTA).
+  · «Seguros generales» como nombre de grupo, que viene de la Sesion 16 y sigue
+    sin tu visto bueno.
+
+
+================================================================================
+9. ARCHIVOS Y ESTADO
+================================================================================
+
+NUEVOS (sin commitear)
+  web/src/components/TarjetaAseguradora.astro
+  web/src/components/LetraPequena.astro
+  web/src/components/BloqueFAQ.astro
+  REPORTE-SESION-17.txt
+
+MODIFICADOS (sin commitear)
+  web/src/pages/seguros/auto.astro     contenido definitivo
+  web/src/layouts/ProductLayout.astro  props `proceso`/`faq`, @graph con
+                                       FAQPage, BloqueFAQ, y el fix del
+                                       `.reveal` de la seccion 6
+
+NO SE TOCARON
+  infra/nginx.conf · Layout.astro · Header.astro · Footer.astro ·
+  sitemap.xml · las cinco paginas de producto hermanas · global.css
+
+ESTADO GIT
+  HEAD 7b7c4c2 · origin/main 7104909 · 8 commits locales sin push
+  Working tree con lo de hoy SIN COMMITEAR, como pedia el encargo.
+  Cero push.
+
+LO QUE FALTA PARA EL CIERRE
+  1. Tu aprobacion escrita del copy, que sigue pendiente desde la Sesion 16 y
+     ahora incluye todo el contenido nuevo de esta pagina.
+  2. Recien con eso: commit de la pagina definitiva (+ commits de componentes)
+     y PUSH de todo el backlog local a origin.
+  3. El deploy sigue esperando que se levante la veda de Aurora, y exige
+     REBUILD de la imagen (R-44).
+
+================================================================================
+

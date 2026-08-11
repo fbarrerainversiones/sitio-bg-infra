@@ -1,0 +1,410 @@
+================================================================================
+REPORTE SESION 18 — 11 de agosto de 2026
+Respaldo remoto, clase de bug .reveal, atribucion de leads y accesibilidad
+================================================================================
+
+ESTADO INICIAL, VERIFICADO
+  HEAD local            7b7c4c2   coincide
+  origin/main           7104909   coincide
+  sin respaldo remoto   8 commits coincide
+  working tree          con la Sesion 17 sin commitear, coincide
+  pwsh 7.6.4 · git pull: "Already up to date."
+
+
+================================================================================
+1. PUSH DE RESPALDO — HECHO ANTES DE TOCAR NADA
+================================================================================
+
+  git push origin main   ->   7104909..7b7c4c2
+
+  origin/main quedo en 7b7c4c2. Commits sin respaldo remoto: 0.
+  Los ocho commits que estuvieron una semana viviendo solo en el disco de
+  Francisco ya tienen copia. Y no publica nada: en esta arquitectura el VPS
+  hace pull manual y la veda de Aurora sigue vigente.
+
+
+================================================================================
+2. LAS TRES CORRECCIONES DEL PASO 0.3 — NINGUNA HABIA ENTRADO
+================================================================================
+
+Se verificaron con ripgrep antes de tocar nada. Las tres estaban SIN aplicar, y
+es correcto que asi fuera: el encargo de la Sesion 17 nunca las contenia. Llegan
+por primera vez en este encargo.
+
+  a) "90 dias"  ->  ESTABA, en auto.astro:281 (letra pequena de Chubb).
+                    RETIRADA. No se publica vigencia de cotizacion por
+                    aseguradora.
+  b) "RASA"     ->  ESTABA, en auto.astro:274 (distintivos de Chubb).
+                    RETIRADA. Termino que no se puede explicar en lenguaje
+                    simple; nada se publica si no se puede explicar.
+  c) vigencia de 15 dias  ->  NO ESTABA. AGREGADA.
+
+  Como se agrego (c): con una prop nueva `procesoNota` de ProductLayout, no
+  con texto suelto en la pagina. Es politica de la CASA, no de una aseguradora,
+  asi que no cabia ni en un paso del proceso ni en la letra pequena de un
+  tercero. La prop queda disponible para los otros cinco productos.
+
+  Verificado sobre el HTML emitido de las 13 paginas:
+    '90 dias' 0 · 'RASA' 0 · 'vigencia de 15 dias' 1
+
+
+================================================================================
+3. GATES — LO QUE RESPONDIO FRANCISCO
+================================================================================
+
+  TELEFONO REAL (0.4b): «Si, veo todo el cuerpo».
+    >>> Es la confirmacion que faltaba del fix de la Sesion 17. La aritmetica
+        decia que el contenido tenia que verse; ahora lo dice un telefono.
+
+  GENERALI (0.4a): SI, sube a linea visible.
+
+  COPY (0.4c): aprobado en contenido, con cuatro correcciones. Ver seccion 4.
+
+
+================================================================================
+4. LAS CUATRO CORRECCIONES DE LA VERIFICACION VISUAL
+================================================================================
+
+1. RESTRICCION PROVINCIAL DE GENERALI — APLICADA
+   Vineta visible en la lista de distintivos, con el texto exacto pedido:
+   «Emision disponible para residentes de Imbabura, Pichincha, Cotopaxi,
+   Tungurahua y Chimborazo, con cobertura a nivel nacional.»
+   El dato queda TAMBIEN en la letra pequena, como se pidio: en los dos
+   lugares. Un lector de Guayas ya no necesita desplegar nada para enterarse.
+
+2. «Compañia» -> «Compañía» — NO HABIA NADA QUE CORREGIR
+   >>> Verificado antes de tocar: las tres razones sociales YA estaban
+       correctas, en el fuente y en el emitido. El HTML tiene «Compañía» dos
+       veces y «Compania»/«Compañia» CERO. Los puntos de codigo lo confirman:
+       C o m p a ñ í a  =  0043 006F 006D 0070 0061 00F1 00ED 0061,
+       donde 00F1 es la ñ y 00ED es la i con tilde.
+   LO QUE SI ES CIERTO: no se VE. Esa linea es `font-mono text-xs`, o sea
+   JetBrains Mono a 12 px, y a ese tamano en un telefono la tilde de la i es
+   casi invisible. Es un problema de LEGIBILIDAD, no de ortografia, y por eso
+   no se «corrigio» algo que no estaba mal.
+   PENDIENTE PARA FRANCISCO: si molesta, la solucion es subir esa linea a 13-14
+   px o sacarla de la monoespaciada. Es decision de diseno, no la tomo yo.
+
+3. «Sobre mi» -> «Sobre mí» — APLICADA
+   Corregido en Header (menu de escritorio y movil), Footer, la 404, el kicker
+   de la seccion del home, el <title> de la pagina y el mensaje de WhatsApp.
+   Verificado sobre las 13 paginas del build:
+     «Sobre mi» sin tilde: 44 -> 0        «Sobre mí» con tilde: 44
+   La RUTA /sobre-mi no se toco: sigue en ASCII.
+
+4. EMAIL DEL FOOTER — REPORTADO, NO TOCADO
+   Donde vive `fbarrera.inversiones@gmail.com` en el FUENTE:
+     web/src/components/Footer.astro     2 apariciones  (mailto + texto)
+     web/src/layouts/Layout.astro        1  (campo `email` del JSON-LD
+                                             InsuranceAgency)
+     web/src/pages/contacto.astro        2  (mailto + texto)
+     web/src/pages/terminos.astro        2
+     web/src/pages/cookies.astro         1
+   EN CUANTAS PAGINAS APARECE: **13 de 13**. Footer y Layout estan en todas.
+   Para contraste: `privacidad@barreraglobal.com` —el correo propio del
+   dominio, probado y cerrado como R-19— aparece en **1 sola pagina**.
+   El reemplazo es decision de Francisco para la proxima sesion. Ojo con el
+   campo del JSON-LD: cambiarlo toca datos estructurados de las 13.
+
+
+================================================================================
+5. AUDITORIA SISTEMICA DE LA CLASE DE BUG .reveal
+================================================================================
+
+EL MECANISMO, otra vez, para que quede en un solo lugar:
+  `.reveal` deja el elemento en opacity:0 hasta que el IntersectionObserver le
+  ponga `.visible`, y ese observer usa `threshold: 0.15` con rootMargin
+  '0px 0px -50px 0px'. Un observer con umbral 0,15 NO PUEDE dispararse sobre un
+  elemento mas alto que (alto_viewport - 50) / 0,15, porque su
+  intersectionRatio —lo visible sobre lo TOTAL— nunca llega a 0,15.
+
+  TECHOS:  360x640 -> 3.933 px      390x844 -> 5.293 px
+
+INVENTARIO: 37 usos de `.reveal` en web/src (global.css, ProductLayout,
+BloqueFAQ, index, sobre-mi, PorticoConstruye). Se midio el contenido REAL de
+cada contenedor en el HTML emitido de las 13 paginas y se estimo su altura a
+360 px de ancho.
+
+MODELO DE ESTIMACION, declarado para que se pueda discutir: contenedor util de
+~312 px (px-6 a cada lado), cuerpo a 16 px con leading-relaxed => ~26 px por
+linea y ~38 caracteres por linea, mas ~22 px de colchon por bloque hijo.
+
+  ubicacion                        que envuelve            alto est.  techo640  veredicto
+  -------------------------------  ----------------------  ---------  --------  ---------
+  /seguros/auto  BloqueFAQ         .reveal space-y-8           1.562     3.933   ok
+  (el resto de los 37)             bloques cortos               <1.500    3.933   ok
+
+  >>> CONTENEDORES POR ENCIMA DEL TECHO: 0 ... A 100% DE TEXTO Y A 360x640.
+      Y ESA ULTIMA FRASE ES TODO EL PROBLEMA. VER LA SECCION 8.
+
+  Con esta medicion di la clase por contenida. Estaba equivocado: solo habia
+  medido UNA condicion. La auditoria adversarial midio otras y encontro que el
+  `.reveal` de BloqueFAQ SI cruza el umbral. El detalle completo, la
+  correccion y lo que aprendi del metodo estan en la seccion 8.
+
+RECOMENDACION SOBRE EL ARREGLO DE RAIZ — NO EJECUTADA, ES DECISION DE FRANCISCO
+
+  La propuesta es cambiar el disparo por umbral a uno independiente de la
+  altura: `threshold: 0` con un rootMargin inferior negativo, por ejemplo
+  `{ threshold: 0, rootMargin: '0px 0px -15% 0px' }`. Con umbral 0 el callback
+  dispara en cuanto UN PIXEL del elemento entra en el root recortado, sin
+  importar cuanto mida el elemento. El bug desaparece por construccion.
+
+  A FAVOR
+   · Mata la clase entera, no la instancia. Ningun `.reveal` futuro puede
+     volverse invisible por crecer.
+   · Es UNA linea.
+   · El disparo queda mas predecible: siempre a la misma distancia del borde
+     inferior, sin depender del tamano del bloque.
+
+  EN CONTRA — y esto es lo que hay que sopesar
+   · TOCA EL <script> INLINE de Layout.astro. Eso cambia su hash, o sea que
+     obliga a REGENERAR los hashes CSP de infra/nginx.conf y a rebuild. Si el
+     hash no cuadra, el navegador bloquea el script EN SILENCIO y todos los
+     `.reveal` del sitio quedan invisibles: el fallo es peor que el que se
+     quiere arreglar.
+   · RADIO DE IMPACTO TOTAL: ese observer alimenta las 13 paginas, incluidas
+     las apariciones de F1 (el portico que se construye). Cambiar el momento
+     del disparo cambia la sensacion de TODA la animacion del sitio, no solo
+     la de los bloques largos.
+   · El disparo se adelanta: con umbral 0 los bloques cortos aparecen antes de
+     lo que aparecen hoy. Puede leerse como que «ya estaba todo visible».
+   · Hoy no hay ningun contenedor en riesgo, asi que el arreglo no repara nada
+     roto: previene.
+
+  MI LECTURA: hacerlo, pero en su propia sesion, con su regeneracion de hashes
+  y su verificacion en navegador. No colgarlo de una sesion que hace otras
+  cuatro cosas. Mientras tanto, la regla de la seccion siguiente evita que el
+  problema vuelva.
+
+TEXTO DE LA REGLA NUEVA, para el registro del proyecto (SIN NUMERO: lo asigna
+Francisco desde el registro real):
+
+  «Ningun contenedor con `.reveal` puede envolver cuerpo de contenido ni un
+   bloque que pueda crecer sin techo. El observer del sitio dispara con
+   `threshold: 0.15`, y un elemento mas alto que (alto_del_viewport - 50) / 0,15
+   nunca alcanza ese ratio: se queda en `opacity: 0` para siempre, sin ningun
+   error en consola. Corolario, que es la mitad importante: el contenido que
+   tiene que poder leer un buscador o un asistente NO depende de JavaScript
+   para ser visible. Las animaciones de aparicion son para bloques cortos y
+   decorativos.»
+
+
+================================================================================
+6. ATRIBUCION DE LEADS EN LOS CTA DE WHATSAPP
+================================================================================
+
+DIAGNOSTICO DEL PATRON REAL, antes de tocar:
+  NO habia componente compartido. El numero 593998027819 estaba duplicado como
+  constante local en OCHO archivos: index, Header, Footer, sobre-mi,
+  PorticoConstruye, contacto, 404 y ProductLayout. Las seis paginas de producto
+  si estaban parametrizadas, pero solo para el MENSAJE, via la prop
+  `whatsappMessage`.
+
+DECISION: parametrizar, no duplicar.
+  NUEVO web/src/lib/whatsapp.ts — fuente unica del numero, del tipo `TokenBG`
+  y del constructor `enlaceWhatsApp(mensaje, token?)`.
+  Header y Footer reciben `token` por prop, asi que el CTA del header —que
+  suele ser el mas clicado— queda atribuido a la pagina desde la que se hizo
+  clic, y no a un generico.
+  ProductLayout DERIVA el token del slug con `BG-${slug.toUpperCase()}`: los
+  seis slugs dan exactamente los seis marcadores acordados, asi que no hay
+  tabla que se pueda desincronizar ni pagina que se pueda olvidar de
+  declararlo.
+
+POR QUE EL MARCADOR VA DENTRO DEL TEXTO Y NO EN LA URL:
+  `wa.me` solo respeta `phone` y `text`. Cualquier `utm_*` colgado del enlace
+  se pierde: no llega al mensaje, no llega a Aurora, no llega a ningun lado.
+  Lo unico que sobrevive el salto a la aplicacion es el texto pre-rellenado.
+
+RESULTADO, verificado sobre el HTML emitido:
+
+  pagina                                  token                    enlaces
+  --------------------------------------  -----------------------  -------
+  index.html                              BG-HOME                     10
+  sobre-mi/                               BG-SOBRE-MI                  4
+  seguros/auto/                           BG-AUTO                      6
+  seguros/vida-termino/                   BG-VIDA-TERMINO              6
+  seguros/vida-indexada/                  BG-VIDA-INDEXADA             6
+  seguros/salud-nacional/                 BG-SALUD-NACIONAL            6
+  seguros/salud-internacional/            BG-SALUD-INTERNACIONAL       6
+  inversion/                              BG-INVERSION                 6
+  404, contacto, cookies, privacidad, terminos   (ninguno)             0
+
+  8 tokens distintos, uno por pagina, ninguno repetido entre paginas, y cero
+  en las cinco paginas que no estan en la lista acordada.
+
+  EL MENSAJE COMPLETO, DECODIFICADO:
+    /seguros/auto  «Hola, llego desde la página de Seguro vehicular de
+                    barreraglobal.com y quiero conversar. [BG-AUTO]»
+    /              «Hola, llego desde barreraglobal.com y quiero conversar.
+                    [BG-HOME]»
+
+  CODIFICACION: los corchetes viajan como %5B y %5D dentro del parametro
+  `text`, y WhatsApp los restituye al abrir el chat. Se verifico decodificando
+  las URLs del build, no suponiendo.
+
+  EL NUMERO NO CAMBIO: 593998027819 en los 67 enlaces del sitio.
+
+  EFECTO LATERAL BUSCADO: el numero quedo en UN solo lugar del codigo. Se
+  elimino tambien la ultima copia a mano, la del campo `telephone` del JSON-LD
+  de Layout.astro, que ahora importa la constante.
+
+
+================================================================================
+7. ACCESIBILIDAD DEL FOOTER
+================================================================================
+
+LAS FALLAS EXACTAS, con su regla y su nodo:
+
+  1. color-contrast · `<span class="block text-tx-disabled text-xs ...">`
+     #6b6964 sobre #0f0f15 = 3,48:1. WCAG AA pide 4,50:1 para 12 px.
+     Cuatro nodos por pagina.
+  2. color-contrast · `<p class="font-body text-xs text-tx-disabled">`
+     #6b6964 sobre #08080d = 3,64:1.
+  3. link-in-text-block · `<a href="/cookies">`
+     El dorado #c9a84c contra el gris del parrafo daba 2,40:1 y el criterio
+     pide 3,00; y el enlace no tenia subrayado que lo distinguiera.
+
+  Las tres son objetivas y se corrigieron. Ninguna exigia decision de diseno.
+
+FIX 1 — el token --tx-disabled: #6b6964 -> #7d7b75
+  Se calculo el gris MAS OSCURO que cumple 4,5:1 sobre los DOS fondos,
+  conservando la proporcion original entre canales (107/105/100) para no mover
+  el matiz calido: sube la luz, no el color. Es el cambio visual mas chico
+  posible que cumple.
+    #7d7b75 sobre #0f0f15 = 4,51:1     sobre #08080d = 4,72:1
+
+FIX 2 — el subrayado, y la trampa en la que cai
+  Primero se puso `class="underline underline-offset-2"`, la utilidad de
+  Tailwind. Lighthouse SIGUIO marcando «The link has no styling (such as
+  underline)». Motivo: `a { text-decoration: none }` de global.css vive FUERA
+  de toda @layer y le gana a la utilidad, que vive en @layer utilities. Es
+  R-43 otra vez, ahora sobre la DECORACION y no sobre el color, y yo mismo
+  habia escrito un comentario afirmando que text-decoration no estaba afectada.
+  Estaba equivocado, y lo dijo la herramienta.
+  Se resolvio con la mitigacion sancionada del proyecto: `.enlace-subrayado`,
+  regla propia, sin capa, con mas especificidad. Sin tocar las capas, que R-43
+  prohibe mover hasta P-47.
+  Detalle que cierra el asunto: con el gris aclarado, el contraste del dorado
+  contra el parrafo EMPEORA a 1,85:1. Por color no se puede cumplir ni
+  aclarando ni oscureciendo. El subrayado no era una opcion: era la unica via.
+
+RESULTADO
+                     antes    despues
+  /                    92       100
+  /seguros/auto        92       100
+  /sobre-mi            91       100
+  Objetivo declarado del proyecto: 95. Auditorias de accesibilidad falladas: 0.
+
+
+================================================================================
+8. >>> LA AUDITORIA ME ENCONTRO EL MISMO BUG, EN OTRO ARCHIVO <<<
+================================================================================
+
+17 hallazgos crudos, 1 CONFIRMADO. Y el confirmado es una REGRESION DE ESTA
+MISMA SESION, en la clase de bug que yo acababa de declarar contenida.
+
+EL HALLAZGO
+  `BloqueFAQ.astro:46` — el `.reveal` que envuelve el `preguntas.map()`. Es un
+  contenedor de altura SIN TECHO: crece con el array. Exactamente el mismo bug
+  que se saco del <slot /> en la Sesion 17, sobreviviente porque aquel arreglo
+  se aplico a un ARCHIVO y no a la CLASE.
+
+POR QUE MI AUDITORIA NO LO VIO
+  Yo lo medi en UNA sola condicion: 100% de texto, viewport 360x640. Ahi da
+  1.663 px contra un techo de 3.933 px, o sea 42% del techo, y lo di por
+  cerrado con «margen de 2,5x». El auditor lo midio en Chrome real a otras
+  escalas de texto:
+      100%  1.663 px  ok          150%  4.167 px  FALLA (ratio 0,1416)
+      115%  2.046 px  ok          175%  5.954 px  FALLA
+      130%  2.995 px  ok          200%  8.264 px  FALLA
+  El refutador reprodujo esos numeros por su cuenta, digito por digito, y
+  encima encontro un camino MAS BARATO que no necesita ninguna preferencia
+  especial: a viewport 320x256 CSS px —que es la condicion de prueba de
+  WCAG 2.1 SC 1.4.10 Reflow, o sea zoom de pagina al 400% en escritorio— con
+  el tamano de fuente POR DEFECTO da 1.819 px contra un techo de 1.373 px, y
+  el elemento sale `visible=false, opacity=0`.
+
+ES REGRESION DE ESTA SESION, no codigo viejo
+  En HEAD (7b7c4c2) la FAQ era un `const` fijo de 3-4 preguntas dentro de
+  ProductLayout. El `FAQ_AUTO` de SEIS preguntas y el componente BloqueFAQ son
+  de este arbol de trabajo. O sea que este mismo trabajo DUPLICO la altura de
+  ese contenedor —de ~834 a 1.663 px— y le comio la mitad del margen, en la
+  misma pagina cuyo bug hermano se acababa de arreglar.
+  Y mi propio comentario en ProductLayout, escrito en la Sesion 17, decia:
+  «Las demas `.reveal` de este layout envuelven bloques acotados y no corren el
+  riesgo». Esa frase quedo FALSA en el momento en que la FAQ se extrajo a su
+  propio componente y paso de 3 a 6 preguntas. La escribi yo.
+
+CONSECUENCIA, y por que nada la habria detectado
+  Bajo el titulo «Preguntas frecuentes / Sobre el seguro vehicular» queda un
+  hueco en blanco de 4.167 px. Cero errores en consola. El JSON-LD de FAQPage
+  se sigue emitiendo completo y el texto sigue en el DOM, asi que el build
+  13/13, el cruce de schema y Lighthouse —que emula 823 px de alto— lo dan
+  todo por bueno. Rompe WCAG 2.1 SC 1.4.4 Resize Text (AA) de forma limpia: al
+  200% de texto se pierde un bloque entero. Y golpea justo a los usuarios de
+  texto grande y zoom, que son los mismos que esta sesion dice atender con el
+  trabajo de contraste del footer.
+
+EL ARREGLO — se aplico a la CLASE, no al archivo
+  · `BloqueFAQ.astro:46`  pierde el `.reveal`. Queda `class="space-y-8"`.
+  · `ProductLayout.astro` la grilla del PROCESO tambien lo pierde, aunque hoy
+    PASA: 3.362 px al 200% con ratio 0,1755 contra el minimo de 0,15, o sea un
+    17% de margen. Tambien es un `map()` sobre un array que cada producto puede
+    sobreescribir con la prop `proceso`: siete pasos en vez de cinco lo tumban.
+    Se aplica la regla, no la excepcion.
+  · Los `.reveal` de encabezados, parrafos sueltos y el CTA se quedan: son
+    bloques cortos y fijos, y ahi la animacion no cuesta nada.
+  Verificado tras el arreglo: ningun `.reveal` del sitio envuelve una lista
+  generada. Cero JS nuevo, hashes CSP intactos.
+
+LO QUE APRENDI, Y QUE VALE MAS QUE EL FIX
+  Una verificacion que mide una sola condicion no verifica: tranquiliza. Yo
+  produje una tabla con veredicto «ok» para 37 contenedores habiendo probado
+  un solo viewport y una sola escala de texto, y la presente como auditoria
+  sistematica de la clase. La regla que redacte en la seccion 5 es correcta;
+  lo que fallo fue el metodo para comprobarla. Para la proxima: la altura de
+  un contenedor no es un numero, es una funcion del viewport Y de la escala de
+  texto Y del zoom, y hay que barrer las tres.
+
+LOS OTROS 16, refutados. Ninguno toca reglas duras.
+
+
+================================================================================
+9. LIGHTHOUSE — Y UNA TRAMPA DE MEDICION QUE CASI REPORTO MAL
+================================================================================
+
+MEDICION FINAL, MOVIL (127.0.0.1)
+  pagina           Perf  A11y  BP   SEO  |  LCP     CLS     FCP     TBT
+  ---------------  ----  ----  ---  ---  |  ------  ------  ------  ----
+  /                  99   100  100  100  |  1,97 s  0,000   1,67 s   0 ms
+  /seguros/auto      99   100  100  100  |  1,81 s  0,000   1,66 s   0 ms
+  /sobre-mi          97   100  100  100  |  2,11 s  0,000   2,11 s   0 ms
+
+  A11y 100 en las tres. CLS 0,000 en las tres. Objetivo de accesibilidad: 95.
+  LCP sigue por encima de 1,80 s por el motivo ya documentado en la Sesion 16
+  —el cuello es el FCP y las fuentes self-hosted—, salvo /seguros/auto que
+  queda a 0,01 s.
+
+LA TRAMPA, dicha entera porque casi la reporto como regresion
+  Las mismas paginas, en el mismo build, medidas por `http://localhost:4321`
+  daban Perf 59, LCP 8,2-8,4 s y FCP 6,3-6,6 s. Cuatro veces peor. Nada del
+  sitio podia explicarlo: los cambios de la sesion son texto, un token de
+  color y quitar dos clases.
+  Primera hipotesis: la maquina cargada. Habia 236 procesos de Chrome vivos
+  consumiendo 14,7 GB —restos de las corridas headless, cuya limpieza fallaba
+  con EPERM—. Se mataron los 52 headless (respetando los 184 del navegador de
+  Francisco). El numero NO cambio: seguia en 59.
+  Segunda hipotesis, la correcta: este preview se levanto con `--host`, y
+  `localhost` resuelve primero a `::1`. Medido:
+      http://localhost:4321   48 ms de media por request (max 188)
+      http://127.0.0.1:4321   12 ms de media (max 23)
+  Con el throttling de red simulado de Lighthouse, ese sobrecosto por request
+  se multiplica por cada asset y hunde el FCP. Midiendo por IPv4 los numeros
+  vuelven a 97-99.
+  LECCION OPERATIVA: para medir Lighthouse en local, usar 127.0.0.1 y NO
+  localhost, sobre todo si el preview se levanto con `--host`. Y antes de
+  reportar una regresion de rendimiento, verificar que el instrumento no sea
+  el que cambio.
+
