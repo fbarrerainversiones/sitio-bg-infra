@@ -408,3 +408,71 @@ LA TRAMPA, dicha entera porque casi la reporto como regresion
   reportar una regresion de rendimiento, verificar que el instrumento no sea
   el que cambio.
 
+
+
+================================================================================
+10. CIERRE
+================================================================================
+
+COMMITS DE LA SESION 18
+  28441c0  feat(producto): /seguros/auto definitiva - copy aprobado por Francisco
+  b9e5490  fix(a11y): ningun .reveal envuelve una lista que pueda crecer
+  015add3  feat(leads): marcador de atribucion en los CTA de WhatsApp
+  29def09  fix(a11y): contraste del footer y subrayado del enlace de cookies
+  1b767f0  docs(reportes): reportes de las Sesiones 17 y 18
+
+PUSH: 7b7c4c2..1b767f0   origin/main = HEAD local = 1b767f0
+Commits sin respaldo remoto: 0. Working tree limpio. Build 13/13.
+
+>>> HASH DEL FRENO DE VERIFICACION DEL DEPLOY <<<
+    1b767f06371b6a4fc3e2db407e958f4013de2c3e
+
+    Cuando Aurora levante la veda, en el VPS: tras el git pull y ANTES del
+    rebuild, confirmar por git log que ESE hash llego. Si el pull dice
+    "Already up to date" y el build sale todo CACHED, se violo la secuencia y
+    el VPS esta reconstruyendo la version vieja (R-47).
+
+ESTADO DE LA CSP
+  NO se toco ningun <script> inline en toda la sesion, asi que los hashes
+  quedan IDENTICOS. Cruce verificado: 2 <-> 2, 13 apariciones cada uno, cero
+  huerfanos en ambas direcciones.
+    sha256-aOPTArMuUPr5ybUMJpH+mtSGicP8zlnwwFwZYYhokv4=
+    sha256-Qra3eTJV60gng4dzuHtxcR7XY8lE1nLbTAAJ5T7jyto=
+
+ARCHIVOS
+  NUEVOS       web/src/lib/whatsapp.ts
+               web/src/components/TarjetaAseguradora.astro
+               web/src/components/LetraPequena.astro
+               web/src/components/BloqueFAQ.astro
+               REPORTE-SESION-17.txt · REPORTE-SESION-18.txt
+  MODIFICADOS  web/src/pages/seguros/auto.astro
+               web/src/layouts/ProductLayout.astro · web/src/layouts/Layout.astro
+               web/src/components/Header.astro · Footer.astro · PorticoConstruye.astro
+               web/src/pages/index.astro · sobre-mi.astro · contacto.astro · 404.astro
+               web/src/styles/tokens.css · web/src/styles/global.css
+  NO SE TOCO   infra/nginx.conf · sitemap.xml · las cinco paginas de producto
+               hermanas · los assets
+
+QA FINAL
+  build 13/13 · CSP 2 <-> 2 con los mismos hashes · 0 atributos on* ·
+  0 <script src> · 0 [PENDIENTE en web/src y en dist ·
+  centinelas de datos personales 0 en todo el repo y dist ·
+  cifras de producto fuera de la whitelist: 0 ·
+  «Sobre mi» sin tilde: 0 (antes 44) · numero de WhatsApp en 1 solo archivo ·
+  8 marcadores, uno por pagina, ninguno repetido.
+
+LO QUE QUEDA ABIERTO
+  1. El email Gmail del footer: 13 de 13 paginas. Reportado, sin tocar, para
+     que Francisco decida el reemplazo por el correo propio del dominio.
+  2. La legibilidad de la razon social a 12 px en font-mono: la tilde esta,
+     pero no se ve. Decision de diseno.
+  3. El arreglo de raiz del observer (threshold 0 + rootMargin negativo).
+     Recomendado en la seccion 5, con sus contras: toca el <script> inline y
+     por lo tanto los hashes CSP, y su radio de impacto es todo el sitio.
+     Merece su propia sesion.
+  4. La regla nueva de la seccion 5, para que Francisco le asigne numero en el
+     registro real del proyecto.
+  5. El deploy. Sigue esperando que se levante la veda de Aurora, y exige
+     REBUILD de la imagen (R-44).
+
+================================================================================
