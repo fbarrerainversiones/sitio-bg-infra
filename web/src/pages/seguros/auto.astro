@@ -1,67 +1,323 @@
 ---
 import ProductLayout from "../../layouts/ProductLayout.astro";
+import TarjetaAseguradora from "../../components/TarjetaAseguradora.astro";
+import LetraPequena from "../../components/LetraPequena.astro";
 import heroImage from "../../assets/productos/auto.jpg";
 
 /**
- * /seguros/auto — REPUESTA el 11/08/2026 por decision de Francisco.
+ * /seguros/auto — versión definitiva (Sesión 17).
  *
- * Esta pagina existio y se retiro el 25/07/2026 (decision D1, commit 96f629c).
- * La decision de Francisco del 11/08/2026 SUPERA a D1: el seguro vehicular
- * vuelve como producto, con el alcance acotado a "cobertura unicamente en el
- * Ecuador", que va enunciado de forma prominente en el primer parrafo y
- * repetido en el subtitulo del hero.
+ * REPUESTA el 11/08/2026 por decisión de Francisco, que SUPERA a D1
+ * (25/07/2026, commit 96f629c), donde el producto se había retirado.
  *
- * COPY: es BORRADOR, pendiente de aprobacion de Francisco. Escrito bajo las
- * mismas restricciones que el resto del sitio:
- *   - Cero primas, cero cifras, cero porcentajes (Art. 11.6 SCVS).
- *   - Cero "mejor precio", cero descuentos, cero promesas (Art. 12.12 SCVS).
- *   - Cero nombres de aseguradoras.
- *   - Nada de coberturas especificas presentadas como garantizadas: se habla
- *     de lo que un seguro vehicular CONTEMPLA en general, y se remite a la
- *     poliza y a la conversacion para lo que aplique a cada caso.
- * El disclaimer del Art. 11.6 lo emite ProductLayout, igual que en las cinco
- * paginas hermanas: no se duplica aca.
+ * ORIGEN DE LOS DATOS DE PRODUCTO: bloque curado por el auditor a partir de
+ * cotizaciones reales de las tres aseguradoras (junio 2026), sin datos
+ * personales y sin primas. Ese bloque es la ÚNICA fuente permitida: ninguna
+ * cifra de esta página sale de la web de una aseguradora, de un PDF suelto ni
+ * de memoria. Toda cifra monetaria y todo porcentaje que aparece acá existe
+ * textualmente en el bloque curado — es una whitelist cerrada, y se verifica
+ * cruzando el HTML emitido contra ella.
+ *
+ * LO QUE NO PUEDE ENTRAR NUNCA:
+ *   - primas, cuotas, formas de pago o valores de vehículos (Art. 11.6 SCVS);
+ *   - «la mejor», «más barata», «recomendada» ni comparación de precio entre
+ *     aseguradoras (Art. 12.12 SCVS);
+ *   - datos personales de las cotizaciones de origen.
+ *
+ * ORDEN DE LAS ASEGURADORAS: Sweaden, Generali, Chubb. Es el orden en que el
+ * auditor entregó los datos y se conserva tal cual, sin reordenar por ningún
+ * criterio que pudiera leerse como preferencia. Ninguna tarjeta se compara con
+ * las otras: cada una se presenta por su punto fuerte propio.
+ *
+ * ALCANCE: se dice «seguro para vehículos que circulan en el Ecuador», y una
+ * FAQ explica que la cobertura principal opera en el Ecuador y que algunas
+ * aseguradoras incluyen extensiones puntuales según plan. NO se usa
+ * «únicamente» como absoluto, porque sería falso: dos de las tres tienen
+ * extensiones fuera del país.
  */
+
+const COBERTURAS = [
+  {
+    c: "Todo riesgo",
+    q: "Si tu carro choca, se vuelca, se incendia o te lo roban, la aseguradora responde.",
+  },
+  {
+    c: "Responsabilidad civil",
+    q: "Si dañas el vehículo o la propiedad de otra persona, la póliza responde por ti hasta el límite del plan.",
+  },
+  {
+    c: "Accidentes personales",
+    q: "Protege a quienes viajan dentro del vehículo, según plan.",
+  },
+  {
+    c: "Amparo patrimonial",
+    q: "Te cubre incluso en errores del conductor que normalmente anularían un seguro; el alcance exacto depende de la aseguradora y el plan.",
+  },
+  {
+    c: "Deducible",
+    q: "La parte del siniestro que asumes tú; el resto lo cubre la aseguradora.",
+  },
+  {
+    c: "Asistencias",
+    q: "Grúa, llanta, batería, cerrajería y ayuda legal en el camino.",
+  },
+];
+
+const PROCESO_AUTO = [
+  {
+    n: "01",
+    t: "Cuéntale de tu vehículo",
+    d: "Escribe por WhatsApp con los datos de tu carro y del uso que le das. Sin formularios largos.",
+  },
+  {
+    n: "02",
+    t: "Compara contigo las opciones",
+    d: "Francisco pone sobre la mesa lo que ofrecen las tres aseguradoras para tu caso concreto.",
+  },
+  {
+    n: "03",
+    t: "Eliges con claridad",
+    d: "Con lo que cubre y lo que no cubre cada opción explicado con el mismo énfasis.",
+  },
+  {
+    n: "04",
+    t: "La aseguradora emite tu póliza",
+    d: "La emisión y la cobertura son de la aseguradora que elijas. Francisco gestiona el trámite.",
+  },
+  {
+    n: "05",
+    t: "Francisco te acompaña en cada siniestro",
+    d: "El acompañamiento no termina con la firma: empieza ahí.",
+  },
+];
+
+const REQUISITOS = [
+  "Cédula o RUC",
+  "Matrícula del vehículo",
+  "Inspección del vehículo",
+  "Formulario de conocimiento del cliente",
+  "Planilla de un servicio básico, según la aseguradora",
+];
+
+const FAQ_AUTO = [
+  {
+    q: "¿Cuánto cuesta un seguro vehicular?",
+    a: "Depende de tu caso y se calcula uno por uno, así que no hay un precio de lista. Pesan la marca y el año del vehículo, su valor, el uso que le das, la zona donde circulas, tu historial y si tiene dispositivo de rastreo. Escribe por WhatsApp y armamos tu cotización personalizada, sin compromiso.",
+  },
+  {
+    q: "¿Qué es el deducible?",
+    a: "Es la parte del siniestro que asumes tú; el resto lo cubre la aseguradora. Cada aseguradora lo calcula distinto y suele cambiar según se trate de una pérdida parcial o total. Los valores referenciales de cada una están en la letra pequeña de su tarjeta.",
+  },
+  {
+    q: "¿Qué es el amparo patrimonial?",
+    a: "Es la cobertura que te protege incluso cuando el error fue del conductor, en situaciones que normalmente anularían un seguro. El alcance exacto depende de la aseguradora y del plan, y es una de las diferencias más grandes entre una opción y otra.",
+  },
+  {
+    q: "¿Me cubre fuera del Ecuador?",
+    a: "La cobertura principal opera en el Ecuador. Algunas aseguradoras incluyen extensiones puntuales según el plan —por ejemplo hacia países vecinos o dentro de la Comunidad Andina—, y eso se confirma en la asesoría antes de contratar, no después.",
+  },
+  {
+    q: "¿Qué hago si tengo un siniestro?",
+    a: "Avisas a Francisco y él te acompaña en el trámite con la aseguradora. Ese acompañamiento es el motivo de contratar con un asesor y no por tu cuenta: alguien que conoce tu póliza responde el teléfono cuando el problema ya ocurrió.",
+  },
+  {
+    q: "¿Qué documentos necesito?",
+    a: "Cédula o RUC, matrícula del vehículo, inspección del vehículo y formulario de conocimiento del cliente. Según la aseguradora se suma la planilla de un servicio básico. Los requisitos exactos se confirman al momento de emitir.",
+  },
+];
 ---
 
 <ProductLayout
   title="Seguro vehicular · Seguros generales · Barrera Global"
-  description="Seguro vehicular con cobertura únicamente en el Ecuador: protección para tu vehículo y para tu responsabilidad frente a terceros. Cotización personalizada, sin compromiso."
+  description="Seguro vehicular para vehículos que circulan en el Ecuador: todo riesgo, responsabilidad civil y asistencias, con tres aseguradoras comparadas contigo. Cotización personalizada, sin compromiso."
   canonical="https://barreraglobal.com/seguros/auto"
   eyebrow="Seguros generales"
   productName="Seguro vehicular"
-  heroSubtitle="Protección para tu vehículo y para tu responsabilidad frente a terceros, con cobertura únicamente en el Ecuador."
+  heroSubtitle="Protección para tu vehículo y para tu responsabilidad frente a terceros, con tres aseguradoras sobre la mesa y las diferencias explicadas."
   whatsappMessage="Hola, llego desde la página de Seguro vehicular de barreraglobal.com y quiero conversar."
   slug="auto"
   heroImage={heroImage}
   heroImageAlt="Frente de un automóvil con las luces encendidas y una carretera de montaña al fondo"
+  proceso={PROCESO_AUTO}
+  procesoNota="Las cotizaciones que entrega Francisco tienen una vigencia de 15 días."
+  faq={FAQ_AUTO}
+  faqKicker="Preguntas frecuentes"
+  faqTitulo="Sobre el"
+  faqTituloDestacado="seguro vehicular."
 >
+
+  {/* 1 — INTRO ANSWER-FIRST. Responde en la primera oración: qué es, para
+      quién, con qué alcance. */}
   <p>
-    El <span class="text-tx font-medium">seguro vehicular</span> que asesoro
-    tiene <span class="text-tx font-medium">cobertura únicamente en el
-    Ecuador</span>. Es el primer dato y no la letra chica: si manejas fuera del
-    país, esta no es la solución que necesitas y te lo digo antes de que
-    preguntes.
+    El <span class="text-tx font-medium">seguro vehicular</span> cubre los daños
+    a tu carro y lo que le debes a un tercero cuando el accidente es tuyo. Es un
+    seguro para vehículos que circulan en el Ecuador, pensado para quien usa su
+    auto todos los días y no quiere que un choque se convierta en un problema
+    patrimonial. Trabajamos con tres aseguradoras y comparamos las tres contigo.
   </p>
-  <p>
-    Dentro de ese alcance, un seguro vehicular atiende dos frentes que suelen
-    confundirse. Por un lado tu <span class="text-tx font-medium">vehículo</span>:
-    los daños que sufre por un choque, un robo o un evento cubierto. Por el
-    otro, tu <span class="text-tx font-medium">responsabilidad frente a
-    terceros</span>: lo que le debes a otra persona cuando el accidente afecta
-    su vehículo, sus bienes o su salud. Ese segundo frente es el que la mayoría
-    subestima, y es el que puede comprometer un patrimonio entero.
-  </p>
-  <p>
-    Qué entra exactamente en cada frente, qué queda excluido y bajo qué
-    condiciones no es algo que se pueda publicar en una página: depende del
-    vehículo, del uso que le das y de la póliza que se arme para tu caso. Lo
-    revisamos juntos antes de que firmes nada, y lo que no está cubierto te lo
-    señalo con el mismo énfasis que lo que sí.
-  </p>
-  <p>
-    Es la pieza más cotidiana de una arquitectura financiera y la que más se
-    contrata a las apuradas. Un vehículo se usa todos los días y es, para
-    muchas familias, el segundo activo después de la vivienda.
-  </p>
+
+  {/* 2 — TABLA DEL RAMO. Va en <table> real y no en una lista maquetada:
+      las tablas se extraen mejor, tanto por buscadores como por asistentes,
+      y el lenguaje es deliberadamente simple. */}
+  <div class="pt-6">
+    <h3 class="font-display font-semibold text-tx mb-6 leading-tight">
+      Cómo te protege un seguro vehicular
+    </h3>
+
+    <div class="overflow-x-auto -mx-6 px-6 md:mx-0 md:px-0">
+      <table class="w-full border-collapse text-left">
+        <caption class="sr-only">
+          Coberturas de un seguro vehicular y qué significa cada una para el asegurado
+        </caption>
+        <thead>
+          <tr class="border-b border-gd-muted">
+            <th scope="col" class="py-3 pr-4 font-mono text-xs text-gd uppercase tracking-widest font-medium align-bottom">
+              Cobertura
+            </th>
+            <th scope="col" class="py-3 font-mono text-xs text-gd uppercase tracking-widest font-medium align-bottom">
+              Qué significa para ti
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          {COBERTURAS.map((f) => (
+            <tr class="border-b border-gd-muted align-top">
+              <th scope="row" class="py-4 pr-4 font-body text-sm md:text-base text-tx font-medium whitespace-nowrap">
+                {f.c}
+              </th>
+              <td class="py-4 font-body text-sm md:text-base text-tx-muted leading-relaxed">
+                {f.q}
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  {/* 3 — LAS TRES ASEGURADORAS. Orden fijo, sin ranking, cada una por su
+      punto fuerte propio. Los nombres van en TEXTO: el slot de logo del
+      componente está desactivado hasta tener autorización de uso de marca. */}
+  <div class="pt-10">
+    <h3 class="font-display font-semibold text-tx mb-4 leading-tight">
+      Las tres aseguradoras con las que trabajamos
+    </h3>
+    <p class="font-body text-base text-tx-muted leading-relaxed mb-8">
+      Cada una tiene una fortaleza distinta y ninguna es «la mejor» en
+      abstracto: la que te conviene depende de tu vehículo y de tu caso. Eso es
+      exactamente lo que se compara en la asesoría.
+    </p>
+
+    <div class="space-y-8">
+
+      <TarjetaAseguradora
+        nombre="Sweaden"
+        razonSocial="Sweaden Compañía de Seguros S.A."
+        puntoFuerte="Te respalda incluso cuando el error fue tuyo: su amparo patrimonial cubre negligencia del conductor —desatención de señales, licencia caducada, infracciones menores e incluso conducción en estado de embriaguez, con o sin fuga del conductor según el plan."
+        distintivos={[
+          "Amparo patrimonial por negligencia, con alcance según plan.",
+          "Auto de reemplazo hasta 30 días según plan y tipo de vehículo (requiere licencia vigente y garantía con tarjeta del titular).",
+          "Beneficios familiares: muerte accidental del propietario dentro del vehículo asegurado hasta $10.000, más subsidio mensual de canasta familiar al beneficiario durante la vigencia de la póliza.",
+          "Cirugía estética por lesiones de accidente hasta $1.000; protección de airbags al 100% en siniestro; reembolso por duplicado de llaves tras robo con denuncia.",
+          "Cobertura hasta 200 km cruzando la frontera hacia países vecinos, solo para daños propios.",
+          "Asistencias: grúa por accidente o avería, cerrajería vial, auxilio vial (paso de corriente, cambio de llanta, combustible) y asistencia legal telefónica.",
+        ]}
+      >
+        <LetraPequena>
+          <p>
+            Deducible en pérdidas parciales de 10% del valor del siniestro / 1%
+            del valor asegurado (mínimo aplicable, el mayor); pérdida total: 15%
+            del valor asegurado; taller fuera de la red: +30% al deducible;
+            accesorios no originales asegurables hasta el 20% del valor del
+            vehículo si se declaran; depreciación de partes desde 10 años de
+            antigüedad (multimarca) o desde 5 años (marcas de origen chino);
+            aplica a uso particular hasta 36.000 km al año.
+          </p>
+        </LetraPequena>
+      </TarjetaAseguradora>
+
+      <TarjetaAseguradora
+        nombre="Generali"
+        razonSocial="Generali Ecuador Compañía de Seguros S.A."
+        contexto="Heredera de la primera aseguradora constituida en el Ecuador, en 1940, hoy parte del grupo asegurador global Generali."
+        puntoFuerte="El ecosistema de asistencias que te resuelve la vida, no solo el choque: talleres con pagos ágiles, grúa, taxi tras un siniestro, lavado a domicilio, asistencia del hogar, tramitador personal y hasta chofer profesional."
+        distintivos={[
+          "Asistencia GEA: pagos ágiles en talleres concertados hasta $1.500; grúa hasta $350; traslado en taxi posterior a un siniestro; lavado exprés a domicilio; asistencia de hogar (plomería, electricista, cerrajería, vidriería); tramitador personal; chofer profesional; cajero protegido; reparación de parabrisas en daños menores a 20 cm.",
+          "Auto sustituto estructurado: 10 días en pérdidas parciales / 20 en totales, máximo 2 eventos al año, con categoría del vehículo según el valor asegurado.",
+          "Todo riesgo amplio: incluye fenómenos de la naturaleza, motín y huelgas, daños maliciosos y rotura de vidrios.",
+          "Accidentes personales hasta $10.000 por ocupante (muerte accidental o invalidez permanente) y gastos médicos hasta $3.000 por ocupante.",
+          "Emisión disponible para residentes de Imbabura, Pichincha, Cotopaxi, Tungurahua y Chimborazo, con cobertura a nivel nacional.",
+        ]}
+      >
+        <LetraPequena>
+          <p>
+            Deducible parcial de 10% del siniestro / 1% del asegurado (mínimo
+            aplicable); pérdida total por choque: 10% del valor asegurado; robo
+            total: 10% con dispositivo de rastreo / 20% sin dispositivo;
+            vehículos eléctricos: solo marcas con representación en el Ecuador y
+            mínimos mayores; sobre 36.000 km al año aplican deducibles
+            diferenciados; emisión disponible para residentes de Imbabura,
+            Pichincha, Cotopaxi, Tungurahua y Chimborazo, con cobertura a nivel
+            nacional; exclusiones habituales del ramo según condiciones
+            generales (carreras, transporte público o alquiler, carencia de
+            licencia, daño intencional, entre otras).
+          </p>
+        </LetraPequena>
+      </TarjetaAseguradora>
+
+      <TarjetaAseguradora
+        nombre="Chubb"
+        razonSocial="Chubb Seguros Ecuador S.A."
+        puntoFuerte="Respaldo global y cero deducible por robo si tu vehículo tiene rastreo: con dispositivo autorizado (Hunter, Onstar, Sherloc, Carsync o Tracklink), el deducible por robo total es 0%."
+        distintivos={[
+          "Deducible 0% en robo total con dispositivo de rastreo autorizado; sin dispositivo, 20% del valor asegurado.",
+          "Siniestro express: proceso ágil de pago de siniestros.",
+          "Pacto Andino: extensión de cobertura en países de la Comunidad Andina.",
+          "Extensión de responsabilidad civil; gastos médicos por ocupante hasta $3.000 y muerte accidental por ocupante hasta $5.000.",
+        ]}
+      >
+        <LetraPequena>
+          <p>
+            Pérdida parcial por daños: 10% del valor del siniestro (mínimo
+            aplicable sobre el valor asegurado); pérdida total por choque: 15%
+            del valor asegurado; requisitos de emisión: cédula o RUC, planilla
+            de servicio básico, matrícula del vehículo, inspección de riesgo y
+            formulario de conocimiento del cliente.
+          </p>
+        </LetraPequena>
+      </TarjetaAseguradora>
+
+    </div>
+  </div>
+
+  {/* 5 — REQUISITOS. (El paso 4, «cómo funciona el proceso», lo pinta el
+      layout desde la prop `proceso`, para no duplicar la sección.) */}
+  <div class="pt-10">
+    <h3 class="font-display font-semibold text-tx mb-6 leading-tight">
+      Requisitos para cotizar y emitir
+    </h3>
+    <ul class="font-body text-base text-tx-muted space-y-3">
+      {REQUISITOS.map((r) => (
+        <li class="flex items-start gap-3">
+          <span class="text-gd mt-1 shrink-0" aria-hidden="true">·</span>
+          <span class="leading-relaxed">{r}</span>
+        </li>
+      ))}
+    </ul>
+  </div>
+
+  {/* 7 — DISCLAIMER GENERAL. El del Art. 11.6 lo emite el layout; este suma
+      lo propio de una página que describe productos de terceros. */}
+  <div class="pt-10 mt-10 border-t border-gd-muted">
+    <p class="font-mono text-xs text-tx-disabled leading-relaxed">
+      Condiciones referenciales a agosto de 2026 — los términos finales se
+      validan con las condiciones generales y particulares de cada póliza
+      emitida. Barrera Global es asesoría productora de seguros y no mantiene
+      exclusividad con ninguna aseguradora; las pólizas las emite y las cubre
+      cada aseguradora, no esta asesoría. Las coberturas, montos y deducibles
+      descritos varían según el plan contratado y el perfil de cada vehículo, y
+      se confirman por escrito antes de contratar.
+    </p>
+  </div>
+
 </ProductLayout>

@@ -1,0 +1,84 @@
+---
+/**
+ * Tarjeta de aseguradora — reutilizable para replicar el patrón en los otros
+ * cinco productos.
+ *
+ * EL NOMBRE VA EN TEXTO, NO EN LOGO. El componente tiene un slot `logo`
+ * PREVISTO Y HOY DESACTIVADO: usar la marca gráfica de un tercero exige
+ * autorización de uso que todavía no está. Mientras `mostrarLogo` sea false
+ * —y lo es por defecto— el slot no se renderiza aunque alguien le pase
+ * contenido. El día que llegue la autorización se cambia una prop, no el
+ * componente.
+ *
+ * NEUTRALIDAD: la tarjeta no tiene lugar para puntajes, estrellas, orden de
+ * preferencia ni comparación de precio. Cada aseguradora se presenta por su
+ * punto fuerte propio, en su propio idioma, sin medirse contra las otras
+ * (Art. 12.12 SCVS). Esa restricción está en la FORMA del componente, no
+ * confiada al criterio de quien lo use.
+ */
+interface Props {
+  /** Razón social o nombre comercial, en texto. */
+  nombre: string;
+  /** Denominación legal completa, si difiere del nombre de cabecera. */
+  razonSocial?: string;
+  /** El punto fuerte, en UNA frase. */
+  puntoFuerte: string;
+  /** 3 a 5 viñetas de distintivos. */
+  distintivos: string[];
+  /** Contexto verificable adicional (opcional). */
+  contexto?: string;
+  /** Interruptor del slot de logo. Hoy SIEMPRE false: falta autorización. */
+  mostrarLogo?: boolean;
+}
+
+const {
+  nombre,
+  razonSocial,
+  puntoFuerte,
+  distintivos,
+  contexto,
+  mostrarLogo = false,
+} = Astro.props;
+---
+
+<article class="border border-gd-muted rounded-lg bg-bg-elev-1 p-6 md:p-8">
+
+  <header class="mb-5">
+    {mostrarLogo && (
+      <div class="mb-4">
+        <slot name="logo" />
+      </div>
+    )}
+
+    <h3 class="font-display font-semibold text-tx leading-tight">
+      {nombre}
+    </h3>
+
+    {razonSocial && (
+      <p class="font-mono text-xs text-tx-disabled mt-2 leading-relaxed">
+        {razonSocial}
+      </p>
+    )}
+  </header>
+
+  {contexto && (
+    <p class="font-body text-sm text-tx-muted leading-relaxed mb-5">
+      {contexto}
+    </p>
+  )}
+
+  <p class="font-body text-base md:text-lg text-tx leading-relaxed mb-6">
+    {puntoFuerte}
+  </p>
+
+  <ul class="font-body text-sm text-tx-muted space-y-3">
+    {distintivos.map((d) => (
+      <li class="flex items-start gap-3">
+        <span class="text-gd mt-1 shrink-0" aria-hidden="true">·</span>
+        <span class="leading-relaxed">{d}</span>
+      </li>
+    ))}
+  </ul>
+
+  <slot />
+</article>
