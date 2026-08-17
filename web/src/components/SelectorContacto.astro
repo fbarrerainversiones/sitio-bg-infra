@@ -78,9 +78,24 @@ const OPCIONES = [
 ];
 
 /**
- * QUE PASA DESPUES. Cumple ademas la transparencia de asistente automatizado
- * que ya exigen /privacidad (seccion 5) y /terminos (seccion 6): el visitante
- * sabe, ANTES de escribir, que quien contesta primero es un asistente.
+ * QUE PASA DESPUES.
+ *
+ * EL PASO 01 DICE «UN ASISTENTE AUTOMATIZADO», Y NO ES ADORNO.
+ * La primera version decia solo «Aurora te responde al instante». La auditoria
+ * adversarial de la Sesion 19 lo levanto como hallazgo de severidad ALTA y el
+ * refutador no pudo tumbarlo: en /contacto el disclaimer existe (contacto.astro
+ * lo dice bajo el selector), pero en el HOME —que es la pagina de mas trafico y
+ * donde este componente tambien se monta— NO habia ninguno. Un visitante leia
+ * «Aurora te responde» junto a «Francisco lo revisa», los dos con nombre propio
+ * y verbo en tercera persona, y se llevaba la idea de que Aurora es una persona
+ * del equipo. Eso contradice el compromiso escrito del propio sitio en
+ * privacidad.astro:142 («un asistente virtual basado en inteligencia artificial
+ * QUE SE IDENTIFICA COMO TAL») y en terminos.astro:157. Ahora el componente lo
+ * declara por su cuenta, asi que cumple en las dos paginas y no depende de que
+ * la pagina anfitriona traiga su propio aviso.
+ *
+ * El paso 02 recupera «en horario laboral», que era la unica acotacion de plazo
+ * del bloque que este componente reemplazo en el home.
  *
  * El paso 03 NO dice «las tres aseguradoras». Esa cifra es verdadera solo del
  * ramo vehicular —/seguros/auto la declara y nombra a Sweaden, Generali y
@@ -91,8 +106,8 @@ const OPCIONES = [
  * cifra que no generaliza.
  */
 const PASOS = [
-  { n: "01", t: "Aurora te responde al instante y toma tu caso" },
-  { n: "02", t: "Francisco lo revisa y te escribe personalmente" },
+  { n: "01", t: "Aurora, un asistente automatizado, te responde al instante" },
+  { n: "02", t: "Francisco lo revisa y te escribe personalmente, en horario laboral" },
   { n: "03", t: "Comparas las opciones sobre la mesa y decides" },
 ];
 ---
@@ -106,8 +121,10 @@ const PASOS = [
 >
   <div class="max-w-5xl mx-auto px-6">
 
-    <!-- Encabezado. Unico bloque con .reveal, y a proposito: es texto de
-         acompanamiento, no la accion. -->
+    {/* Encabezado. Unico bloque con .reveal, y a proposito: es texto de
+        acompanamiento, no la accion.
+        Se comenta con {} y no con <!-- -->: los comentarios HTML SI llegan al
+        build y estas notas son internas (convencion de Footer.astro:39). */}
     <div class="reveal text-center">
       {antetitulo && (
         <p class="font-mono text-xs text-gd uppercase tracking-widest mb-4">
@@ -123,19 +140,33 @@ const PASOS = [
       </p>
     </div>
 
-    <!-- Las cuatro opciones concretas.
-         `items-stretch` + `h-full` en el <a>: el alto lo fija el contenido y
-         todas las tarjetas de una fila igualan a la mas alta. No hay `min-h`
-         ni alto fijo, para que al 150 % de texto la tarjeta CREZCA en vez de
-         desbordar (regla de verificacion en tres condiciones). -->
-    <ul class="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-5 items-stretch list-none">
+    {/* Las cuatro opciones concretas.
+
+        `items-stretch` + `h-full` en el <a>: el alto lo fija el contenido y
+        todas las tarjetas de una fila igualan a la mas alta. No hay `min-h` ni
+        alto fijo, para que al 150 % de texto la tarjeta CREZCA en vez de
+        desbordar (R-52, verificacion en tres condiciones).
+
+        `sc-tarjeta` agrega lo que las utilidades no pueden: corte de palabras
+        largas. La auditoria de la Sesion 19 midio que a 320 px con la raiz
+        escalada, «Conversemos» pide 127,7 px contra 108,0 px de caja. Su
+        cuantificacion quedo REFUTADA en los otros anchos, pero la guarda es
+        gratis y cierra la clase entera: con `html { overflow-x: hidden }`
+        (global.css) lo que se sale del viewport NO se recupera con scroll, se
+        pierde. Vale mas la guarda que la discusion.
+
+        `role="list"`: el preflight de Tailwind v4 emite `ol,ul,menu{list-style:
+        none}` para todo el sitio, y WebKit RETIRA el rol `list` del arbol de
+        accesibilidad de una lista sin marcador. Sin este atributo, VoiceOver no
+        anuncia «lista, 4 elementos» ni ofrece navegacion por lista. */}
+    <ul role="list" class="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-5 items-stretch list-none">
       {OPCIONES.map((o) => (
         <li>
           <a
             href={enlaceCTA(o.token)}
             target="_blank"
             rel="noopener noreferrer"
-            class="card-product h-full flex flex-col items-start gap-3 border border-gd-muted rounded-lg bg-bg-elev-1 p-4 md:p-6"
+            class="sc-tarjeta card-product h-full flex flex-col items-start gap-3 border border-gd/60 rounded-lg bg-bg-elev-1 p-4 md:p-6"
           >
             <span class="w-11 h-11 shrink-0 rounded-full bg-gd-muted flex items-center justify-center">
               {o.icono === "auto" && (
@@ -175,13 +206,13 @@ const PASOS = [
       ))}
     </ul>
 
-    <!-- El indeciso. Ancha y con borde discontinuo: se lee como «esta puerta
-         tambien esta abierta», no como una quinta categoria de producto. -->
+    {/* El indeciso. Ancha y con borde discontinuo: se lee como «esta puerta
+        tambien esta abierta», no como una quinta categoria de producto. */}
     <a
       href={enlaceCTA("BG-CTA-EXPLORA")}
       target="_blank"
       rel="noopener noreferrer"
-      class="card-product mt-3 md:mt-5 flex items-center gap-4 border border-dashed border-gd/40 rounded-lg bg-bg-elev-1 p-4 md:p-6"
+      class="sc-tarjeta card-product mt-3 md:mt-5 flex items-center gap-4 border border-dashed border-gd/60 rounded-lg bg-bg-elev-1 p-4 md:p-6"
     >
       <span class="w-11 h-11 shrink-0 rounded-full bg-gd-muted flex items-center justify-center">
         <svg xmlns="http://www.w3.org/2000/svg" width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="text-gd" aria-hidden="true">
@@ -200,13 +231,13 @@ const PASOS = [
       <span class="sr-only">— abrir WhatsApp</span>
     </a>
 
-    <!-- QUE PASA DESPUES. Sin .reveal: es la parte que responde la objecion
-         («¿y si me llenan de mensajes?») y tiene que estar visible siempre. -->
+    {/* QUE PASA DESPUES. Sin .reveal: es la parte que responde la objecion
+        («¿y si me llenan de mensajes?») y tiene que estar visible siempre. */}
     <div class="mt-16 pt-10 border-t border-gd-muted">
       <p class="font-mono text-xs text-gd uppercase tracking-widest mb-6">
         Qué pasa después
       </p>
-      <ol class="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8 list-none">
+      <ol role="list" class="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8 list-none">
         {PASOS.map((p) => (
           <li class="flex items-start gap-3">
             <span class="font-mono text-sm text-gd shrink-0 pt-0.5">{p.n}</span>

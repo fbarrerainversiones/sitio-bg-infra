@@ -7,20 +7,34 @@
    DIETA DE FUENTES — Sesion 19 (17/08/2026)
 
    Antes se importaban `400.css`, `500.css`... a secas. Cada uno de esos
-   archivos declara el peso en TODOS los subsets que publica Google Fonts:
-   cirilico, cirilico extendido, latin, latin extendido y vietnamita. Cuatro
-   pesos de Cormorant y cinco de Outfit daban 30 bloques @font-face, y el
-   build emitia 65 archivos de fuente por 1.005,9 KB.
+   archivos declara el peso en TODOS los subsets que publica Google Fonts para
+   ESA familia: Cormorant trae cinco (cirilico, cirilico-ext, latin, latin-ext
+   y vietnamita) y Outfit dos (latin y latin-ext). Cuatro pesos de Cormorant y
+   cinco de Outfit daban 4x5 + 5x2 = 30 bloques @font-face, y el build emitia
+   65 archivos de fuente por 1.005,9 KB.
 
    QUE SE PODA Y CON QUE PRUEBA.
    Se extrajeron los 94 caracteres distintos del texto visible de las 13
    paginas del build y se cruzaron contra los `unicode-range` que el propio
    CSS emitido declara. Resultado: 92 caen en `latin` — y SOLO en `latin` —,
-   incluidas todas las tildes, la ñ, los signos de apertura ¿ ¡ y el ·. Los
-   otros dos son ← (U+2190) y → (U+2192), que no estan en NINGUN subset y ya
-   hoy los pinta la fuente de respaldo del sistema; la poda no los cambia.
-   Conclusion: cirilico, cirilico-ext, griego, vietnamita y TAMBIEN
-   latin-ext son inertes. Quitarlos no puede alterar un solo glifo.
+   incluidas todas las tildes, la ñ, el signo de apertura ¿ y el ·. Los otros
+   dos son ← (U+2190) y → (U+2192), que no estan en NINGUN subset y ya hoy los
+   pinta la fuente de respaldo del sistema; la poda no los cambia.
+   Conclusion: para Cormorant y Outfit, los subsets cirilico, cirilico-ext,
+   vietnamita y TAMBIEN latin-ext quedan sin un solo caracter que servir.
+   Quitarlos no puede alterar un glifo.
+
+   DOS PRECISIONES QUE APORTO LA AUDITORIA, anotadas para que este rastro sea
+   reproducible por quien lo lea dentro de seis meses:
+     - el signo ¡ (U+00A1) NO aparece hoy en el sitio. La primera version de
+       esta nota lo citaba como caracter presente y no lo es. La conclusion no
+       se cae —¡ tambien vive en U+0000-00FF, o sea en `latin`— pero una
+       verificacion escrita tiene que poder repetirse tal cual.
+     - GRIEGO: esta poda NO retira ningun subset griego, porque ni Cormorant
+       ni Outfit publican uno. El unico @font-face griego del bundle es de
+       JetBrains Mono Variable, que sigue emitiendose (ver mas abajo). Decir
+       que «el griego es inerte» era cierto en cuanto a descarga y engañoso en
+       cuanto a la poda.
 
    PESOS: se verificaron uno por uno contra el fuente.
      Cormorant  400 (sobre-mi lineas 88 y 426), 500 (sobre-mi 163) y 600
@@ -870,6 +884,34 @@ a.enlace-subrayado {
 }
 
 /* ============================================================
+   SELECTOR DE CONTACTO — corte de palabras largas (Sesion 19)
+   ============================================================
+   Componente: web/src/components/SelectorContacto.astro
+
+   Las tarjetas viven en una grilla de dos columnas cuyo ancho lo fija el
+   VIEWPORT, mientras que el texto de adentro escala con la preferencia de
+   tamano de fuente del visitante. Palabras como «patrimonio»,
+   «internacional» o «Conversemos» son indivisibles: cuando su ancho supera la
+   caja no envuelven, se derraman fuera del borde. Y como `html` lleva
+   `overflow-x: hidden`, lo que se sale del viewport NO se recupera con
+   scroll: se pierde, que es una falla de WCAG 2.1 SC 1.4.4 Resize Text.
+
+   `hyphens: auto` parte con guion donde el navegador sabe hacerlo —el <html>
+   declara lang="es-EC", asi que hay diccionario— y `overflow-wrap:
+   break-word` es la red de abajo: parte igual, sin guion, cuando no hay otra.
+   Las dos juntas hacen que el desbordamiento horizontal sea imposible por
+   construccion, no por calculo.
+
+   Vive aca y no en el componente porque en este proyecto TODO el CSS vive en
+   global.css: no hay un solo bloque <style> en el repo.
+   ============================================================ */
+
+.sc-tarjeta {
+  hyphens: auto;
+  overflow-wrap: break-word;
+}
+
+/* ============================================================
    BARRA FIJA DE WHATSAPP — SOLO MOVIL (Sesion 19, 17/08/2026)
    ============================================================
    Componente: se monta dentro de web/src/components/Footer.astro, que ya
@@ -877,6 +919,9 @@ a.enlace-subrayado {
    CSS puro y un enlace: cero JavaScript, cero <script>, hashes CSP intactos.
 
    POR QUE EL ALTO SE CALCULA Y NO SE ESCRIBE A MANO.
+   (Ver tambien la nota de `--barra-wa-alto`: la cuenta reserva DOS lineas,
+   porque el escalado en rem resuelve el crecimiento del texto pero NO el
+   envolvimiento de la etiqueta, que es el caso que de verdad rompia.)
    El compensado del body tiene que seguir al alto REAL de la barra, o la
    barra termina tapando el final del footer. Si el alto fuera un numero fijo
    en px, bastaria con que el visitante suba el tamano de texto al 150 % para
@@ -911,9 +956,21 @@ a.enlace-subrayado {
   --barra-wa-pad: 0.8rem;
   /* Alto de linea de su texto. */
   --barra-wa-linea: 1.25rem;
-  /* Alto total sin contar el inset del dispositivo: los dos paddings, la
-     linea de texto y el borde superior de 1px. */
-  --barra-wa-alto: calc(var(--barra-wa-pad) * 2 + var(--barra-wa-linea) + 1px);
+  /* Alto que RESERVA el body. Cuenta DOS lineas de texto, no una, y esa es
+     una correccion de la auditoria de la Sesion 19: nada garantiza que
+     «Escribir por WhatsApp» quepa en un renglon. El <span> es un item flex con
+     min-width automatico, asi que se encoge hasta su min-content y el texto
+     pasa a dos lineas. Se midio el punto exacto de rotura sobre la fuente que
+     el sitio sirve (Outfit 500, la etiqueta pide 10,156 em): envuelve por
+     debajo de ~291 px al 150 % de texto y por debajo de ~382 px al 200 %, que
+     es justo el nivel que exige WCAG 2.1 SC 1.4.4.
+     Cuando eso pasa, la barra crece 1,25rem y el compensado se queda corto —y
+     como la barra es `fixed`, ese sobrante tapa el final del footer SIN forma
+     de recuperarlo con scroll.
+     Reservar dos lineas cuesta 1,25rem de aire de mas en el caso comun, que
+     cae debajo del footer y no se nota. Quedarse corto cuesta contenido
+     ilegible. La asimetria decide. */
+  --barra-wa-alto: calc(var(--barra-wa-pad) * 2 + var(--barra-wa-linea) * 2 + 1px);
 }
 
 /* Fuera de movil no existe. `display: none` y no `hidden` de Tailwind para
@@ -951,8 +1008,40 @@ a.enlace-subrayado {
     color: #08080d;
   }
 
+  /* FOCO PROPIO, y por que la regla general no servia aca.
+     `a:focus-visible` de este mismo archivo dibuja `outline: 2px solid
+     var(--gd)` con `outline-offset: 2px`. Sobre esta barra eso falla por
+     geometria, no por color: la barra es `fixed` con left/right/bottom en 0,
+     asi que tres de los cuatro lados del anillo caen FUERA del viewport y no
+     se pintan (un outline es ink overflow: no genera scroll). Solo sobrevive
+     el segmento superior, y ademas queda flotando sobre el contenido que este
+     desplazado detras de la barra, que puede ser una de las superficies
+     doradas del sitio.
+     La solucion es un anillo hacia ADENTRO y en el color oscuro de la marca:
+     se dibuja entero, siempre esta sobre el dorado de la barra (8,75:1) y no
+     depende de lo que haya detras. */
+  .barra-wa:focus-visible {
+    outline: 2px solid #08080d;
+    outline-offset: -5px;
+    border-radius: 0;
+  }
+
   /* El compensado. Sin esto la barra tapa el ultimo renglon del footer. */
   body {
     padding-bottom: calc(var(--barra-wa-alto) + env(safe-area-inset-bottom, 0px));
+  }
+
+  /* FOCO QUE NO QUEDA DEBAJO DE LA BARRA (WCAG 2.2 SC 2.4.11).
+     El padding del body resuelve el final del documento, pero no el caso de
+     media pagina: al tabular, el navegador desplaza el elemento enfocado con
+     alineacion «nearest», o sea lo deja pegado al borde inferior del viewport
+     —que es exactamente la franja que cubre la barra— y como la barra es
+     `fixed` no la tiene en cuenta. Cualquier control mas bajo que la barra
+     quedaba ENTERAMENTE oculto mientras tenia el foco.
+     `scroll-padding-bottom` le dice al navegador donde termina de verdad el
+     area util. Se reproduce sin telefono: basta angostar la ventana a menos de
+     768 px y recorrer la pagina con Tab. */
+  html {
+    scroll-padding-bottom: calc(var(--barra-wa-alto) + env(safe-area-inset-bottom, 0px));
   }
 }

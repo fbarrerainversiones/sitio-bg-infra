@@ -23,7 +23,7 @@ import fotoFrancisco from "../assets/francisco-barrera.jpg";
  */
 
 const TITLE = "Contacto · Barrera Global · Asesoría en seguros en Ecuador";
-const DESCRIPTION = "Conversa por WhatsApp o correo con Barrera Global. Asesoría en seguros de vida, salud, vehicular e inversión en Ecuador. Sin presión, sin compromiso.";
+const DESCRIPTION = "Conversa por WhatsApp o correo con Barrera Global. Asesoría en seguros de vida, salud, vehículo e inversión en Ecuador. Sin presión, sin compromiso.";
 ---
 
 <Layout title={TITLE} description={DESCRIPTION}>
@@ -75,8 +75,10 @@ const DESCRIPTION = "Conversa por WhatsApp o correo con Barrera Global. Asesorí
       </div>
     </section>
 
-    <!-- El selector reemplaza al boton generico. Sin antetitulo: el hero de
-         arriba ya dijo «Contacto». -->
+    {/* El selector reemplaza al boton generico. Sin antetitulo: el hero de
+        arriba ya dijo «Contacto».
+        Con {} y no con <!-- -->: los comentarios HTML llegan al build y esta
+        nota es interna (convencion de Footer.astro:39). */}
     <SelectorContacto antetitulo={false} />
 
     <!-- Correo, aviso legal y salida -->
