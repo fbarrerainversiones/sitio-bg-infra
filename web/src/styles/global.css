@@ -3,23 +3,67 @@
    Importa: Fuentes Fontsource + Tokens del Brand Book + Tailwind
    ============================================================ */
 
-/* ---------- FUENTES SELF-HOSTED (Fontsource) ---------- */
+/* ---------- FUENTES SELF-HOSTED (Fontsource) ----------
+   DIETA DE FUENTES — Sesion 19 (17/08/2026)
 
-/* Cormorant Garamond: display (titulos hero, jerarquia alta) */
-/* Cargamos solo los pesos que usaremos: 400, 500, 600, 700 */
-@import "@fontsource/cormorant-garamond/400.css";
-@import "@fontsource/cormorant-garamond/500.css";
-@import "@fontsource/cormorant-garamond/600.css";
-@import "@fontsource/cormorant-garamond/700.css";
+   Antes se importaban `400.css`, `500.css`... a secas. Cada uno de esos
+   archivos declara el peso en TODOS los subsets que publica Google Fonts:
+   cirilico, cirilico extendido, latin, latin extendido y vietnamita. Cuatro
+   pesos de Cormorant y cinco de Outfit daban 30 bloques @font-face, y el
+   build emitia 65 archivos de fuente por 1.005,9 KB.
 
-/* Outfit: UI / body (interfaz, lectura) */
-@import "@fontsource/outfit/300.css";
-@import "@fontsource/outfit/400.css";
-@import "@fontsource/outfit/500.css";
-@import "@fontsource/outfit/600.css";
-@import "@fontsource/outfit/700.css";
+   QUE SE PODA Y CON QUE PRUEBA.
+   Se extrajeron los 94 caracteres distintos del texto visible de las 13
+   paginas del build y se cruzaron contra los `unicode-range` que el propio
+   CSS emitido declara. Resultado: 92 caen en `latin` — y SOLO en `latin` —,
+   incluidas todas las tildes, la ñ, los signos de apertura ¿ ¡ y el ·. Los
+   otros dos son ← (U+2190) y → (U+2192), que no estan en NINGUN subset y ya
+   hoy los pinta la fuente de respaldo del sistema; la poda no los cambia.
+   Conclusion: cirilico, cirilico-ext, griego, vietnamita y TAMBIEN
+   latin-ext son inertes. Quitarlos no puede alterar un solo glifo.
 
-/* JetBrains Mono Variable: numeros tabulares, codigo */
+   PESOS: se verificaron uno por uno contra el fuente.
+     Cormorant  400 (sobre-mi lineas 88 y 426), 500 (sobre-mi 163) y 600
+                (regla h1..h6 de este archivo + 14 componentes). El 700 no
+                lo usa NADIE: fuera.
+     Outfit     400 (body) y 500 (font-medium). Los 300, 600 y 700 no se
+                usan como clase en ninguna parte: fuera.
+   Los 400 y 500 de Cormorant se conservan aunque solo vivan en /sobre-mi:
+   quitarlos haria que el navegador SINTETIZARA esos pesos y esa pagina
+   cambiaria de aspecto. La dieta es de peso, no de diseño.
+
+   OJO — LO QUE ESTA PODA **NO** HACE. Los subsets que se van nunca se
+   descargaban: `unicode-range` ya impedia pedirlos. Lo que se ahorra es CSS
+   RENDER-BLOCKING (los 36 bloques @font-face pesaban 15,6 KB, el 29,5 % del
+   bundle) y peso de imagen. Los KB de fuente que baja un visitante de la
+   home no cambian con esto; para eso esta la precarga de Layout.astro.
+
+   Los CSS por subset de Fontsource no llevan `unicode-range` —al ser de un
+   solo subset no hace falta—, asi que ademas cada bloque es mas corto.
+
+   font-display: se queda en `swap`, que es lo que Fontsource emite. Con
+   `swap` el texto pinta de inmediato con la fuente de respaldo y cambia al
+   llegar la real, que es justo lo que conviene a FCP y LCP. `optional` daria
+   un pelo mas de estabilidad pero descarta la fuente de marca entera en la
+   primera visita lenta, y este es un sitio de marca. Cambiarlo, ademas,
+   obligaria a abandonar el CSS de Fontsource y escribir los @font-face a
+   mano: mas superficie fragil para ganar milisegundos que no son el cuello.
+   ------------------------------------------------------- */
+
+/* Cormorant Garamond: display (titulos, jerarquia alta). Subset latin. */
+@import "@fontsource/cormorant-garamond/latin-400.css";
+@import "@fontsource/cormorant-garamond/latin-500.css";
+@import "@fontsource/cormorant-garamond/latin-600.css";
+
+/* Outfit: UI / body (interfaz, lectura). Subset latin. */
+@import "@fontsource/outfit/latin-400.css";
+@import "@fontsource/outfit/latin-500.css";
+
+/* JetBrains Mono Variable: numeros tabulares, codigo.
+   Se queda entera: el paquete variable NO publica CSS por subset (solo
+   index.css y wght.css), asi que sus 6 bloques y sus 5 archivos no se pueden
+   podar por import. De ellos el navegador solo baja el latin. Queda anotado
+   como deuda menor en PENDIENTES. */
 @import "@fontsource-variable/jetbrains-mono";
 
 /* ---------- TOKENS DEL BRAND BOOK ---------- */

@@ -3,6 +3,30 @@ import "../styles/global.css";
 import { WHATSAPP_NUMERO } from "../lib/whatsapp";
 
 /**
+ * PRECARGA DE LA FUENTE DEL LCP — Sesion 19 (17/08/2026)
+ *
+ * Se precarga UNA sola, a proposito. Precargar de mas empeora: cada preload
+ * compite por ancho de banda con el recurso que de verdad pinta la pantalla.
+ *
+ * POR QUE ESTA Y NO OTRA. El elemento mas grande sobre el pliegue de todas
+ * las paginas es un titulo, y todo h1..h6 sale en Cormorant Garamond peso
+ * 600 por la regla de global.css. Ese archivo —subset latin, peso 600— es el
+ * unico que hace falta para pintar el LCP con la fuente correcta. Outfit 400
+ * viste el cuerpo, que es texto mas chico y llega despues; JetBrains solo
+ * viste antetitulos de 12 px.
+ *
+ * POR QUE `?url` Y NO LA RUTA A MANO: Astro le pone hash de contenido al
+ * archivo emitido. Escribir la ruta a mano la dejaria rota en el proximo
+ * build en que cambie el hash, y un preload roto no falla: descarga un
+ * archivo que nadie usa y encima retrasa al bueno.
+ *
+ * `crossorigin` NO es opcional aunque el origen sea el mismo: las fuentes se
+ * piden en modo CORS, y un preload sin ese atributo no casa con la peticion
+ * real, asi que el navegador descarga el archivo DOS veces.
+ */
+import fuenteLcp from "@fontsource/cormorant-garamond/files/cormorant-garamond-latin-600-normal.woff2?url";
+
+/**
  * Layout base del sitio.
  * Incluye <head> con SEO completo + JSON-LD InsuranceAgency + Person.
  * Cada pagina puede override title, description, ogImage, canonical.
@@ -168,6 +192,13 @@ const websiteSchema = {
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
 
     <!-- Performance hints -->
+    <link
+      rel="preload"
+      as="font"
+      type="font/woff2"
+      href={fuenteLcp}
+      crossorigin
+    />
     <meta name="generator" content={Astro.generator} />
 
     <!-- JSON-LD Schema.org -->
