@@ -512,15 +512,61 @@ Al final del documento estan las **reglas consolidadas (R-01 a R-50)** que salen
 - **Honestidad sobre el dano:** cero dano permanente, pero **no fue cero efecto**. Hubo ~10 minutos de sitio publico sirviendo el cartel viejo. Se clasifica como near-miss porque nada quedo roto, la causa se entendio al instante y la re-aplicacion fue inmediata.
 - **Aprendizaje:** **R-49**. Un runbook no es una lista para pegar de corrido: los bloques condicionales solo se ejecutan si su condicion se cumple, y la condicion se confirma en voz alta ANTES de pegar.
 
+### NM-12 — El `<slot />` entero de ProductLayout envuelto en un `.reveal`: las seis paginas de producto en blanco bajo el hero
+
+- **Fecha:** 12/08/2026, Sesion 17.
+- **Que paso:** `ProductLayout.astro:304` envolvia el `<slot />` completo —todo el cuerpo de la pagina— en un unico `<div class="reveal">`. `.reveal` deja el elemento en `opacity: 0` hasta que el IntersectionObserver de `Layout.astro` le agrega `.visible`, y ese observer dispara con `threshold: 0.15`.
+- **El mecanismo, que es lo que hay que entender:** un observer con umbral 0,15 **no puede dispararse** sobre un elemento mas alto que `(alto_del_viewport - 50) / 0,15`, porque su `intersectionRatio` —lo visible sobre lo TOTAL— nunca alcanza ese valor. No es que tarde: **no ocurre jamas**. Techos reales: viewport 640 px -> 3.933 px; 823 px (el que emula Lighthouse) -> 5.153 px.
+- **Por que aparecio recien ahi:** la misma seccion en `/seguros/vida-termino` tiene 311 caracteres. En `/seguros/auto` paso a 6.783, mas una tabla de 7 filas, 3 tarjetas, 3 `<details>`, 17 parrafos, 19 vinetas y 6 encabezados. **22 veces mas contenido en el mismo contenedor**, que asi cruzo el techo.
+- **Por que pudo ser grave:** en cualquier telefono de menos de ~800 px de alto —o sea la mayoria— la pagina entera bajo el hero se habria visto **EN BLANCO**. Sin error en consola, sin nada roto a la vista: solo vacio. Y Lighthouse **no lo veia**, porque emula 412x823 y el bloque quedaba apenas por debajo del techo. Un 99 de Performance no dice nada sobre si la pagina se ve.
+- **Aprendizaje:** **R-51**. Se quito el `.reveal` de ese contenedor en vez de subir el umbral: una animacion de aparicion sobre un contenedor de miles de pixeles no significa nada aunque funcione, y el cuerpo de una pagina cuyo objetivo declarado es que la extraigan buscadores y asistentes no puede depender de JavaScript para ser visible.
+
+### NM-13 — El mismo bug, en otro archivo: el `.reveal` de BloqueFAQ, que solo falla al 150 % de texto
+
+- **Fecha:** 13/08/2026, Sesion 18.
+- **Que paso:** `BloqueFAQ.astro:46` envolvia el `preguntas.map()` en un `.reveal`. Es un contenedor de altura **sin techo**: crece con el array. Exactamente el bug de NM-12, **sobreviviente porque aquel arreglo se aplico a un ARCHIVO y no a la CLASE**.
+- **Por que la primera auditoria lo dio por bueno:** se midio en **una sola condicion** —100 % de texto, viewport 360x640— y ahi da 1.663 px contra un techo de 3.933 px, un 42 % del techo. Se cerro con la frase «margen de 2,5x». La auditoria adversarial lo midio en Chrome real a otras escalas y lo tumbo:
+
+  | escala de texto | alto medido | veredicto |
+  |---|---|---|
+  | 100 % | 1.663 px | ok |
+  | 115 % | 2.046 px | ok |
+  | 130 % | 2.995 px | ok |
+  | **150 %** | **4.167 px** | **FALLA** (ratio 0,1416) |
+  | 175 % | 5.954 px | FALLA |
+  | 200 % | 8.264 px | FALLA |
+
+  Y encontro un camino **mas barato**, que no necesita ninguna preferencia especial: a **320x256 CSS px** —la condicion de prueba de WCAG 2.1 SC 1.4.10 Reflow, o sea zoom de pagina al 400 % en escritorio— con el tamano de fuente por defecto da 1.819 px contra un techo de 1.373 px, y el elemento sale `visible=false, opacity=0`.
+- **Era regresion del propio trabajo de esa sesion:** en el HEAD anterior la FAQ era un `const` fijo de 3-4 preguntas dentro de `ProductLayout`. El `FAQ_AUTO` de seis preguntas y el componente `BloqueFAQ` nacieron ahi mismo, o sea que ese trabajo **duplico la altura** del contenedor (de ~834 a 1.663 px) y le comio la mitad del margen, en la misma pagina cuyo bug hermano se acababa de arreglar. Y el comentario escrito en la Sesion 17 —«las demas `.reveal` de este layout envuelven bloques acotados y no corren el riesgo»— quedo FALSO en el momento en que la FAQ se extrajo a su propio componente.
+- **Por que pudo ser grave:** bajo el titulo «Preguntas frecuentes» quedaba un hueco en blanco de 4.167 px. Cero errores en consola; el JSON-LD de `FAQPage` se seguia emitiendo completo y el texto seguia en el DOM, asi que el build 13/13, el cruce de schema y Lighthouse lo daban todo por bueno. Rompe **WCAG 2.1 SC 1.4.4 Resize Text (AA)** de forma limpia, y golpea justo a los usuarios de texto grande y zoom.
+- **Aprendizaje:** **R-52**, que es la leccion de metodo y vale mas que el fix: **una verificacion que mide una sola condicion no verifica, tranquiliza.** El arreglo se aplico a la CLASE y no al archivo: `BloqueFAQ` y tambien la grilla del proceso de `ProductLayout` perdieron el `.reveal`, esta ultima aunque HOY pasaba (3.362 px al 200 %, ratio 0,1755 contra el minimo de 0,15, un 17 % de margen) — porque tambien es un `map()` sobre un array que cada producto puede sobreescribir, y siete pasos en vez de cinco la tumbaban.
+
+### NM-14 — Primer asesino silencioso del video: la CSP no declaraba `media-src`
+
+- **Fecha:** 11/08/2026, Sesion 16.
+- **Que paso:** `infra/nginx.conf` declaraba `default-src 'none'` y **no declaraba `media-src`**. Por especificacion, `media-src` no tiene valor propio: **cae en `default-src`**. O sea que valia `'none'`.
+- **Por que pudo ser grave:** el navegador habria **bloqueado** `/videos/hero2.mp4` y `/videos/sobre-mi-loop.mp4`. Los fondos de video F2 (hero del home) y F3 (`/sobre-mi`) —el trabajo central de esa sesion— habrian llegado a produccion **muertos**: el visitante veria el poster estatico para siempre y el error solo aparece en la consola. Misma familia que el hash CSP que no cuadra y que el `sed -i` sobre un bind-mount: **falla en silencio**.
+- **Como se atajo:** se detecto verificando a mano la pregunta que se le habia encargado a la lente de CSP de la auditoria, **antes** de que la auditoria terminara. Fix: `media-src 'self';`. Los dos hashes sha256 no se tocaron.
+- **Aprendizaje:** con `default-src 'none'`, **toda directiva que no se declara vale `'none'`**. Antes de agregar un tipo de recurso nuevo al sitio (video, audio, worker, fuente externa), se revisa si su directiva esta declarada. Y como vive en `infra/nginx.conf`, exige **rebuild** (R-44).
+
+### NM-15 — Segundo asesino silencioso del mismo video: `Permissions-Policy: autoplay=()`
+
+- **Fecha:** 11/08/2026, Sesion 16.
+- **Que paso:** la cabecera `Permissions-Policy` traia `autoplay=()`, con **allowlist vacia**. El hallazgo se levanto como severidad ALTA, el refutador de la auditoria lo **descarto**, y el refutador se equivoco. Se verifico contra MDN antes de aceptar la refutacion, porque olia igual que el `media-src`.
+- **El mecanismo, segun la documentacion oficial:** una allowlist vacia «grants permission to no origins» — **el propio origen incluido**; «the autoplay attribute on `<audio>` and `<video>` elements will be ignored»; y el valor por defecto de la directiva, si se omite, es `self`. O sea que la cabecera estaba **quitando** un permiso que por defecto ya se tenia.
+- **Por que pudo ser grave:** los dos videos se habrian quedado **congelados en su poster**, sin reproducir jamas. Es un asesino **independiente** del `media-src`: bastaba cualquiera de los dos para que F2 y F3 llegaran muertas a produccion. Dos causas distintas para el mismo sintoma es la peor combinacion posible de diagnosticar, porque arreglar una sola no cambia nada visible.
+- **Como se atajo:** `autoplay=(self)`, que ademas es el valor por defecto de la directiva. La cabecera queda igual de restrictiva para terceros: las otras doce funciones siguen en allowlist vacia.
+- **Aprendizaje:** **una refutacion de la auditoria no es la palabra final.** Cuando un hallazgo refutado toca un mecanismo que ya mordio una vez en la misma sesion, se verifica contra la documentacion oficial antes de cerrarlo. Y una cabecera restrictiva puede romper una funcion del propio sitio: `Permissions-Policy` se revisa contra lo que el sitio USA, no solo contra lo que quiere prohibirle a terceros.
+
 ### Nota de reconciliacion (Sesion 9) — repo GitHub privado pese a D-21
 
 El repo `fbarrerainversiones/sitio-bg-infra` seguia PRIVADO en GitHub pese a que D-21 lo daba por publico: el switch nunca se acciono. Resuelto el 19/07/2026 con "Make public" tras una DOBLE auditoria de secretos (nada sensible en el historial). Con esto D-21 queda por fin accionada y la documentacion coincide con la realidad. Riesgo latente que se evito: exponer un repo con secretos commiteados al hacerlo publico; mitigado por la auditoria previa.
 
 ---
 
-## Reglas operativas consolidadas (R-01 a R-50)
+## Reglas operativas consolidadas (R-01 a R-55)
 
-De los 28 errores y 11 near-miss anteriores, salen estas reglas vivas para no repetir.
+De los 28 errores y 15 near-miss anteriores, salen estas reglas vivas para no repetir.
 
 ### Reglas de herramientas
 
@@ -627,14 +673,28 @@ De los 28 errores y 11 near-miss anteriores, salen estas reglas vivas para no re
 
 - **R-50:** **`caddy validate` sobre un archivo que NO se llame exactamente `Caddyfile` va SIEMPRE con `--adapter caddyfile`.** Caddy infiere el adaptador por el nombre del archivo; sobre un `/tmp/cf.check` asume JSON nativo y falla por sintaxis sin haber mirado el contenido. Corolario, que es la mitad importante de la regla: **una validacion que falla DETIENE el runbook.** Nunca se pasa al restart o al reload "porque el error parecia del comando": si la red de seguridad no corrio, el paso siguiente no se ejecuta. (Origen: E-28.)
 
+### Reglas nuevas (Sesiones 16 a 19 — el sitio ya publico)
+
+- **R-51:** **Ninguna animacion de aparicion dependiente de JavaScript sobre un contenedor de contenido largo o de altura sin techo.** `.reveal` deja el elemento en `opacity: 0` hasta que el IntersectionObserver le agregue `.visible`, y con `threshold: 0.15` un elemento mas alto que `(alto_del_viewport - 50) / 0,15` **nunca** alcanza ese ratio: se queda invisible para siempre, sin un solo error en consola. Prohibido envolver en `.reveal` cuerpos de pagina, `<slot />`, listas generadas con `map()` o cualquier bloque que pueda crecer con los datos. Las animaciones de aparicion son para bloques **cortos y fijos**: encabezados, un parrafo suelto, un CTA. **Corolario, que es la mitad importante de la regla:** lo que tiene que poder extraer un buscador o un asistente **no depende de JavaScript para ser visible**. (Origen: NM-12 y NM-13, Sesiones 17 y 18.)
+
+- **R-52:** **Toda verificacion de altura se mide en TRES condiciones, o no es una verificacion.** (1) 360x640 al 100 % de texto; (2) 150 % de escala de texto; (3) 320x256 CSS px, que es la condicion de prueba de WCAG 2.1 SC 1.4.10 Reflow, o sea zoom de pagina al 400 %. Medir una sola condicion **no verifica: tranquiliza**. NM-13 paso la condicion 1 con un margen de 2,5x y fallaba en las otras dos. Aplica a cualquier contenedor nuevo y a cualquier contenedor existente cuyo contenido crezca. (Origen: NM-13, Sesion 18.)
+
+- **R-53:** **Lighthouse local SIEMPRE por `127.0.0.1`, nunca por `localhost`.** En un host con IPv6 activo, `localhost` resuelve primero a `::1` y la latencia se cuadruplica; el Performance se hunde y se persiguen cuellos de botella que no existen. La cifra que se registra en un reporte tiene que venir de una corrida por `127.0.0.1`. (Origen: Sesiones 15-18, medicion de LCP.)
+
+- **R-54:** **Los centinelas de datos personales se DESCRIBEN, no se transcriben.** Un barrido que busca datos personales en el repo se reporta diciendo que dio cero y como se busco, **nunca escribiendo los valores buscados**. El repo es publico: un informe que dice «esto no esta en el repo» no puede lograrlo escribiendolo. Vale igual para chats, commits y exports. (Origen: la primera version del REPORTE-SESION-17, detectada y corregida en la Sesion 18 antes de commitear.)
+
+- **R-55:** **Push al cierre de cada jornada: un commit local NO es un respaldo.** Un commit que solo vive en un clon esta a un disco de distancia de no existir. El trabajo verificado se publica el mismo dia, y en este proyecto el push lo ejecuta **Francisco** (los agentes no pushean). Si una jornada cierra con commits locales sin publicar, eso se dice explicitamente en el reporte y en el snapshot de continuidad, con los hashes, para que nadie lo de por respaldado. (Origen: Sesion 18.)
+
+> **Nota de numeracion:** el **PROTOCOLO DE VEDA** de infraestructura compartida (practica establecida en la Sesion 14) sigue **sin numerar** a proposito. Cuando se formalice tomara el numero que siga en este registro, que hoy seria R-56.
+
 ---
 
 ## Estadisticas del historico
 
 ```
 Errores documentados:    28
-Near-miss documentados:  11
-Reglas operativas:       50
+Near-miss documentados:  15
+Reglas operativas:       55
 Rollbacks ejecutados:    3 — 1 planificado (B4 v1 -> network disconnect, Sesion 9)
                             + 1 planificado (switch v1 fallido por inodo, E-27 Sesion 13)
                             + 1 ACCIDENTAL (bloque condicional pegado de mas, NM-11 Sesion 13)
@@ -657,11 +717,11 @@ Danos evitados:          incalculables (cualquier near-miss pudo replicar el 522
 Si vos sos Claude leyendo este documento por primera vez en una sesion nueva:
 
 1. **Lee este documento ANTES de proponer cualquier accion tecnica.**
-2. Las 50 reglas (R-01 a R-50) son **inviolables** salvo argumento explicito de Francisco.
+2. Las 55 reglas (R-01 a R-55) son **inviolables** salvo argumento explicito de Francisco.
 3. Si una propuesta tuya contradice una regla, para y discutilo antes.
 4. Cuando detectes un error nuevo, agregalo a este documento con la misma estructura. La memoria del proyecto se construye con historico, no con olvido.
 
 **Fin del documento de errores y aprendizajes.**
 
-**Ultima revision:** 9 de agosto de 2026, Sesion 13 (el switch a publico).
+**Ultima revision:** 17 de agosto de 2026, Sesion 19 (primera sesion corrida dentro del VPS).
 **Proxima revision:** al cierre de la proxima sesion (cuando se detecten errores nuevos).

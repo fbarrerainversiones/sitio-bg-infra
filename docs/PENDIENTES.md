@@ -2,7 +2,7 @@
 
 > **Lista viva única.** Todos los cabos sueltos del proyecto en un solo archivo. Se actualiza con cada sesión que cierre un item o detecte uno nuevo.
 
-**Última actualización:** 10 de agosto de 2026, mediodía — **DÍA 1 DEL SITIO PÚBLICO: SE CERRARON LOS TRES ÍTEMS ABIERTOS DEL LANZAMIENTO**. **P-51 → R-19**: la casilla `privacidad@` quedó **PROBADA** (Cloudflare 1 recibido / 1 entregado; el correo llegó al Gmail de Francisco a las 11:53, en Spam, se aplicó «No es spam») — era el **último gate operativo** y ya no existe. **P-55 → R-20**: Francisco decidió **SÍ** al recuadro oscuro del `logo.svg` y quedó ejecutado (commit `fd8316b`), pendiente solo del deploy. **P-56 → R-21**: misión, visión y valores **aprobados**; el Manual de Marca pasó de v3.0 propuesta a **v3.1 FINAL** y se entregó al manager de marketing, con la **capa comercial del símbolo** (basamento = método, columnas = vida y salud, frontón = inversión) como narrativa oficial, anotada en **P-54**. Además, **P-54 F1 quedó CONSTRUIDA** en `main` (7 commits, `be196c5..69f83bd`) pero **NO desplegada**: rige **veda de infraestructura compartida** por la ventana de promoción a producción de Aurora. El deploy de F1 + P-55 sale junto, post-veda. Antes, el 9 de agosto por la noche — **EL SITIO ES PÚBLICO Y YA TIENE SÍMBOLO PROPIO**. La producción del logo P3 (fase 1 de **P-52**) quedó **desplegada y verificada en producción**. Altas de la noche: **P-54** (experiencia visual del home, 4 fases), **P-55** (recuadro opcional del `logo.svg`) y **P-56** (aprobar misión/visión/valores del Manual v3.0). Queda registrada la lección de caché: el Purge de Cloudflare va **después** del deploy, nunca antes. Antes, esa misma tarde (Sesión 13). Se ejecutó el switch: `barreraglobal.com` y `www` sirven el sitio real. Altas de esta tanda: **P-52** (producción del logo P3, decisión **D-29**) y **P-53** (renombrar `basicauth` → `basic_auth`, con método inode-safe). **P-51 queda ABIERTO**: la casilla `privacidad@` está configurada pero sin prueba de recepción, y Francisco decidió lanzar igual — configurar sin probar sigue sin contar. Antes, esa misma mañana: **P-39 CERRADO como R-18** (el abogado aprobó las tres páginas legales y el recuadro "DISCLAIMER OPERATIVO" de `/privacidad` se retiró, commit `6772a51`) y **P-42 CERRADO como R-17**: nginx ya sirve la 404 premium — `error_page 404 /404.html;` en `infra/nginx.conf`, commit `8c7c18a`, aplicado con rebuild de la imagen y verificado en el navegador sobre staging. El 5 de agosto: merge de `publicacion-v1` a `main` y **staging completo y navegable**. P-39 ampliado con la **inconsistencia de redacción del "trámite"** entre páginas de presentación y páginas legales. Reconciliación anti-fantasma: **P-42** afirmaba que `404.astro` no existía y sí existe desde Sesión 10; **P-06** mandaba editar un texto que ya no está en Footer ni en index; **P-23** citaba 551 KB de foto cuando P-44 la dejó en 54,8 KB. El 04/08: **política de privacidad v3** con el dictamen verbal del abogado, **P-48 CERRADO** (R-16), P-39 pasa a esperar el visto bueno **escrito**, alta de **P-51**. El 03/08: P-43 cerrado como R-15, P-37 entregado v1, P-36 parcial, alta de P-48, P-49 y P-50)
+**Última actualización:** 17 de agosto de 2026, madrugada — **SESIÓN 19: PRIMERA SESIÓN CORRIDA DENTRO DEL VPS, con el usuario `web`.** Cierres: **P-04 → R-22** (el sitio deja el Gmail y usa `contacto@barreraglobal.com` y `privacidad@barreraglobal.com`; buzón confirmado por Francisco antes de ejecutar), **R-23** (accesibilidad del footer: 91-92 → **100** en las tres páginas medidas, contra un objetivo declarado de 95) y **R-24** (el deploy que esperaba bajo veda **se ejecutó el 17/08**: P-54 F1 y P-55 están en producción y el sitio público ya no está desfasado del repo). Entregas nuevas de esta sesión, **construidas y commiteadas en local, sin publicar**: selector de contacto con cinco marcadores `BG-CTA-*`, barra fija de WhatsApp en móvil y **dieta de fuentes** (65 archivos y 1.005,9 KB → 15 y 303,6 KB; 36 bloques `@font-face` → 11; CSS render-blocking 52,9 → 42,9 KB) con precarga de la fuente del LCP. Altas: **P-57** (medir la dieta y podar JetBrains), **P-58** (arreglo de raíz del observer), **P-59** (`name: sitio-bg` en el compose), **P-60** (legibilidad de la razón social a 12 px en monoespaciada), **P-61** (definir RASA y LAA) y **P-62** (Google Search Console). Antes, el 10 de agosto — **DÍA 1 DEL SITIO PÚBLICO: SE CERRARON LOS TRES ÍTEMS ABIERTOS DEL LANZAMIENTO**. **P-51 → R-19**: la casilla `privacidad@` quedó **PROBADA** (Cloudflare 1 recibido / 1 entregado; el correo llegó al Gmail de Francisco a las 11:53, en Spam, se aplicó «No es spam») — era el **último gate operativo** y ya no existe. **P-55 → R-20**: Francisco decidió **SÍ** al recuadro oscuro del `logo.svg` y quedó ejecutado (commit `fd8316b`), pendiente solo del deploy. **P-56 → R-21**: misión, visión y valores **aprobados**; el Manual de Marca pasó de v3.0 propuesta a **v3.1 FINAL** y se entregó al manager de marketing, con la **capa comercial del símbolo** (basamento = método, columnas = vida y salud, frontón = inversión) como narrativa oficial, anotada en **P-54**. Además, **P-54 F1 quedó CONSTRUIDA** en `main` (7 commits, `be196c5..69f83bd`) pero **NO desplegada**: rige **veda de infraestructura compartida** por la ventana de promoción a producción de Aurora. El deploy de F1 + P-55 sale junto, post-veda. Antes, el 9 de agosto por la noche — **EL SITIO ES PÚBLICO Y YA TIENE SÍMBOLO PROPIO**. La producción del logo P3 (fase 1 de **P-52**) quedó **desplegada y verificada en producción**. Altas de la noche: **P-54** (experiencia visual del home, 4 fases), **P-55** (recuadro opcional del `logo.svg`) y **P-56** (aprobar misión/visión/valores del Manual v3.0). Queda registrada la lección de caché: el Purge de Cloudflare va **después** del deploy, nunca antes. Antes, esa misma tarde (Sesión 13). Se ejecutó el switch: `barreraglobal.com` y `www` sirven el sitio real. Altas de esta tanda: **P-52** (producción del logo P3, decisión **D-29**) y **P-53** (renombrar `basicauth` → `basic_auth`, con método inode-safe). **P-51 queda ABIERTO**: la casilla `privacidad@` está configurada pero sin prueba de recepción, y Francisco decidió lanzar igual — configurar sin probar sigue sin contar. Antes, esa misma mañana: **P-39 CERRADO como R-18** (el abogado aprobó las tres páginas legales y el recuadro "DISCLAIMER OPERATIVO" de `/privacidad` se retiró, commit `6772a51`) y **P-42 CERRADO como R-17**: nginx ya sirve la 404 premium — `error_page 404 /404.html;` en `infra/nginx.conf`, commit `8c7c18a`, aplicado con rebuild de la imagen y verificado en el navegador sobre staging. El 5 de agosto: merge de `publicacion-v1` a `main` y **staging completo y navegable**. P-39 ampliado con la **inconsistencia de redacción del "trámite"** entre páginas de presentación y páginas legales. Reconciliación anti-fantasma: **P-42** afirmaba que `404.astro` no existía y sí existe desde Sesión 10; **P-06** mandaba editar un texto que ya no está en Footer ni en index; **P-23** citaba 551 KB de foto cuando P-44 la dejó en 54,8 KB. El 04/08: **política de privacidad v3** con el dictamen verbal del abogado, **P-48 CERRADO** (R-16), P-39 pasa a esperar el visto bueno **escrito**, alta de **P-51**. El 03/08: P-43 cerrado como R-15, P-37 entregado v1, P-36 parcial, alta de P-48, P-49 y P-50)
 **Documento maestro de referencia:** [`PLAN-MAESTRO-v2.md`](PLAN-MAESTRO-v2.md)
 
 ---
@@ -63,7 +63,7 @@ Cuando un item se cierra, se mueve a la sección **Resueltos** al final con la f
 
 ### P-04 — Email institucional `contacto@barreraglobal.com` o similar
 
-- **Estado:** 🟡 EN CURSO (gmail provisional mientras tanto)
+- **Estado:** ✅ **CERRADO el 17/08/2026** (Sesión 19, commit local `0b22bd0`) — ver **R-22** en Resueltos. El sitio ya no muestra ninguna dirección de Gmail: **8 apariciones en 5 archivos** pasaron al dominio propio. Siete a `contacto@barreraglobal.com` (footer, `/contacto`, los dos bloques de `/terminos` y el campo `email` del JSON-LD `InsuranceAgency`) y **una a `privacidad@barreraglobal.com`** — la sección 9 de `/cookies`, que no es contacto comercial sino el canal de un instrumento de protección de datos. Francisco confirmó **antes de ejecutar** que el buzón existe y recibe.
 - **Criticidad:** media
 - **Bloquea a:** Fase 2 (footer profesional, `/contacto` formal).
 - **Owner:** Francisco.
@@ -612,7 +612,7 @@ Cuando un item se cierra, se mueve a la sección **Resueltos** al final con la f
 
 ### P-54 — Experiencia visual del home (estilo Apple)
 
-- **Estado:** 🟡 EN CURSO (alta del 09/08/2026, Sesión 13). **F1 CONSTRUIDA el 10/08/2026** y en `main`, pendiente de la **verificación visual de Francisco** y del **deploy** (que exige rebuild de la imagen, R-44, y hoy está bajo veda por la ventana de promoción de Aurora). F2 a F4 esperan insumos.
+- **Estado:** 🟡 EN CURSO (alta del 09/08/2026, Sesión 13). **F1 CONSTRUIDA el 10/08/2026** y **DESPLEGADA A PRODUCCIÓN el 17/08/2026**, junto con P-55, cuando se levantó la veda de Aurora. La sección «El pórtico que se construye» está en vivo en `barreraglobal.com`. F2 a F4 esperan insumos.
 - **Criticidad:** media. El sitio ya convierte sin esto; es la capa que lo separa de un sitio correcto y lo vuelve memorable.
 - **Bloquea a:** nada. Ninguna fase bloquea a la siguiente salvo por los insumos que cada una necesita.
 - **Owner:** Claude (implementa) + Francisco (aprueba y entrega los insumos de F2 y F4).
@@ -648,7 +648,7 @@ Cuando un item se cierra, se mueve a la sección **Resueltos** al final con la f
 
 ### P-55 — `logo.svg` con recuadro oscuro opcional para el panel de Google
 
-- **Estado:** ✅ **CERRADO el 10/08/2026** (commit `fd8316b`) — ver **R-20** en Resueltos. Francisco decidió **SÍ**: el recuadro va. Ejecutado el mismo día. **Queda pendiente solo el deploy**, que viaja junto con P-54 F1 cuando se levante la veda de Aurora (R-44: `logo.svg` se hornea en la imagen, el pull no alcanza).
+- **Estado:** ✅ **CERRADO el 10/08/2026** (commit `fd8316b`) — ver **R-20** en Resueltos. Francisco decidió **SÍ**: el recuadro va. Ejecutado el mismo día. **El deploy se ejecutó el 17/08/2026**, junto con P-54 F1, al levantarse la veda de Aurora. El `logo.svg` con fondo oscuro está en producción.
 - **Criticidad:** baja.
 - **Bloquea a:** nada.
 - **Owner:** ~~**Francisco** (decide)~~ decidido, Claude (aplicó).
@@ -665,6 +665,60 @@ Cuando un item se cierra, se mueve a la sección **Resueltos** al final con la f
 - **Próximo paso:** ~~Francisco da el veredicto~~ **dado el 10/08/2026: aprobados.** El manual v3.1 es la fuente vigente y se cita como tal. Lo que sigue no es de este ítem: es el **handoff formal al manager de marketing** y el reloj de 48 h que arranca con él.
 
 ---
+### P-57 — Medir la dieta de fuentes en Lighthouse y podar los subsets de JetBrains
+
+- **Estado:** 🟡 EN CURSO (alta del 17/08/2026, Sesión 19).
+- **Criticidad:** media (rendimiento; el LCP está a 0,01-0,31 s del objetivo).
+- **Bloquea a:** cerrar el objetivo de LCP ≤ 1,80 s.
+- **Owner:** Francisco mide, Claude Code interpreta y ejecuta lo que falte.
+- **Detalle:** la dieta se ejecutó en la Sesión 19 (commit local `bae5af6`): 65 archivos de fuente y 1.005,9 KB → **15 archivos y 303,6 KB**; 36 bloques `@font-face` → **11**; CSS render-blocking 52,9 → **42,9 KB**. Se agregó una **única** precarga, la de Cormorant Garamond latin 600, que es la fuente que pinta el título de cualquier página. **Lo que falta es la medición**, y falta por una razón concreta: **el VPS no tiene Chrome ni Lighthouse**, así que la sesión que hizo la dieta no pudo medir su propio efecto. Queda además una deuda menor identificada: **JetBrains Mono Variable sigue emitiendo sus 5 subsets (82 KB)** —cirílico, griego, latin-ext, latin y vietnamita— porque el paquete variable de Fontsource **no publica CSS por subset**, solo `index.css` y `wght.css`. De los cinco, el navegador solo descarga el latin (39,5 KB); el resto es peso de imagen, no de red.
+- **Próximo paso:** Francisco corre Lighthouse en su laptop **por `127.0.0.1`, nunca por `localhost`** (R-53), con el guion del REPORTE-SESION-19, y reporta LCP y FCP antes/después. Si el LCP sigue por encima de 1,80 s, la siguiente palanca **no** son las fuentes: es identificar en el propio informe cuál es el elemento LCP real de la home, que hoy se asume que es el título del hero.
+
+### P-58 — Arreglo de raíz del IntersectionObserver (`threshold: 0` + `rootMargin` negativo)
+
+- **Estado:** ⚪ POR DECIDIR (alta del 13/08/2026 en la Sesión 18, registrada acá el 17/08/2026).
+- **Criticidad:** media (preventiva: hoy no hay ningún contenedor en riesgo).
+- **Bloquea a:** nada. **Previene** la clase de bug de NM-12 y NM-13.
+- **Owner:** Francisco decide; la ejecución pide sesión propia.
+- **Detalle:** el observer de `Layout.astro` dispara con `threshold: 0.15`, y un elemento más alto que `(alto_del_viewport - 50) / 0,15` **nunca** alcanza ese ratio: se queda en `opacity: 0` para siempre y sin error en consola. Ya mordió dos veces (`ProductLayout` en la Sesión 17, `BloqueFAQ` en la 18). La propuesta es `{ threshold: 0, rootMargin: '0px 0px -15% 0px' }`: con umbral 0 el callback dispara en cuanto **un píxel** del elemento entra en el root recortado, sin importar cuánto mida, y el bug desaparece por construcción. Es **una línea**. **Lo que lo hace caro:** toca el `<script>` inline de `Layout.astro`, o sea que **cambia su hash y obliga a regenerar los hashes CSP de `infra/nginx.conf` y a rebuild**. Si el hash no cuadra, el navegador bloquea el script **en silencio** y todos los `.reveal` del sitio quedan invisibles: el fallo sería peor que el que se quiere arreglar. Además su radio de impacto es total —ese observer alimenta las 13 páginas, incluida la animación de P-54 F1—, así que cambia la sensación de todo el sitio, no solo la de los bloques largos.
+- **Próximo paso:** sesión propia, con regeneración de hashes según `infra/README-hashes.md`, rebuild y verificación **en navegador**. Mientras tanto, **R-51** impide que el problema vuelva a aparecer.
+
+### P-59 — Fijar `name: sitio-bg` en `infra/docker-compose.yml`
+
+- **Estado:** 🔵 BACKLOG (alta del 17/08/2026, Sesión 19).
+- **Criticidad:** baja (higiene operativa), pero con un efecto concreto en el runbook de purga.
+- **Bloquea a:** que la purga de imágenes del runbook sea determinista.
+- **Owner:** Francisco, coordinado con el proyecto de infraestructura (recrear el contenedor es zona compartida).
+- **Detalle:** `infra/docker-compose.yml` **no declara `name:` de nivel superior** — verificado el 17/08: el único `name:` del archivo está en la línea 37, dentro del bloque `networks:`, y nombra la red `sitio_bg_net`, no el proyecto. Sin esa clave, el nombre del proyecto compose **se infiere del directorio** desde el que se corre el comando, y puede cambiar además por un `-p` explícito o por `COMPOSE_PROJECT_NAME` en el `.env`. Consecuencia práctica: la purga acotada del runbook, que filtra por `label=com.docker.compose.project=<proyecto>`, depende de una etiqueta que nadie fijó. Y falla **en silencio**: `docker image prune` con una etiqueta que no existe no da error, simplemente **no borra nada**, y uno se queda convencido de que purgó. Con `name: sitio-bg` explícito, el filtro deja de depender del directorio, del `.env` y de quién corra el comando.
+- **Próximo paso:** confirmar el nombre real con `docker compose -f /opt/sitio-bg/docker-compose.yml config --format json | head -5` y si la imagen construida lleva la etiqueta `com.docker.compose.project` (`docker image inspect sitio-bg-web:latest --format '{{json .Config.Labels}}'`); después fijar `name:` y **recrear el contenedor** en su propia ventana.
+
+### P-60 — Legibilidad de la razón social a 12 px en monoespaciada
+
+- **Estado:** ⚪ POR DECIDIR (alta del 13/08/2026 en la Sesión 18, registrada acá el 17/08/2026).
+- **Criticidad:** baja (diseño / legibilidad, no accesibilidad formal: el contraste ya cumple).
+- **Bloquea a:** nada.
+- **Owner:** Francisco (decisión de diseño).
+- **Detalle:** el REPORTE-SESION-18 lo dejó anotado así: «la legibilidad de la razón social a 12 px en `font-mono`: la tilde está, pero no se ve». Es un problema de **renderizado**, no de contenido: el carácter acentuado existe en el HTML y la tilde se pierde visualmente al tamaño y en la familia monoespaciada. **El reporte no nombró el archivo**, y la revisión del 17/08 encontró dos candidatos, sin poder decidir cuál es sin la vista de Francisco: `LetraPequena.astro:50` (`font-mono text-xs text-tx-disabled`, que es el bloque de letra pequeña legal de `/seguros/auto`) y los bloques `font-mono text-sm`/`text-xs` de las páginas legales. Se registra sin inventar la ubicación.
+- **Próximo paso:** Francisco señala el nodo exacto en el navegador. Opciones sobre la mesa, de menor a mayor cambio: subir ese bloque de `text-xs` a `text-sm`; sacarlo de monoespaciada y pasarlo a `font-body`; o dejarlo como está si a tamaño real se lee.
+
+### P-61 — Desarrollar las siglas RASA y LAA la primera vez que aparezcan
+
+- **Estado:** 🔵 BACKLOG (alta del 12/08/2026 en la Sesión 17, registrada acá el 17/08/2026).
+- **Criticidad:** baja (claridad del copy).
+- **Bloquea a:** nada.
+- **Owner:** Francisco aporta la definición correcta; Claude Code la redacta.
+- **Detalle:** la auditoría de la Sesión 17 marcó que **la sigla RASA no se desarrolla** donde aparece. Estado verificado el 17/08 sobre el fuente: **hoy ni `RASA` ni `LAA` aparecen en `web/src`** — el REPORTE-SESION-18 registra el barrido con resultado `'RASA' 0`, o sea que el término salió del copy en el trabajo de esa sesión. El pendiente queda vivo igual, en forma de regla de redacción: si cualquiera de las dos vuelve al copy, va **desarrollada la primera vez que aparece en cada página**, porque son siglas de industria que el visitante no tiene por qué conocer. La definición la aporta Francisco: no se inventa el significado de una sigla regulatoria.
+- **Próximo paso:** ninguno hasta que el término vuelva al copy. Si vuelve, se desarrolla en el mismo commit que lo introduce.
+
+### P-62 — Google Search Console: verificar el dominio y dar de alta el sitemap
+
+- **Estado:** 🟡 EN CURSO (alta del 17/08/2026, Sesión 19).
+- **Criticidad:** media (el sitio lleva más de una semana público sin ninguna telemetría de indexación).
+- **Bloquea a:** saber si Google está indexando las 13 páginas, y detectar errores de rastreo antes de que cuesten posiciones.
+- **Owner:** Francisco (la verificación exige acceso al DNS de Cloudflare y a la cuenta de Google).
+- **Detalle:** el sitio es público desde el 09/08/2026 y no hay Search Console dado de alta. Sin él no se sabe qué páginas indexó Google, cuáles rechazó ni por qué, ni se puede pedir el rastreo de una página nueva. Hay dos piezas ya listas que hoy nadie está aprovechando: `web/public/sitemap.xml`, que se mantiene a mano (**P-50**), y los tres bloques JSON-LD de `Layout.astro`. Nota de coherencia que conviene revisar en el mismo movimiento: el canonical del sitio se normalizó **sin barra final**, así que el sitemap tiene que declarar exactamente esa forma o Search Console reportará duplicados.
+- **Próximo paso:** Francisco verifica el dominio por registro DNS TXT en Cloudflare (es el método que sobrevive a cambios de hosting), da de alta `https://barreraglobal.com/sitemap.xml` y revisa el informe de cobertura una semana después. **No se agrega ninguna etiqueta de verificación al HTML**: eso obligaría a rebuild y además ata la verificación al código.
+
 ## 9. Decisiones cerradas (referencia rápida)
 
 Lista de decisiones que YA están resueltas pero conviene tener visibles para no reabrirlas:
@@ -880,10 +934,40 @@ Lista de items que fueron cerrados, con fecha. Sirve de memoria del proyecto.
 - **Nota de alcance:** el manual **vive fuera del repo** (lo entregó el auditor). Lo que queda registrado acá es la decisión y su fecha, no el documento.
 - **Commits relacionados:** ninguno en código — el cierre es una aprobación, y su rastro documental es esta entrada más la bitácora de Sesión 14.
 
+### R-22 — El sitio usa correo del dominio en vez de Gmail (cierre de P-04)
+
+- **Cerrado:** 17 de agosto de 2026 (Sesión 19)
+- **Estado al cerrar:** 🟢 RESUELTO
+- **Resumen:** las **8 apariciones** de `fbarrera.inversiones@gmail.com` en `web/src` —repartidas en 5 archivos: `Layout.astro` (JSON-LD), `Footer.astro` (×2), `contacto.astro` (×2), `terminos.astro` (×2) y `cookies.astro`— pasaron al dominio propio. Francisco confirmó **antes de ejecutar** que `contacto@barreraglobal.com` existe y recibe, así que el commit salió sin marca de pendiente.
+- **El reparto no es cosmético:** siete fueron a `contacto@barreraglobal.com` y **una a `privacidad@barreraglobal.com`**. La excepción es la sección 9 de `/cookies`: no es contacto comercial sino el canal de un instrumento de protección de datos, y su propia sección 8 declara que el tratamiento se rige por la LOPDP y remite a `/privacidad`, que ya fija `privacidad@` como canal de datos personales en sus cuatro menciones. Mandar las consultas de cookies al buzón comercial habría dejado **dos canales en conflicto para la misma materia** y mezclado un buzón de ventas con uno de cumplimiento.
+- **Lo que sella el cierre:** ripgrep de la dirección vieja da **0** en `web/src`, **0** en `dist` y **0** en todo el repo versionado fuera de `docs/`. Ninguna meta OG ni Twitter contenía correo; `public/` tampoco. De los tres bloques JSON-LD, solo `InsuranceAgency` lleva `email`, y ya apunta al dominio.
+- **Commits relacionados:** `0b22bd0` (local al cierre de la Sesión 19).
+
+### R-23 — Accesibilidad del footer: de 91-92 a 100, por encima del objetivo de 95
+
+- **Cerrado:** 13 de agosto de 2026 (Sesión 18)
+- **Estado al cerrar:** 🟢 RESUELTO
+- **Resumen:** dos fallas **preexistentes de todo el sitio**, no de una página, y las dos vivían en el footer. **Contraste:** el token `--tx-disabled` pasó de `#6b6964` a `#7d7b75`; el valor anterior daba 3,64:1 sobre `--bg` y 3,48:1 sobre `--bg-elev-1`, contra los 4,50:1 que pide WCAG AA para texto de 12 px, y Lighthouse lo marcaba en las **13 páginas**, cuatro nodos por página. Se calculó el gris **más oscuro** que cumple en los dos fondos conservando la proporción original entre canales (107/105/100), para subir la luz sin mover el matiz cálido: el cambio visual más chico posible que cumple. **Subrayado:** el enlace de la política de cookies del footer daba 1,85:1 de contraste contra el gris del párrafo, y el criterio «Links rely on color» pide 3,00 — por color no se cumplía ni aclarando ni oscureciendo, así que la vía es que el enlace no dependa solo del color.
+- **La trampa que dejó lección:** primero se usó la utilidad `underline` de Tailwind y **Lighthouse siguió marcando el fallo**. Motivo: `a { text-decoration: none }` de `global.css` vive **fuera de toda `@layer`** y le gana a cualquier utilidad. Es **R-43** otra vez, ahora sobre la decoración en vez del color. Se resolvió con `.enlace-subrayado`, regla propia sin capa y con más especificidad, que es la mitigación sancionada.
+- **Resultado medido:** `/` 92 → **100**, `/seguros/auto` 92 → **100**, `/sobre-mi` 91 → **100**. Objetivo declarado del proyecto: 95. Auditorías de accesibilidad falladas: **0**.
+- **Commits relacionados:** `29def09`.
+
+### R-24 — El deploy que esperaba bajo veda se ejecutó: el sitio público deja de estar desfasado del repo
+
+- **Cerrado:** 17 de agosto de 2026
+- **Estado al cerrar:** 🟢 RESUELTO
+- **Resumen:** desde el 10/08 había trabajo **verificado en build y no desplegado** —P-54 F1 («El pórtico que se construye») y P-55 (fondo oscuro del `logo.svg`)—, frenado por la **veda de infraestructura compartida** durante la ventana de promoción a producción de Aurora. Los dos viven en archivos que se hornean en la imagen Docker, así que un `git pull` en el VPS no alcanzaba: **exigían rebuild** (R-44). Francisco levantó la veda y ejecutó el deploy el **17/08/2026**. El sitio público sirve hoy **13 páginas** y ya no está desfasado del repo.
+- **Lo que valida el protocolo de veda:** funcionó exactamente como se diseñó en la Sesión 14 — el trabajo local no se detuvo, el deploy se puso **en cola y no se negoció**, la cola quedó documentada donde se iba a leer, y la veda la levantó Francisco. Un cambio verificado en build y no desplegado es justo el tipo de cosa que a los tres días alguien da por publicada; acá no pasó porque estaba escrito en tres lugares.
+- **Procedencia:** el deploy y su hash los reporta Francisco. **Ningún agente puede verificarlo por su cuenta:** `/opt/sitio-bg` está fuera del perímetro de todos ellos, sin `sudo` y sin acceso al socket de Docker.
+- **Commits relacionados:** los de P-54 F1 (`be196c5..69f83bd`) y P-55 (`fd8316b`), ya en `main` desde el 10/08.
+
 ---
+
 **Fin del documento PENDIENTES.md.**
 
 **Próxima revisión:** al cierre de cualquier item activo o al inicio de la siguiente sesión.
+
+**Conteo al 17/08/2026:** 62 items (P-01 a P-62) + 24 resueltos históricos (R-01 a R-24).
 
 
 

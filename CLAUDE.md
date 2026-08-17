@@ -4,9 +4,11 @@
 > Tambien sirve como referencia rapida para cualquier sesion de chat (Claude.ai).
 > NO editar sin actualizar la version y la fecha al final.
 
-**Version:** 2.5
-**Ultima actualizacion:** lunes 10 de agosto de 2026 (Sesion 14: **DIA 1 DEL SITIO PUBLICO**)
-**Cubre el estado del proyecto hasta:** Sesion 14 cerrada (10/08). **EL SITIO ES PUBLICO Y YA NO TIENE NINGUN GATE DE LANZAMIENTO ABIERTO.** Cayo el ultimo: **P-51 probado** (Cloudflare 1 recibido / 1 entregado, el correo llego al Gmail de Francisco a las 11:53, en Spam, se aplico «No es spam») y cerro como **R-19**. Tambien cerraron **P-55** como **R-20** (fondo oscuro del `logo.svg`, commit `fd8316b`) y **P-56** como **R-21** (mision/vision/valores aprobados; Manual de Marca **v3.1 FINAL** entregado al manager de marketing). **P-54 F1 esta CONSTRUIDA en `main` pero NO desplegada**: el 10/08 rigio veda de infraestructura compartida por la ventana de promocion a produccion de Aurora.
+**Version:** 2.6
+**Ultima actualizacion:** lunes 17 de agosto de 2026 (Sesion 19: **PRIMERA SESION CORRIDA DENTRO DEL VPS**)
+**Cubre el estado del proyecto hasta:** Sesion 19 (17/08). **EL DEPLOY QUE ESPERABA BAJO VEDA SE EJECUTO**: P-54 F1 y P-55 estan en produccion y el sitio publico ya NO esta desfasado del repo. El sitio sirve **13 paginas**: volvio `/seguros/auto` (Sesion 16, decision de Francisco que **SUPERA a D1**). Las Sesiones 15 a 18 sumaron los fondos de video F2/F3, la pagina de seguro vehicular, el sistema de atribucion de leads de `web/src/lib/whatsapp.ts` y la accesibilidad del footer a **100**. La Sesion 19 agrego el **selector de contacto**, la **barra fija de WhatsApp en movil**, el **correo del dominio** y la **dieta de fuentes**.
+
+> **ESTADO ANTERIOR, conservado por trazabilidad:** hasta la v2.5 este archivo cerraba en la Sesion 14 (10/08). **EL SITIO ES PUBLICO Y YA NO TIENE NINGUN GATE DE LANZAMIENTO ABIERTO.** Cayo el ultimo: **P-51 probado** (Cloudflare 1 recibido / 1 entregado, el correo llego al Gmail de Francisco a las 11:53, en Spam, se aplico «No es spam») y cerro como **R-19**. Tambien cerraron **P-55** como **R-20** (fondo oscuro del `logo.svg`, commit `fd8316b`) y **P-56** como **R-21** (mision/vision/valores aprobados; Manual de Marca **v3.1 FINAL** entregado al manager de marketing). **P-54 F1 esta CONSTRUIDA en `main` pero NO desplegada**: el 10/08 rigio veda de infraestructura compartida por la ventana de promocion a produccion de Aurora.
 
 ---
 
@@ -14,9 +16,9 @@
 
 Antes de proponer cualquier accion tecnica, Claude Code debe leer estos archivos en este orden:
 
-1. **`docs/ERRORES-Y-APRENDIZAJES.md`** — 28 errores (E-01 a E-28) + 11 near-miss (NM-01 a NM-11) + 50 reglas operativas (R-01 a R-50). NO repetir errores ya documentados.
+1. **`docs/ERRORES-Y-APRENDIZAJES.md`** — 28 errores (E-01 a E-28) + **15 near-miss (NM-01 a NM-15)** + **55 reglas operativas (R-01 a R-55)**. NO repetir errores ya documentados. Los cuatro near-miss nuevos son de la familia «falla en silencio»: dos del `.reveal` que deja bloques invisibles para siempre (NM-12, NM-13) y dos que habrian dejado los videos muertos en produccion (NM-14, NM-15).
 2. **`docs/PLAN-MAESTRO-v2.md`** — documento maestro con decisiones tecnicas firmes (D-01 a D-29), bitacora de sesiones (la ultima entrada es **Sesion 14**), hallazgos legales. Ojo con la numeracion D-XX: la seccion 10 lista D-18 a D-24 y D-29; D-25 a D-28 viven en la bitacora (Sesiones 6 y 8).
-3. **`docs/PENDIENTES.md`** — **56 items (P-01 a P-56) + 21 resueltos historicos (R-01 a R-21)**. Numeracion verificada contra el archivo el 10/08/2026.
+3. **`docs/PENDIENTES.md`** — **62 items (P-01 a P-62) + 24 resueltos historicos (R-01 a R-24)**. Numeracion verificada contra el archivo el 17/08/2026. Ojo: los `R-XX` de PENDIENTES son **resueltos** y los `R-XX` de ERRORES son **reglas**. Son dos numeraciones distintas que conviven.
 4. **`docs/ESTADO-GENERAL-PROYECTO.md`** — estado consolidado del proyecto al cierre de Sesion 5.
 5. **`docs/DIAGRAMA-FLUJO-PROYECTO.md`** — visualizacion completa de fases y dependencias.
 6. **`docs/REPORTE-SESION-10.md`** — bitacora de la jornada estructural (Bloques A-B) + decisiones D1 a D6 + QA pre-merge.
@@ -35,8 +37,8 @@ Si una propuesta tuya contradice algo de estos documentos, PARAR y discutirlo co
 - **Carpeta local:** `C:\Users\panch\projects\sitio-bg-infra\`
 - **Carpeta VPS:** `/opt/sitio-bg/` (creada en HITO 01)
 - **Repo GitHub:** `fbarrerainversiones/sitio-bg-infra` (publico, D-21)
-- **Fase actual:** **SITIO PUBLICO Y EN LINEA** desde el 09/08/2026 con 12 paginas y **simbolo propio**. El switch se ejecuto (Sesion 13) y el dia 1 (Sesion 14) cerro los tres items que quedaban del lanzamiento. Staging se mantiene con candado como ambiente de revision. Lo que sigue ya no es lanzamiento sino producto: **desplegar lo que espera en `main`** (P-54 F1 + P-55), la papeleria de **P-52** fase 2, y la deuda tecnica ya catalogada.
-- **HAY TRABAJO CONSTRUIDO SIN DESPLEGAR.** `main` tiene P-54 F1 (la seccion «El portico que se construye») y P-55 (fondo oscuro del `logo.svg`) **verificados en build pero NO en produccion**. Los dos viven en archivos que se hornean en la imagen Docker, asi que **un `git pull` en el VPS no alcanza: exigen rebuild** (R-44). No asumir que el sitio publico ya los muestra.
+- **Fase actual:** **SITIO PUBLICO Y EN LINEA** desde el 09/08/2026, con **13 paginas** y **simbolo propio**. El deploy que esperaba bajo veda se ejecuto el **17/08/2026**: P-54 F1 y P-55 estan en produccion. Staging se mantiene con candado como ambiente de revision. Lo que sigue es producto y deuda: la papeleria de **P-52** fase 2, el arreglo de raiz del observer (**P-58**), Google Search Console (**P-62**) y la medicion de la dieta de fuentes (**P-57**).
+- **HAY TRABAJO COMMITEADO EN LOCAL Y SIN PUBLICAR.** La Sesion 19 corrio **dentro del VPS** con el usuario `web`, que **no puede pushear**. Sus tres commits de codigo viven solo en el clon `/home/web/sitio-bg-infra` hasta que Francisco los publique. **R-55: un commit local no es un respaldo.** Los hashes estan en `REPORTE-SESION-19.txt`.
 
 ---
 
@@ -48,6 +50,38 @@ Si una propuesta tuya contradice algo de estos documentos, PARAR y discutirlo co
 - **No procesa pagos.** El cliente paga directo al carrier.
 - **No publica primas especificas** (viola Art. 11.6 SCVS).
 - **No usa "el mejor precio" ni "hasta X% de descuento"** (viola Art. 12.12 SCVS).
+
+---
+
+## Entorno de trabajo dentro del VPS (Sesion 19)
+
+Desde el 17/08/2026 este proyecto tambien se trabaja **dentro del servidor**,
+con el usuario Linux `web`. Lo que la proxima sesion en el VPS necesita saber
+antes de perder media hora averiguandolo:
+
+- **Clon:** `/home/web/sitio-bg-infra`. **NO** es `/opt/sitio-bg/src`, que es el
+  clon de despliegue y esta fuera del perimetro del usuario `web`.
+- **El `node` del sistema NO SIRVE y NO HAY `npm`.** `/usr/bin/node` es
+  **v18.19.1**, y tanto `web/package.json` como el propio `astro@6.3.8` exigen
+  **`node >=22.12.0`**. El paquete de Ubuntu vino sin `npm`, `npx`, `pnpm`,
+  `yarn` ni `corepack`.
+- **La solucion instalada:** **Node 22.23.2 (LTS «Jod») con npm 10.9.8**,
+  tarball oficial de nodejs.org **verificado por SHA256** contra su
+  `SHASUMS256.txt`, extraido en `~/.local/opt/node-v22.23.2-linux-x64` con el
+  enlace estable `~/.local/opt/node22` y los binarios en `~/.local/bin`, que ya
+  esta primero en el `PATH`. Todo dentro del home: **cero sudo, cero zona
+  compartida**, y se revierte con un `rm -rf` de un solo directorio.
+- **Por que la linea 22 y no la 24:** `infra/Dockerfile:10` compila con
+  `FROM node:22-alpine`. Construir con la misma linea mayor que hornea la
+  imagen es lo que hace que el build local signifique algo.
+- **NO hay Chrome ni Lighthouse en el VPS.** Las mediciones de rendimiento las
+  corre Francisco en su laptop, **siempre por `127.0.0.1`** (R-53). Una sesion
+  en el servidor **no puede** verificar Performance, LCP ni accesibilidad con
+  Lighthouse: lo declara y entrega el guion.
+- **El usuario `web` no pushea.** Sus commits quedan locales hasta que Francisco
+  los publique (R-55).
+- Herramientas disponibles verificadas: `rg` 14.1.1, `jq`, `curl`, `git`, `tar`,
+  `xz`. Hay egreso de red a nodejs.org, registry.npmjs.org y github.com.
 
 ---
 
@@ -93,14 +127,16 @@ El componente `web/src/components/Pendiente.astro` sigue en el repo pero ya
 **no lo usa ninguna pagina**; si vuelve a usarse, retirar los marcadores
 vuelve a ser gate antes de publicar.
 
-- `/seguros/auto` fue **retirada** (decision **D1**, 25/07, commit `96f629c`).
-  La decision de Sesion 2 de "6 productos" queda SUPERADA. Nunca estuvo
-  enlazada; solo era accesible por URL directa.
+- `/seguros/auto` **VOLVIO** (Sesion 16, 11/08/2026, commit `28441c0`), con el
+  alcance acotado a «cobertura unicamente en el Ecuador» y copy aprobado por
+  Francisco. Esa decision **SUPERA a D1** (25/07, commit `96f629c`), que la
+  habia retirado. Hoy esta enlazada desde el desplegable «Productos» del
+  Header. **Son 6 paginas de producto y 13 paginas en total.**
 - `/aprende` (blog) sigue **pendiente**, sin pagina creada.
 
 ---
 
-## REGLAS DURAS INVIOLABLES (resumen de las 50 reglas)
+## REGLAS DURAS INVIOLABLES (resumen de las 55 reglas)
 
 ### Herramientas
 - **R-01:** SIEMPRE pwsh 7 en Windows. NUNCA Windows PowerShell 5.1 ni ISE.
@@ -172,15 +208,29 @@ vuelve a ser gate antes de publicar.
 - **R-49:** **los bloques condicionales de un runbook se ejecutan UNICAMENTE si su condicion se cumple.** Antes de pegar un bloque marcado "solo si falla", el operador **confirma la condicion en voz alta**. Un runbook no se pega de corrido: la mitad de sus bloques existen para el caso que no ocurrio, y los de rollback tocan el Caddyfile compartido (NM-11).
 - **R-50:** **`caddy validate` sobre un archivo que no se llame `Caddyfile` va SIEMPRE con `--adapter caddyfile`** (Caddy infiere el adaptador por el nombre y si no, asume JSON). Corolario, que es la mitad importante: **una validacion que falla DETIENE el runbook**; nunca se pasa al restart "porque el error parecia del comando" (E-28).
 
+### Contenido, verificacion y respaldo (Sesiones 16 a 19)
+
+- **R-51:** **ninguna animacion de aparicion dependiente de JavaScript sobre un contenedor de contenido largo o de altura sin techo.** `.reveal` deja el elemento en `opacity: 0` hasta que el observer le ponga `.visible`, y con `threshold: 0.15` un elemento mas alto que `(alto_del_viewport - 50) / 0,15` **nunca** alcanza ese ratio: queda invisible para siempre, sin un error en consola. Prohibido envolver cuerpos de pagina, `<slot />`, listas con `map()` o cualquier bloque que crezca con los datos. **Corolario, que es la mitad importante:** lo que tiene que poder extraer un buscador o un asistente **no depende de JavaScript para ser visible**. (NM-12, NM-13.)
+- **R-52:** **toda verificacion de altura se mide en TRES condiciones, o no es una verificacion:** (1) 360x640 al 100 % de texto, (2) 150 % de escala de texto, (3) 320x256 CSS px, que es la condicion de WCAG 2.1 SC 1.4.10 Reflow, o sea zoom al 400 %. Medir una sola **no verifica: tranquiliza**. NM-13 pasaba la primera con margen de 2,5x y fallaba en las otras dos. (NM-13.)
+- **R-53:** **Lighthouse local SIEMPRE por `127.0.0.1`, nunca por `localhost`.** Con IPv6 activo, `localhost` resuelve primero a `::1`, la latencia se cuadruplica y el Performance se hunde: se persiguen cuellos que no existen. Una cifra de un reporte solo vale si vino de una corrida por `127.0.0.1`.
+- **R-54:** **los centinelas de datos personales se DESCRIBEN, no se transcriben.** Un barrido se reporta diciendo que dio cero y como se busco, nunca escribiendo los valores buscados. El repo es publico: un informe que dice «esto no esta en el repo» no puede lograrlo escribiendolo.
+- **R-55:** **push al cierre de cada jornada: un commit local NO es un respaldo.** En este proyecto el push lo ejecuta **Francisco** — los agentes no pushean. Si una jornada cierra con commits locales sin publicar, se dice explicitamente en el reporte y en el snapshot de continuidad, con los hashes, para que nadie lo de por respaldado.
+
 **Chequeo barato que vale por diez:** despues de tocar el proxy, pedir **una URL inventada**. Si `/no-existe` devuelve **200**, no estas mirando el sitio real. Ese 200 fue lo que desenmascaro el switch v1.
 
-**Lista completa de las 50 reglas:** ver `docs/ERRORES-Y-APRENDIZAJES.md` seccion "Reglas operativas consolidadas".
+**Lista completa de las 55 reglas:** ver `docs/ERRORES-Y-APRENDIZAJES.md` seccion "Reglas operativas consolidadas".
 
 ### PROTOCOLO DE VEDA (practica establecida en Sesion 14, 10/08/2026)
 
-> **Todavia NO es una regla numerada.** Las reglas siguen siendo **50** (R-01 a
-> R-50) en `docs/ERRORES-Y-APRENDIZAJES.md`. Esto es practica confirmada por uso,
-> y se numera el dia que se formalice ahi. No inventar un "R-51" mientras tanto.
+> **Todavia NO es una regla numerada.** Las reglas son **55** (R-01 a R-55) en
+> `docs/ERRORES-Y-APRENDIZAJES.md`, y ninguna es la veda. Esto sigue siendo
+> practica confirmada por uso, y se numera el dia que se formalice ahi: le
+> tocaria **R-56**. No inventarle numero mientras tanto.
+>
+> **La veda funciono y se levanto.** La ventana de Aurora cerro y el deploy en
+> cola (P-54 F1 + P-55) se ejecuto el 17/08/2026. El protocolo hizo exactamente
+> lo que prometia: el trabajo local no se detuvo, el deploy no se negocio, la
+> cola quedo escrita en tres lugares y la veda la levanto Francisco.
 
 El VPS es compartido con **Aurora** y **FBE Sport**. Cuando cualquiera de esos
 proyectos abre una **ventana de promocion a produccion**, avisa y queda declarada
@@ -237,8 +287,8 @@ sitio-bg-infra/
 ├── .gitignore (endurecido con *.bak.*)
 ├── docs/
 │   ├── PLAN-MAESTRO-v2.md          ← doc maestro (LEER PRIMERO)
-│   ├── PENDIENTES.md                ← 56 items (P-01 a P-56) + 21 resueltos
-│   ├── ERRORES-Y-APRENDIZAJES.md    ← 28 errores + 11 NM + 50 reglas
+│   ├── PENDIENTES.md                ← 62 items (P-01 a P-62) + 24 resueltos
+│   ├── ERRORES-Y-APRENDIZAJES.md    ← 28 errores + 15 NM + 55 reglas
 │   ├── ESTADO-GENERAL-PROYECTO.md   ← estado consolidado Sesion 5
 │   ├── DIAGRAMA-FLUJO-PROYECTO.md   ← visualizacion completa
 │   ├── IDENTIDAD-MARCA.md           ← Brand Book extraido
@@ -258,7 +308,7 @@ sitio-bg-infra/
 │   │                                  + absolute_redirect/port_in_redirect off
 │   ├── README-hashes.md             ← como regenerar los hashes CSP
 │   └── caddyfile-snippet.txt
-└── web/                              (Astro 6 — 12 paginas)
+└── web/                              (Astro 6 — 13 paginas)
     ├── package.json
     ├── astro.config.mjs
     ├── public/
@@ -276,7 +326,17 @@ sitio-bg-infra/
         │            + el dibujado por etapas de P-54 F1)
         ├── layouts/ (Layout.astro con SEO + 3 JSON-LD + el unico
         │             IntersectionObserver del sitio, ProductLayout.astro)
+        ├── lib/whatsapp.ts  ← FUENTE UNICA del numero de WhatsApp y de
+        │                       los marcadores de atribucion. Dos juegos
+        │                       de tipos que NO se mezclan: TokenBG (de que
+        │                       PAGINA vino el lead, 8 marcadores) y
+        │                       TokenCTA (que ELIGIO en el selector, 5).
         ├── components/ (Logo, Portico ← simbolo de header y footer,
+        │                SelectorContacto ← «¿Por donde empezamos?»: 4
+        │                tarjetas + la del indeciso + «que pasa despues».
+        │                Va en el home y en /contacto. Cero JS.
+        │                BloqueFAQ, TarjetaAseguradora, LetraPequena,
+        │                FondoVideo ← fondos de video F2/F3,
         │                PorticoConstruye ← seccion #metodo del home (P-54
         │                F1), Header sticky con dropdown, Footer,
         │                Pendiente ← huerfano: ya no lo usa ninguna pagina)
@@ -291,14 +351,16 @@ sitio-bg-infra/
 
 ---
 
-## Estado actual (10/08/2026 — Sesion 14: DIA 1 DEL SITIO PUBLICO)
+## Estado actual (17/08/2026 — Sesion 19: primera sesion corrida dentro del VPS)
 
-- **EL SITIO ESTA EN LINEA Y SIN GATES.** `barreraglobal.com` y `www.barreraglobal.com` sirven las 12 paginas reales via `reverse_proxy sitio-bg-web:8080`. Al cierre de Sesion 13 se verifico: **Gate 0 5/5**, HTML del sitio real en el raiz, `/no-existe` devolviendo un **404 de verdad** y **staging respondiendo 401**. En Sesion 14 cayo el ultimo item abierto del lanzamiento.
-- **LO QUE ESPERA EN `main` SIN DESPLEGAR (lo primero que hay que saber):** **P-54 F1** (seccion «El portico que se construye» del home) y **P-55** (fondo oscuro del `logo.svg`). Verificados en build, **no en produccion**. Ambos viven en archivos horneados en la imagen: **exigen rebuild, el pull no alcanza (R-44)**. Salen juntos en el mismo deploy.
-- **HEAD de `main`:** los commits del cierre documental de Sesion 14, sobre `fd8316b` (P-55) y los **8** de P-54 F1 (`be196c5..69f83bd`). Base previa: `be196c5`. **Confirmar siempre por `git log`, no por este archivo.**
-- **Paginas: 12** — `/`, `/sobre-mi`, `/contacto`, `/privacidad`, `/terminos`, `/cookies`, `/inversion`, `/404` y las 4 de `/seguros/`. Build verificado: **12/12** sin errores.
-- **CSP:** los 2 hashes de `infra/nginx.conf` cuadran con los 2 scripts inline del build en las 12 paginas (cruce bidireccional, cero huerfanos). **Ningun hash cambio en Sesion 13 ni en Sesion 14** — y F1 se diseno justamente para eso: cero JavaScript nuevo, el dibujado por scroll sale de `:has()` mas el `IntersectionObserver` que ya existia en `Layout.astro`. Los 3 bloques JSON-LD son `application/ld+json`: no ejecutables, no requieren hash.
-- **404 propia:** `error_page 404 /404.html;` en `infra/nginx.conf` (sin `=`, para conservar el status 404 y no generar un soft-404). Cerro **P-42** como **R-17**.
+- **EL SITIO ESTA EN LINEA, SIN GATES Y YA NO ESTA DESFASADO DEL REPO.** `barreraglobal.com` y `www.barreraglobal.com` sirven **13 paginas** reales via `reverse_proxy sitio-bg-web:8080`. El deploy que esperaba bajo veda desde el 10/08 (**P-54 F1** + **P-55**) **se ejecuto el 17/08/2026**. Procedencia: lo reporta Francisco — **ningun agente puede verificarlo por su cuenta**, porque `/opt/sitio-bg` esta fuera del perimetro de todos ellos.
+- **LO QUE AHORA ESPERA SIN PUBLICAR ES OTRA COSA, y hay que saberlo:** la Sesion 19 corrio dentro del VPS con el usuario `web`, que **no puede pushear**. Sus **tres commits de codigo** —correo del dominio, selector de contacto + barra fija, dieta de fuentes— viven **solo en el clon local** hasta que Francisco los publique. **R-55: un commit local no es un respaldo.** Hashes en `REPORTE-SESION-19.txt`.
+- **Paginas: 13** — `/`, `/sobre-mi`, `/contacto`, `/privacidad`, `/terminos`, `/cookies`, `/inversion`, `/404` y las **5** de `/seguros/` (vida-termino, vida-indexada, salud-nacional, salud-internacional y **auto**, que volvio en la Sesion 16). Build verificado: **13/13** sin errores.
+- **CSP:** los 2 hashes de `infra/nginx.conf` cuadran con los 2 `<script type="module">` inline del build en las **13** paginas (cruce bidireccional, cero huerfanos). **Ningun hash cambio desde la Sesion 13** — y la Sesion 19 tampoco los movio: el selector, la barra fija y la dieta de fuentes son enlaces y CSS, cero JavaScript. Los 3 bloques JSON-LD son `application/ld+json`: no ejecutables, no requieren hash.
+- **Fuentes (Sesion 19):** de **65 archivos y 1.005,9 KB** a **15 y 303,6 KB**; de **36 bloques `@font-face` a 11**; CSS render-blocking de **52,9 a 42,9 KB**. Se conservan Cormorant latin 400/500/600 y Outfit latin 400/500 —los pesos que el sitio USA— y se precarga **una sola** fuente, Cormorant latin 600, que es la que pinta los titulos. Prueba de no-regresion: los 15 archivos que quedan tienen el **mismo hash de contenido** que antes.
+- **Atribucion de leads:** `web/src/lib/whatsapp.ts` es fuente unica del numero y de los marcadores. **8 marcadores de pagina** (`TokenBG`) + **5 de eleccion** (`TokenCTA`, los `BG-CTA-*` del selector). Son tipos separados a proposito: uno dice de donde vino el lead, el otro que eligio.
+- **Accesibilidad: 100** en las tres paginas medidas (`/`, `/seguros/auto`, `/sobre-mi`), contra un objetivo declarado de 95. Cerro como **R-23** en PENDIENTES.
+- **Rendimiento:** Performance 97-99, BP 100, SEO 100, CLS 0,000. **LCP 1,81-2,11 s** contra un objetivo de 1,80 s. El cuello no son las imagenes. La dieta de fuentes esta hecha pero **sin medir**: el VPS no tiene Chrome ni Lighthouse (**P-57**).
 - **VPS:** `caddy` en dos redes (stack_net con default gateway + sitio_bg_net con `--gw-priority=-100`); `sitio-bg-web` healthy en 172.22.10.10.
 - **Incidentes acumulados:** 1 que toco Aurora (Sesion 9, ~5 min, E-24) + 2 solo-staging en Sesion 12 (E-25, E-26) + **2 nuevos en Sesion 13**: **E-27** (el `sed -i` que reemplazo el inodo y dejo al caddy validando y recargando la config vieja) y **E-28** (validacion sin `--adapter caddyfile`, que dejo pasar el restart sin red de seguridad). Mas el near-miss **NM-11**: el bloque de rollback pegado despues de un switch exitoso, **~10 min de cartel viejo** en el sitio ya publico.
 - **Aurora downtime real acumulado:** ~5 minutos (sigue siendo el unico, de Sesion 9). **Ningun incidente de Sesion 13 ni de Sesion 14 la toco** — Sesion 14 no toco infraestructura en absoluto.
@@ -382,13 +444,17 @@ Si Claude detecta desincronizacion entre estos 3 lugares, ALERTAR a Francisco an
 ## Checklist al iniciar cada sesion
 
 ```
-[ ] Leer ERRORES-Y-APRENDIZAJES.md (al menos las reglas R-01 a R-50)
+[ ] Leer ERRORES-Y-APRENDIZAJES.md (al menos las reglas R-01 a R-55)
 [ ] Leer ESTADO-GENERAL-PROYECTO.md (saber donde estamos)
 [ ] Confirmar pwsh 7 activo ($PSVersionTable.PSVersion)
 [ ] cd al repo + git pull origin main
 [ ] git status debe estar working tree clean
 [ ] Si hay cambios sin commit, preguntar a Francisco que hacer
 [ ] Confirmar Aurora viva (curl a 5 dominios HTTP 200)
+[ ] Si la sesion corre DENTRO del VPS: confirmar que `node --version` da
+    v22.x y que `npm --version` responde. Si dan v18 o "command not found",
+    el PATH no esta tomando ~/.local/bin (ver "Entorno de trabajo dentro
+    del VPS")
 [ ] Proponer plan del dia con tiempo estimado
 [ ] Esperar aprobacion de Francisco antes de ejecutar
 ```
@@ -416,8 +482,23 @@ Si Claude detecta desincronizacion entre estos 3 lugares, ALERTAR a Francisco an
     no estas mirando el sitio real
 ```
 
+**Si la sesion toca contenedores nuevos o mide rendimiento (Sesiones 16-19):**
+
+```
+[ ] Ningun contenedor nuevo lleva .reveal si su alto puede crecer (R-51)
+[ ] Toda altura se verifica en TRES condiciones: 360x640 al 100 %, 150 %
+    de texto y 320x256 (zoom 400 %, WCAG Reflow). Una sola no verifica (R-52)
+[ ] Lighthouse SIEMPRE por 127.0.0.1, nunca por localhost (R-53)
+[ ] Los centinelas de datos personales se describen, NO se transcriben (R-54)
+[ ] Al cerrar la jornada: si quedan commits sin publicar, decirlo con los
+    hashes en el reporte y en el snapshot de continuidad (R-55)
+[ ] Color de texto sobre un <a>: va en un <span> interno o en regla propia
+    sin capa. Una utilidad text-* sobre un <a> PIERDE contra la regla base
+    de global.css (R-43). Verificado otra vez el 17/08 sobre el CSS emitido
+```
+
 ---
 
 **Fin del CLAUDE.md.**
 
-**Proxima revision:** cuando se **despliegue** lo que espera en `main` (P-54 F1 + P-55) y el sitio publico deje de estar desfasado del repo, cuando **P-52** entregue la papeleria de fase 2, o cuando se modifique cualquiera de los 5 documentos clave del knowledge.
+**Proxima revision:** cuando Francisco **publique** los tres commits locales de la Sesion 19 y se desplieguen, cuando **P-57** entregue la medicion de la dieta de fuentes, cuando **P-52** entregue la papeleria de fase 2, o cuando se modifique cualquiera de los 5 documentos clave del knowledge.
