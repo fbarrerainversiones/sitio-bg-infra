@@ -1,0 +1,222 @@
+---
+import { enlaceCTA } from "../lib/whatsapp";
+
+/**
+ * SELECTOR DE CONTACTO — Sesion 19 (17/08/2026)
+ *
+ * Cambia la pregunta del cierre: de «¿quieres escribirme?» a «¿por donde
+ * empezamos?». El visitante no elige un canal, elige un TEMA, y el canal sale
+ * solo con el mensaje ya escrito.
+ *
+ * CERO JAVASCRIPT. Son cinco enlaces `wa.me` con texto prellenado. No hay
+ * estado, no hay listeners, no hay <script>: los dos hashes CSP de
+ * infra/nginx.conf siguen siendo los mismos dos.
+ *
+ * POR QUE LOS COLORES VAN EN LOS <span> Y NO EN EL <a> (R-43).
+ * `a { color: var(--gd) }` de global.css vive FUERA de toda @layer, asi que
+ * le gana a cualquier utilidad `text-*` de Tailwind puesta sobre un <a>, sin
+ * importar la especificidad. Una tarjeta con `class="... text-tx"` saldria
+ * DORADA. Por eso el <a> no lleva color y cada linea de texto lo declara en
+ * su propio <span>, que no es un <a> y recibe la utilidad con normalidad.
+ *
+ * POR QUE NINGUNA TARJETA LLEVA `.reveal`.
+ * `.reveal` arranca en `opacity: 0` y solo se revela cuando el
+ * IntersectionObserver de Layout.astro le agrega `.visible`. Si ese script no
+ * corre —CSP que no cuadra, JS bloqueado, error previo en la pagina— el
+ * bloque de conversion entero queda invisible. Un CTA no puede depender de
+ * JavaScript para existir. Solo el encabezado corto lleva `.reveal`, igual
+ * que el resto de las secciones del sitio; si el observer falla se pierde un
+ * titulo, no los cinco caminos.
+ *
+ * ATRIBUCION: cada enlace lleva su marcador BG-CTA-* al final del texto, que
+ * es lo unico que sobrevive el salto a WhatsApp (ver lib/whatsapp.ts). Los
+ * marcadores BG-CTA-* son de ELECCION y no de origen: conviven con los ocho
+ * de pagina sin pisarlos.
+ */
+
+interface Props {
+  /** Ancla de la seccion. La home conserva la suya para no perder el id. */
+  id?: string;
+  /** Linea divisoria superior. La home la necesita; /contacto no. */
+  borde?: boolean;
+  /**
+   * Antetitulo «CONTACTO». Se apaga en /contacto, donde el hero de la pagina
+   * ya lo dice tres centimetros mas arriba y repetirlo es ruido —ademas de
+   * dejar dos veces la misma palabra en el arbol de accesibilidad.
+   */
+  antetitulo?: boolean;
+}
+
+const { id, borde = false, antetitulo = true } = Astro.props;
+
+/** Las cuatro opciones concretas. El orden lo fija Francisco. */
+const OPCIONES = [
+  {
+    token: "BG-CTA-AUTO" as const,
+    titulo: "Mi carro",
+    detalle: "Seguro vehicular",
+    icono: "auto",
+  },
+  {
+    token: "BG-CTA-VIDA" as const,
+    titulo: "Mi familia",
+    detalle: "Vida",
+    icono: "vida",
+  },
+  {
+    token: "BG-CTA-SALUD" as const,
+    titulo: "Mi salud",
+    detalle: "Nacional o internacional",
+    icono: "salud",
+  },
+  {
+    token: "BG-CTA-INVERSION" as const,
+    titulo: "Mi patrimonio",
+    detalle: "Inversión",
+    icono: "inversion",
+  },
+];
+
+/**
+ * QUE PASA DESPUES. Cumple ademas la transparencia de asistente automatizado
+ * que ya exigen /privacidad (seccion 5) y /terminos (seccion 6): el visitante
+ * sabe, ANTES de escribir, que quien contesta primero es un asistente.
+ *
+ * El paso 03 NO dice «las tres aseguradoras». Esa cifra es verdadera solo del
+ * ramo vehicular —/seguros/auto la declara y nombra a Sweaden, Generali y
+ * Chubb—, mientras que /privacidad linea 199 enumera ademas BMI para el resto.
+ * Este selector cubre vida, salud, inversion y vehicular a la vez, asi que
+ * poner el numero aca lo convertiria en una afirmacion falsa para tres de los
+ * cuatro caminos. Se conserva la promesa (comparas y decides) y se retira la
+ * cifra que no generaliza.
+ */
+const PASOS = [
+  { n: "01", t: "Aurora te responde al instante y toma tu caso" },
+  { n: "02", t: "Francisco lo revisa y te escribe personalmente" },
+  { n: "03", t: "Comparas las opciones sobre la mesa y decides" },
+];
+---
+
+<section
+  id={id}
+  class:list={[
+    "scroll-mt-24 py-24 md:py-32",
+    borde && "border-t border-gd-muted",
+  ]}
+>
+  <div class="max-w-5xl mx-auto px-6">
+
+    <!-- Encabezado. Unico bloque con .reveal, y a proposito: es texto de
+         acompanamiento, no la accion. -->
+    <div class="reveal text-center">
+      {antetitulo && (
+        <p class="font-mono text-xs text-gd uppercase tracking-widest mb-4">
+          Contacto
+        </p>
+      )}
+      <h2 class="text-4xl md:text-5xl font-display font-semibold text-tx mb-6">
+        ¿Por dónde
+        <span class="block text-gd">empezamos?</span>
+      </h2>
+      <p class="font-body text-base md:text-lg text-tx-muted leading-relaxed mb-12 max-w-xl mx-auto">
+        Elige lo que te preocupa hoy. Se abre WhatsApp con el mensaje escrito.
+      </p>
+    </div>
+
+    <!-- Las cuatro opciones concretas.
+         `items-stretch` + `h-full` en el <a>: el alto lo fija el contenido y
+         todas las tarjetas de una fila igualan a la mas alta. No hay `min-h`
+         ni alto fijo, para que al 150 % de texto la tarjeta CREZCA en vez de
+         desbordar (regla de verificacion en tres condiciones). -->
+    <ul class="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-5 items-stretch list-none">
+      {OPCIONES.map((o) => (
+        <li>
+          <a
+            href={enlaceCTA(o.token)}
+            target="_blank"
+            rel="noopener noreferrer"
+            class="card-product h-full flex flex-col items-start gap-3 border border-gd-muted rounded-lg bg-bg-elev-1 p-4 md:p-6"
+          >
+            <span class="w-11 h-11 shrink-0 rounded-full bg-gd-muted flex items-center justify-center">
+              {o.icono === "auto" && (
+                <svg xmlns="http://www.w3.org/2000/svg" width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="text-gd" aria-hidden="true">
+                  <path d="M5 17H3v-5l2-5h14l2 5v5h-2" />
+                  <path d="M5 12h14" />
+                  <circle cx="7.5" cy="17" r="2" />
+                  <circle cx="16.5" cy="17" r="2" />
+                </svg>
+              )}
+              {o.icono === "vida" && (
+                <svg xmlns="http://www.w3.org/2000/svg" width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="text-gd" aria-hidden="true">
+                  <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+                </svg>
+              )}
+              {o.icono === "salud" && (
+                <svg xmlns="http://www.w3.org/2000/svg" width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="text-gd" aria-hidden="true">
+                  <path d="M22 12h-4l-3 9L9 3l-3 9H2" />
+                </svg>
+              )}
+              {o.icono === "inversion" && (
+                <svg xmlns="http://www.w3.org/2000/svg" width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="text-gd" aria-hidden="true">
+                  <polyline points="22 7 13.5 15.5 8.5 10.5 2 17" />
+                  <polyline points="16 7 22 7 22 13" />
+                </svg>
+              )}
+            </span>
+            <span class="font-display text-xl md:text-2xl font-semibold text-tx leading-snug">
+              {o.titulo}
+            </span>
+            <span class="font-body text-sm text-tx-muted leading-relaxed">
+              {o.detalle}
+            </span>
+            <span class="sr-only">— abrir WhatsApp</span>
+          </a>
+        </li>
+      ))}
+    </ul>
+
+    <!-- El indeciso. Ancha y con borde discontinuo: se lee como «esta puerta
+         tambien esta abierta», no como una quinta categoria de producto. -->
+    <a
+      href={enlaceCTA("BG-CTA-EXPLORA")}
+      target="_blank"
+      rel="noopener noreferrer"
+      class="card-product mt-3 md:mt-5 flex items-center gap-4 border border-dashed border-gd/40 rounded-lg bg-bg-elev-1 p-4 md:p-6"
+    >
+      <span class="w-11 h-11 shrink-0 rounded-full bg-gd-muted flex items-center justify-center">
+        <svg xmlns="http://www.w3.org/2000/svg" width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="text-gd" aria-hidden="true">
+          <circle cx="12" cy="12" r="9" />
+          <polygon points="15.6 8.4 13.5 13.5 8.4 15.6 10.5 10.5" />
+        </svg>
+      </span>
+      <span class="min-w-0">
+        <span class="block font-display text-xl md:text-2xl font-semibold text-tx leading-snug">
+          Todavía no sé
+        </span>
+        <span class="block font-body text-sm text-tx-muted leading-relaxed">
+          Conversemos y lo vemos juntos
+        </span>
+      </span>
+      <span class="sr-only">— abrir WhatsApp</span>
+    </a>
+
+    <!-- QUE PASA DESPUES. Sin .reveal: es la parte que responde la objecion
+         («¿y si me llenan de mensajes?») y tiene que estar visible siempre. -->
+    <div class="mt-16 pt-10 border-t border-gd-muted">
+      <p class="font-mono text-xs text-gd uppercase tracking-widest mb-6">
+        Qué pasa después
+      </p>
+      <ol class="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8 list-none">
+        {PASOS.map((p) => (
+          <li class="flex items-start gap-3">
+            <span class="font-mono text-sm text-gd shrink-0 pt-0.5">{p.n}</span>
+            <span class="font-body text-sm text-tx-muted leading-relaxed">
+              {p.t}
+            </span>
+          </li>
+        ))}
+      </ol>
+    </div>
+
+  </div>
+</section>

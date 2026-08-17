@@ -30,13 +30,59 @@ export type TokenBG =
   | "BG-INVERSION";
 
 /**
+ * Marcadores del SELECTOR DE CONTACTO (Sesion 19).
+ *
+ * POR QUE SON UN TIPO APARTE Y NO CINCO MIEMBROS MAS DE `TokenBG`.
+ * Los dos juegos responden preguntas distintas y no se pueden mezclar:
+ *   TokenBG   dice DESDE QUE PAGINA salio el lead.
+ *   TokenCTA  dice QUE ELIGIO el lead en el selector.
+ * Un lead que sale del hero de /seguros/auto llega como [BG-AUTO]; uno que
+ * eligio "Mi carro" en el selector llega como [BG-CTA-AUTO]. Si vivieran en
+ * la misma union, `<Header token={...} />` aceptaria un BG-CTA-* sin chistar
+ * y el dato se ensuciaria en silencio: el compilador ya no podria distinguir
+ * origen de eleccion. Separados, el tipo es el que impide la confusion.
+ */
+export type TokenCTA =
+  | "BG-CTA-AUTO"
+  | "BG-CTA-VIDA"
+  | "BG-CTA-SALUD"
+  | "BG-CTA-INVERSION"
+  | "BG-CTA-EXPLORA";
+
+/** Cualquiera de los dos juegos sirve para armar un enlace. */
+export type Token = TokenBG | TokenCTA;
+
+/**
+ * Texto canonico de cada opcion del selector. Vive aca y no en el componente
+ * por el mismo motivo que el numero: es el contenido que Aurora va a leer del
+ * otro lado, asi que tiene un solo dueno. El marcador NO se escribe aca; lo
+ * agrega `enlaceWhatsApp`, que es quien sabe como se compone el texto final.
+ */
+export const MENSAJES_CTA: Record<TokenCTA, string> = {
+  "BG-CTA-AUTO": "Hola, quiero cotizar el seguro de mi vehículo.",
+  "BG-CTA-VIDA": "Hola, quiero información sobre seguro de vida para mi familia.",
+  "BG-CTA-SALUD": "Hola, quiero información sobre seguro de salud.",
+  "BG-CTA-INVERSION": "Hola, quiero información sobre inversión y patrimonio.",
+  "BG-CTA-EXPLORA": "Hola, todavía no sé qué me conviene y quiero conversarlo.",
+};
+
+/**
  * Arma el enlace. Si se pasa `token`, se agrega al FINAL del mensaje separado
  * por un espacio, y todo el conjunto se codifica junto: los corchetes salen
  * como %5B y %5D y WhatsApp los restituye tal cual al abrir el chat.
  */
-export function enlaceWhatsApp(mensaje: string, token?: TokenBG): string {
+export function enlaceWhatsApp(mensaje: string, token?: Token): string {
   const texto = token ? `${mensaje} [${token}]` : mensaje;
   return `https://wa.me/${WHATSAPP_NUMERO}?text=${encodeURIComponent(texto)}`;
+}
+
+/**
+ * Atajo del selector: dado el marcador, arma el enlace con SU mensaje.
+ * Que el componente no pueda elegir el texto es deliberado — es la garantia
+ * de que cada tarjeta lleva exactamente un marcador y el que le corresponde.
+ */
+export function enlaceCTA(token: TokenCTA): string {
+  return enlaceWhatsApp(MENSAJES_CTA[token], token);
 }
 
 /**

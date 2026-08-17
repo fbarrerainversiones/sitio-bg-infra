@@ -824,3 +824,91 @@ a.enlace-subrayado {
     }
   }
 }
+
+/* ============================================================
+   BARRA FIJA DE WHATSAPP — SOLO MOVIL (Sesion 19, 17/08/2026)
+   ============================================================
+   Componente: se monta dentro de web/src/components/Footer.astro, que ya
+   esta en las 13 paginas y ya recibe el `token` de atribucion de cada una.
+   CSS puro y un enlace: cero JavaScript, cero <script>, hashes CSP intactos.
+
+   POR QUE EL ALTO SE CALCULA Y NO SE ESCRIBE A MANO.
+   El compensado del body tiene que seguir al alto REAL de la barra, o la
+   barra termina tapando el final del footer. Si el alto fuera un numero fijo
+   en px, bastaria con que el visitante suba el tamano de texto al 150 % para
+   que la barra crezca y el padding se quede corto: el ultimo renglon del
+   footer quedaria debajo de la barra, sin forma de leerlo.
+   Por eso las tres piezas —padding del enlace, alto de linea del texto y
+   padding compensatorio del body— salen de las MISMAS custom properties, y
+   las tres estan en `rem`. Cuando el navegador escala el texto, escalan
+   juntas y la cuenta sigue cuadrando sola.
+
+   POR QUE `env(safe-area-inset-bottom)` APARECE DOS VECES.
+   Una en la barra, para que su contenido no quede debajo de la barra de
+   gestos del iPhone; otra en el body, porque el alto TOTAL que la barra
+   ocupa incluye ese inset. Si solo se sumara en una, en un iPhone quedarian
+   ~34 px de footer tapados. En un dispositivo sin notch `env()` resuelve a
+   0 px y las dos cuentas dan lo mismo que sin el.
+
+   POR QUE HAY UNA REGLA `:hover` QUE PARECE REDUNDANTE.
+   `a:hover { color: var(--gd-light) }` de este mismo archivo tiene
+   especificidad (0,1,1) y `.barra-wa` (0,1,0): en el primer toque el texto
+   se volveria dorado sobre fondo dorado y la barra se leeria en blanco. Es
+   la deuda R-43 otra vez. Se mitiga como manda el patron de la casa —regla
+   propia, sin capa, con mas especificidad, igual que `.btn-outline`— y NO
+   tocando las capas, que R-43 prohibe mover hasta P-47.
+
+   CONTRASTE: #08080d sobre #c9a84c da 8,75:1, muy por encima del 4,50:1
+   que pide WCAG AA.
+   ============================================================ */
+
+:root {
+  /* Padding vertical del enlace. */
+  --barra-wa-pad: 0.8rem;
+  /* Alto de linea de su texto. */
+  --barra-wa-linea: 1.25rem;
+  /* Alto total sin contar el inset del dispositivo: los dos paddings, la
+     linea de texto y el borde superior de 1px. */
+  --barra-wa-alto: calc(var(--barra-wa-pad) * 2 + var(--barra-wa-linea) + 1px);
+}
+
+/* Fuera de movil no existe. `display: none` y no `hidden` de Tailwind para
+   que la regla viva junto a las demas de la barra y se lea de corrido. */
+.barra-wa {
+  display: none;
+}
+
+@media (max-width: 47.99rem) {
+
+  .barra-wa {
+    display: flex;
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 40; /* debajo del header sticky, que es z-50 */
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: var(--barra-wa-pad) 1rem;
+    padding-bottom: calc(var(--barra-wa-pad) + env(safe-area-inset-bottom, 0px));
+    background-color: var(--gd);
+    color: #08080d;
+    border-top: 1px solid rgba(8, 8, 13, 0.25);
+    font-family: var(--font-body);
+    font-weight: var(--font-medium);
+    font-size: var(--text-sm);
+    line-height: var(--barra-wa-linea);
+    text-align: center;
+  }
+
+  .barra-wa:hover,
+  .barra-wa:focus-visible {
+    color: #08080d;
+  }
+
+  /* El compensado. Sin esto la barra tapa el ultimo renglon del footer. */
+  body {
+    padding-bottom: calc(var(--barra-wa-alto) + env(safe-area-inset-bottom, 0px));
+  }
+}
