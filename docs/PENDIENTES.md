@@ -536,6 +536,10 @@ Cuando un item se cierra, se mueve a la sección **Resueltos** al final con la f
 - **Bloquea a:** nada. Es limpieza de arquitectura, no un fix funcional.
 - **Owner:** Claude (implementa) + Francisco (aprueba el cambio visual, porque lo hay).
 - **Detalle:** ver **R-43** en `docs/ERRORES-Y-APRENDIZAJES.md` para el diagnóstico completo. Resumen: las reglas base de enlaces de `web/src/styles/global.css` van fuera de toda `@layer` y por eso anulan cualquier utilidad `text-*` de Tailwind sobre un `<a>`, sin importar la especificidad. Fue la causa de los dos botones con texto invisible corregidos el 25/07. La mitigación vigente (color inline en los CTAs dorados + regla propia `.btn-outline` para el hover) funciona y está documentada. El fix de raíz —envolver las reglas base en `@layer base`— haría que las utilidades ganen y **cambiaría el color de todos los enlaces del sitio** (los `text-tx-muted` del Header y del Footer, hoy anulados, pasarían a verse gris apagado en vez de dorado). Eso es un rediseño y toca el aspecto ya aprobado visualmente. **Trazabilidad:** decisión **D6** en `docs/REPORTE-SESION-10.md`.
+- **AMPLIADO el 17/08/2026 (Sesión 19).** La auditoría adversarial encontró y **confirmó** tres superficies más de la misma deuda que NO estaban registradas. Ninguna se arregló, y no arreglarlas fue deliberado: las tres llevan meses en producción, así que hoy **son** el aspecto aprobado del sitio y cambiarlas de a una sería la regresión. Van todas juntas cuando se haga el fix de raíz:
+  1. **`font-size` sobre `<h1>` y `<h2>`.** `h2 { font-size: var(--text-4xl) }` vive fuera de toda `@layer` y `.md\:text-5xl` vive dentro de `@layer utilities`. Verificado recorriendo el bundle emitido con la pila de capas, no a ojo. Consecuencia: **el `md:text-5xl` de todos los `<h2>` del sitio es inerte** y los títulos de sección se pintan siempre a 36 px, nunca a 48. Lo mismo con `md:text-7xl` sobre el `<h1>` de `/contacto`. Ya se conocía para el hero (por eso existe `.hero-titulo`); lo que no estaba escrito es que **afecta a todos los encabezados**.
+  2. **Color de los enlaces del footer.** Los 7 enlaces de Navegación y Legal más los 5 iconos de redes llevan `text-tx-muted hover:text-gd`, y las dos utilidades son **inertes**: se pintan en dorado `#c9a84c` en vez del gris `#a8a59f` de intención, y en hover van a `--gd-light` en lugar de a `--gd`. Contraste sobra (~8,4:1), así que el daño es de **jerarquía visual**: el pie queda con doce elementos dorados compitiendo con el único que sí debería serlo.
+  3. **Familia tipográfica de los `<h3>` del footer.** Los tres encabezados de columna («Navegación», «Legal», «Contacto») declaran `font-mono` y **salen en Cormorant Garamond**, porque la regla `h1..h6 { font-family: var(--font-display) }` es unlayered y le gana a `.font-mono`. En el mismo footer, el `<p class="font-mono">` hermano sí sale en JetBrains: dos antetítulos con la misma intención de diseño y dos familias distintas.
 - **Próximo paso:** sesión dedicada **después del lanzamiento**. Envolver el bloque base en `@layer base`, revisar página por página el cambio de color de enlaces, y recién ahí decidir si se conserva el aspecto actual con reglas explícitas o se adopta el nuevo. Hasta entonces **NO tocar las capas** y respetar la mitigación de R-43.
 
 ### P-48 — `og-default.png` no existe: la vista previa al compartir sale rota
@@ -718,6 +722,15 @@ Cuando un item se cierra, se mueve a la sección **Resueltos** al final con la f
 - **Owner:** Francisco (la verificación exige acceso al DNS de Cloudflare y a la cuenta de Google).
 - **Detalle:** el sitio es público desde el 09/08/2026 y no hay Search Console dado de alta. Sin él no se sabe qué páginas indexó Google, cuáles rechazó ni por qué, ni se puede pedir el rastreo de una página nueva. Hay dos piezas ya listas que hoy nadie está aprovechando: `web/public/sitemap.xml`, que se mantiene a mano (**P-50**), y los tres bloques JSON-LD de `Layout.astro`. Nota de coherencia que conviene revisar en el mismo movimiento: el canonical del sitio se normalizó **sin barra final**, así que el sitemap tiene que declarar exactamente esa forma o Search Console reportará duplicados.
 - **Próximo paso:** Francisco verifica el dominio por registro DNS TXT en Cloudflare (es el método que sobrevive a cambios de hosting), da de alta `https://barreraglobal.com/sitemap.xml` y revisa el informe de cobertura una semana después. **No se agrega ninguna etiqueta de verificación al HTML**: eso obligaría a rebuild y además ata la verificación al código.
+
+### P-63 — Los comentarios HTML se sirven al visitante: 16,3 KB en las 13 páginas
+
+- **Estado:** 🔵 BACKLOG (alta del 17/08/2026, Sesión 19).
+- **Criticidad:** baja (peso y prolijidad; no rompe nada).
+- **Bloquea a:** nada.
+- **Owner:** Claude Code, en una pasada de limpieza.
+- **Detalle:** el proyecto ya sabe que **los comentarios `<!-- -->` llegan al build** —está escrito en `Footer.astro:39`, `sobre-mi.astro:36` e `inversion.astro:31`, siempre con la misma nota: «se comenta con `{}` y no con `<!-- -->` porque los comentarios HTML SÍ llegan al build»— pero la convención se aplicó por archivo y no por regla. Medido el 17/08 sobre el build: **192 comentarios HTML y 16,3 KB** servidos a través de las 13 páginas. No son etiquetas estructurales inocuas: varios son notas internas de implementación que citan reglas del proyecto y razonamientos de sesión. La Sesión 19 detectó esto en su propio componente nuevo y lo corrigió ahí (de 39 comentarios y 5.068 bytes a 30 y 3.438 en el home y `/contacto`), pero el resto del sitio sigue igual.
+- **Próximo paso:** pasada de conversión `<!-- -->` → `{/* */}` en las notas internas, conservando como comentario HTML solo lo que sea una etiqueta estructural neutra. Es mecánico y no toca ni una línea de lógica. Verificación: volver a contar comentarios y bytes en `dist`.
 
 ## 9. Decisiones cerradas (referencia rápida)
 
@@ -967,7 +980,7 @@ Lista de items que fueron cerrados, con fecha. Sirve de memoria del proyecto.
 
 **Próxima revisión:** al cierre de cualquier item activo o al inicio de la siguiente sesión.
 
-**Conteo al 17/08/2026:** 62 items (P-01 a P-62) + 24 resueltos históricos (R-01 a R-24).
+**Conteo al 17/08/2026:** 63 items (P-01 a P-63) + 24 resueltos históricos (R-01 a R-24).
 
 
 

@@ -1,0 +1,874 @@
+================================================================================
+REPORTE DE LA SESION 19 — 17 de agosto de 2026
+La primera sesion que corrio DENTRO del VPS
+Correo del dominio, selector de contacto, barra fija y dieta de fuentes
+================================================================================
+
+Autor      : Claude Code, usuario Linux `web`, dentro del VPS de Barrera Global
+Clon       : /home/web/sitio-bg-infra
+HEAD inicial: 6536a70b51fd3bd609640811cb53c7b1df898a21  (coincidio con el esperado)
+Commits     : 5 de codigo y documentacion, TODOS LOCALES, mas el de este
+              reporte. El usuario `web` no puede pushear.
+
+  0b22bd0  feat(contacto): el sitio usa correo del dominio en vez de Gmail
+  4b2535f  feat(contacto): selector de producto y barra fija de WhatsApp en movil
+  bae5af6  perf(fuentes): dieta de subsets y pesos, mas precarga de la fuente del LCP
+  2f0b12e  docs: poner al dia el registro del proyecto tras cuatro sesiones de atraso
+  72a4333  fix(a11y): los cinco defectos que la auditoria adversarial confirmo
+
+>>> LO PRIMERO Y LO UNICO URGENTE <<<
+Esos commits existen en UN SOLO DISCO. `git status -sb` dice
+`[ahead 5]` contra origin/main. Hasta que Francisco los publique, este trabajo
+no esta respaldado en ningun lado. Es la regla R-55, escrita en esta misma
+sesion, aplicandose a esta misma sesion.
+
+
+================================================================================
+0. EL ENTORNO DEL SERVIDOR — el bloqueo real, y como se resolvio
+================================================================================
+
+La sesion se detuvo en el Paso 0 y no por formalismo: EL VPS NO PODIA COMPILAR
+EL SITIO.
+
+  /usr/bin/node          v18.19.1   (paquete Ubuntu de abril de 2024)
+  npm                    NO EXISTE. Tampoco npx, pnpm, yarn, corepack ni bun.
+  /usr/lib/node_modules  no existe
+  web/node_modules       no existia
+
+Y la exigencia, leida de los archivos y no de la memoria:
+
+  web/package.json:5-7        "engines": { "node": ">=22.12.0" }
+  package-lock, astro@6.3.8   engines: node >=22.12.0, npm >=9.6.5
+
+Node 18 esta CUATRO versiones mayores por debajo del minimo. Sin build no hay
+verificacion posible, y sin verificacion el Paso 3 entero (la dieta de fuentes
+exige leer lo que el build EMITE) era inejecutable, ademas de la mitad del QA.
+Se paro y se reporto, como manda el propio encargo.
+
+LA SALIDA, elegida por Francisco entre cuatro opciones:
+  Node 22.23.2 (LTS «Jod») con npm 10.9.8, tarball oficial de nodejs.org,
+  VERIFICADO POR SHA256 contra su SHASUMS256.txt:
+
+    d60acfe00a2932254bb0ad20e01b0d74397a0875595de719654b214f4b03f307
+    node-v22.23.2-linux-x64.tar.xz: OK
+
+  Extraido en ~/.local/opt/node-v22.23.2-linux-x64, con el enlace estable
+  ~/.local/opt/node22 y los binarios enlazados en ~/.local/bin, que ya venia
+  primero en el PATH.
+
+  NO fue `curl | bash`, que REGLAS §3 prohibe: fue descarga, verificacion de
+  checksum y extraccion. Todo dentro de mi home. Cero sudo, cero zona
+  compartida, cero infraestructura tocada. Se revierte con un `rm -rf` de un
+  solo directorio.
+
+POR QUE LA LINEA 22 Y NO LA 24, que es la LTS mas nueva:
+  infra/Dockerfile:10 compila con `FROM node:22-alpine`. Construir con la misma
+  linea mayor que hornea la imagen de produccion es lo que hace que un build
+  local signifique algo. Node 24 tambien cumplia el engine; habria dejado de
+  ser fiel.
+
+RESULTADO
+  npm ci        319 paquetes en 12 s
+  npm run build 13/13 paginas, sin errores
+
+LO QUE EL VPS SIGUE SIN PODER HACER: MEDIR.
+  No hay chromium, google-chrome ni lighthouse. Declarado como no bloqueante
+  segun el propio Paso 0.2. Consecuencia concreta y honesta: esta sesion
+  ejecuto la dieta de fuentes pero NO PUDO MEDIR SU PROPIO EFECTO. El guion
+  para que lo mida Francisco esta en la seccion 8.
+
+ESCRITURA AL REMOTO
+  Lectura PROBADA: `git fetch` y `git ls-remote --heads origin` responden
+  (main, propuestas-logo, publicacion-v1).
+  Escritura NO VERIFICADA, y a proposito: comprobarla exige intentar escribir,
+  y la regla 1 del encargo prohibe «intentos alternos». Da igual: cero push.
+  CABO DOCUMENTAL PARA FRANCISCO: el encargo dice «deploy key de SOLO LECTURA»
+  y ~/.claude/CLAUDE.md dice «deploy key con escritura pero el push lo hace
+  Francisco». Operativamente identico; documentalmente, uno de los dos esta mal.
+
+HERRAMIENTAS VERIFICADAS: rg 14.1.1, jq, curl, git, tar, xz. Hay egreso de red
+a nodejs.org, registry.npmjs.org y github.com. 78 GB libres de 96 GB.
+
+
+================================================================================
+1. RESPUESTAS DE LOS GATES
+================================================================================
+
+0.4a  ¿Existe y recibe contacto@barreraglobal.com?
+      SI. Por eso el commit del correo salio LIMPIO, sin marca de
+      «PENDIENTE DE BUZON».
+
+0.4b  ¿Va la barra fija de WhatsApp en movil?
+      SI, con las guardas. Implementada.
+
+0.4c  (gate que no estaba en el encargo, lo forzo el bloqueo)
+      Toolchain: Node 22.23.2 en ~/.local.
+
+
+================================================================================
+2. INVENTARIO DEL CORREO — Paso 1
+================================================================================
+
+8 apariciones de fbarrera.inversiones@gmail.com en 5 archivos. Ninguna en
+/privacidad: esa pagina ya usaba privacidad@barreraglobal.com en sus 4
+menciones.
+
+  Layout.astro:53        JSON-LD, campo email del InsuranceAgency  -> contacto@
+  Footer.astro:121-122   mailto: y texto visible                   -> contacto@
+  contacto.astro:57,59   mailto: y texto visible                   -> contacto@
+  terminos.astro:83      seccion 2, identidad del titular          -> contacto@
+  terminos.astro:299     seccion de contacto de los T&C            -> contacto@
+  cookies.astro:209      seccion 9, contacto de la politica        -> privacidad@
+
+LA EXCEPCION, que es la unica decision de criterio del paso
+  El Paso 1.2 mandaba reportar cualquier aparicion en contexto legal. La hay:
+  la seccion 9 de la politica de cookies NO es contacto comercial, es el canal
+  de un instrumento de proteccion de datos. Su propia seccion 8 (lineas
+  190-198) declara que el tratamiento se rige por la LOPDP y remite a
+  /privacidad, que ya fija privacidad@ como canal de datos personales en sus
+  cuatro menciones.
+  Mandar las consultas de cookies a contacto@ habria dejado DOS CANALES EN
+  CONFLICTO para la misma materia, y mezclado un buzon de ventas con uno de
+  cumplimiento — justo lo que evita la politica que el abogado aprobo el 09/08.
+  Es una linea: si Francisco prefiere lo contrario, se cambia.
+
+  El otro contexto legal, /terminos seccion 2 «Identidad del titular», SI va a
+  contacto@: es identificacion contractual, no ejercicio de derechos.
+
+VERIFICACION (Paso 1.3)
+  ripgrep de la direccion vieja en web/src              0
+  ripgrep en dist                                       0
+  ripgrep en todo el repo versionado fuera de docs/     0
+  metas OG y Twitter que contengan correo               0
+  web/public/                                           sin correos
+  bloques JSON-LD                                       3; solo InsuranceAgency
+                                                        lleva email, ya al dominio
+
+
+================================================================================
+3. SELECTOR DE CONTACTO Y BARRA FIJA — Paso 2
+================================================================================
+
+3.1 DIAGNOSTICO PREVIO (lo que se leyo antes de tocar nada)
+
+  web/src/lib/whatsapp.ts       fuente unica del numero (593998027819) y de los
+                                8 marcadores de pagina. La atribucion viaja
+                                DENTRO del texto y no en la URL porque wa.me
+                                solo respeta `phone` y `text`: cualquier utm_*
+                                se pierde.
+  contacto.astro                CTA generico unico, con mensaje propio y SIN
+                                marcador de atribucion.
+  index.astro:306-336           seccion #contacto, «Hablemos.» + un boton.
+                                Ningun enlace del sitio apunta a ese ancla.
+  Layout.astro:187-198          el UNICO IntersectionObserver del sitio.
+  global.css                    la deuda de capas R-43, en tres superficies.
+
+3.2 LOS CINCO MARCADORES NUEVOS, Y POR QUE VAN EN UN TIPO APARTE
+
+  BG-CTA-AUTO       Hola, quiero cotizar el seguro de mi vehículo.
+  BG-CTA-VIDA       Hola, quiero información sobre seguro de vida para mi familia.
+  BG-CTA-SALUD      Hola, quiero información sobre seguro de salud.
+  BG-CTA-INVERSION  Hola, quiero información sobre inversión y patrimonio.
+  BG-CTA-EXPLORA    Hola, todavía no sé qué me conviene y quiero conversarlo.
+
+  No se sumaron a la union TokenBG. Viven en `TokenCTA`, porque responden otra
+  pregunta: TokenBG dice DESDE QUE PAGINA salio el lead, TokenCTA dice QUE
+  ELIGIO. Un lead del hero de /seguros/auto llega como [BG-AUTO]; uno que
+  eligio «Mi carro» en el selector llega como [BG-CTA-AUTO]. Si vivieran en la
+  misma union, <Header token={...} /> aceptaria un BG-CTA-* sin chistar y el
+  dato se ensuciaria en silencio. Separados, el compilador lo impide.
+
+  `enlaceCTA(token)` arma el enlace con el mensaje canonico de MENSAJES_CTA.
+  Que el componente no pueda elegir el texto es deliberado: es la garantia de
+  que cada tarjeta lleva exactamente un marcador, y el que le toca.
+
+3.3 EL COMPONENTE — web/src/components/SelectorContacto.astro
+
+  Antetitulo CONTACTO (apagable), «¿Por dónde / empezamos?» con la segunda
+  linea en dorado, y la linea de apoyo. Cuatro tarjetas-enlace en grilla
+  (2 columnas en movil, 4 en lg), una tarjeta ancha con borde discontinuo para
+  el indeciso, y el subbloque «QUE PASA DESPUES» con tres pasos en mono.
+
+  Iconos SVG inline, trazo dorado, sin librerias y sin emoji. Tres de los
+  cinco reutilizan los paths que YA usa el home (corazon para vida, pulso para
+  salud, flecha ascendente para inversion), para que el selector se lea como
+  parte del mismo sistema y no como un injerto.
+
+  DECISION: borde DISCONTINUO (dashed) y no punteado (dotted) en la tarjeta del
+  indeciso. A 1 px sobre #0f0f15, un dotted es practicamente invisible. Es
+  cosmetico y se revierte cambiando una palabra.
+
+3.4 COLOCACION, Y LA DECISION QUE HAY QUE MIRAR
+
+  /contacto   el selector REEMPLAZA el boton generico, que ademas salia sin
+              marcador. Entra la foto de Francisco junto al titulo, con el
+              tratamiento que ya usa /sobre-mi (recorte 4/5, borde tenue, velo
+              inferior) y en eager + fetchpriority=high, porque en movil es el
+              primer elemento y por lo tanto el candidato a LCP de la pagina.
+              El antetitulo del selector se apaga ahi: el hero ya dijo CONTACTO
+              tres centimetros mas arriba.
+
+  home        >>> ACA ME APARTE DE LA LETRA DEL ENCARGO, Y LO DIGO FUERTE <<<
+              El encargo decia «se agrega el selector antes del footer». Lo
+              REEMPLACE por la seccion #contacto en vez de agregarlo debajo.
+              Motivo: esa seccion YA era lo ultimo antes del footer. Dejar las
+              dos habria puesto dos secciones de contacto consecutivas, ambas
+              con el antetitulo CONTACTO, una preguntando «¿quieres
+              escribirme?» y la otra «¿por donde empezamos?» — que es
+              exactamente la pregunta vieja que el encargo queria jubilar.
+              Se conserva id="contacto" para no romper ningun enlace externo.
+              Si Francisco queria las dos, se revierte en un minuto.
+
+  producto    NO se tocaron, como mandaba el encargo.
+
+3.5 LA CIFRA QUE SE RETIRO DEL PASO 03
+
+  El texto pedido decia: «03 Comparas las tres aseguradoras y decides».
+  Quedo:                 «03 Comparas las opciones sobre la mesa y decides».
+
+  Por que. La cifra es cierta SOLO del ramo vehicular: /seguros/auto la declara
+  y nombra a Sweaden, Generali y Chubb, mientras que /privacidad linea 199
+  enumera ademas BMI para el resto. El selector cubre vida, salud, inversion y
+  vehicular a la vez, asi que el numero seria FALSO para tres de los cuatro
+  caminos, ademas de ser una cifra nueva sobre la oferta — y la regla 3 del
+  encargo pide cero cifras nuevas.
+  «sobre la mesa» no es invento mio: es lenguaje de la casa, sale de
+  auto.astro:75. Si Francisco quiere el numero, hay que acotar la frase al
+  camino vehicular.
+
+3.6 BARRA FIJA DE WHATSAPP — solo bajo 768 px
+
+  Montada en Footer.astro y no en Layout.astro por una razon concreta:
+  necesita el marcador de atribucion de la pagina, y el Footer es el unico
+  componente que YA lo recibe y YA esta en las 13 paginas. Montarla en el
+  Layout habria obligado a pasar el token por las trece paginas para conseguir
+  lo mismo. Va FUERA del <footer> —verificado sobre el HTML emitido— para no
+  colarse en el landmark contentinfo del arbol de accesibilidad.
+
+  EL COMPENSADO DEL BODY NO ES UN NUMERO FIJO, y esa es la parte que importa.
+  Si el alto fuera px pelados, bastaria con que el visitante suba el texto al
+  150 % para que la barra crezca, el padding se quede corto y el ultimo renglon
+  del footer quedara debajo de la barra, sin forma de leerlo. Por eso las tres
+  piezas —padding del enlace, alto de linea y padding compensatorio del body—
+  salen de las MISMAS custom properties, y las tres estan en `rem`:
+
+    --barra-wa-pad   : 0.8rem
+    --barra-wa-linea : 1.25rem
+    --barra-wa-alto  : calc(var(--barra-wa-pad) * 2 + var(--barra-wa-linea) + 1px)
+
+  Cuando el navegador escala el texto, escalan juntas y la cuenta sigue
+  cuadrando sola.
+
+  env(safe-area-inset-bottom) aparece DOS veces —en la barra y en el body—
+  porque el alto TOTAL que la barra ocupa lo incluye. Sumarlo en una sola
+  dejaria ~34 px de footer tapados en iPhone. Sin notch, env() resuelve a 0.
+
+3.6-bis  >>> LO QUE LA AUDITORIA LE CAMBIO A ESTA SECCION <<<
+  Todo lo que dice arriba describe el componente TAL COMO SE CONSTRUYO. Cinco
+  cosas cambiaron despues, por hallazgos confirmados de la auditoria
+  adversarial, y estan en la seccion 7:
+    - el paso 01 ahora dice «Aurora, UN ASISTENTE AUTOMATIZADO, te responde al
+      instante», y el 02 recupera «en horario laboral». Era un hallazgo de
+      severidad ALTA: el home nombraba a Aurora sin declarar que es una maquina;
+    - el borde de las tarjetas pasa de 1,42:1 a 3,68:1 (WCAG 1.4.11);
+    - la barra fija suma `scroll-padding-bottom` (WCAG 2.2 SC 2.4.11) y un
+      anillo de foco propio hacia adentro;
+    - el compensado del body reserva DOS lineas en vez de una;
+    - las dos listas llevan `role="list"`.
+  Y una guarda preventiva sobre un hallazgo REFUTADO: `hyphens: auto` +
+  `overflow-wrap: break-word`, porque la guarda es gratis y la discusion no.
+
+3.7 R-43, DOS VECES, Y LAS DOS VERIFICADAS SOBRE EL CSS EMITIDO
+
+  Se recorrio el bundle emitido con un script que lleva la pila de @layer, para
+  no citar la regla de memoria:
+
+    h2{font-size:var(--text-4xl)}   ->  FUERA DE TODA @layer
+    .md\:text-5xl{font-size...}     ->  @layer components > @layer utilities
+    a{color:var(--gd)}              ->  FUERA DE TODA @layer
+    a:hover{color:var(--gd-light)}  ->  FUERA DE TODA @layer
+    .barra-wa{display:none}         ->  FUERA DE TODA @layer
+
+  1. Ninguna tarjeta lleva color en el <a>: cada linea de texto lo declara en
+     su propio <span>. Una tarjeta con class="... text-tx" habria salido
+     DORADA, porque la regla base le gana a la utilidad sin importar la
+     especificidad.
+  2. `.barra-wa:hover` y `.barra-wa:focus-visible` existen porque `a:hover`
+     tiene especificidad (0,1,1) y `.barra-wa` (0,1,0): al primer toque el
+     texto se habria vuelto dorado sobre fondo dorado y la barra se leeria en
+     blanco. Mitigado con el patron sancionado de la casa —regla propia, sin
+     capa, con mas especificidad, igual que .btn-outline— y sin mover las
+     capas, que R-43 prohibe hasta P-47.
+
+  >>> HALLAZGO NUEVO, no pedido, que sale del mismo cruce <<<
+  `md:text-5xl` es INERTE en TODOS los <h2> del sitio. La regla base gana, asi
+  que los titulos de seccion se pintan siempre a 36 px y nunca a 48. Es la
+  misma deuda R-43 ya documentada para el <h1> (por eso existe .hero-titulo),
+  pero sobre <h2>, y esa superficie no estaba registrada. NO la arregle: darle
+  una clase propia a mi h2 lo habria vuelto el unico titulo grande de la
+  pagina. Va a P-47 (fix de raiz de las capas), donde corresponde.
+
+
+================================================================================
+4. DIETA DE FUENTES — Paso 3
+================================================================================
+
+4.1 DIAGNOSTICO — lo que el build emitia ANTES
+
+  65 archivos de fuente, 1.005,9 KB, 36 bloques @font-face.
+  Un solo bundle CSS (52,9 KB), que cargan las 13 paginas.
+  Los @font-face pesaban 15,6 KB: el 29,5 % del CSS render-blocking.
+
+  Cormorant Garamond  4 pesos x 5 subsets x 2 formatos
+  Outfit              5 pesos x 2 subsets x 2 formatos
+  JetBrains Mono      variable, 6 bloques, 5 archivos
+  font-display        swap en las tres familias
+
+4.2 QUE PESOS SE USAN DE VERDAD (cruce sobre el fuente, no sobre el package.json)
+
+  Cormorant  400  sobre-mi.astro:88 y :426  (font-display sin clase de peso,
+                  hereda el 400 del body)
+             500  sobre-mi.astro:163  (font-medium + font-display)
+             600  regla h1..h6 de global.css + 14 archivos
+             700  NADIE.                                    <- se va
+  Outfit     400  body
+             500  font-medium
+             300, 600, 700  no se usan como clase en ninguna parte.  <- se van
+  JetBrains  variable: 400 y 500 salen del mismo archivo. Nada que podar.
+
+  Se conservan Cormorant 400 y 500 aunque solo vivan en /sobre-mi: quitarlos
+  haria que el navegador SINTETIZARA esos pesos y esa pagina cambiaria de
+  aspecto. La dieta es de peso, no de diseño.
+
+4.3 LA PRUEBA DE QUE NINGUN GLIFO CAMBIA
+
+  Se extrajeron los caracteres distintos del texto visible de las 13 paginas
+  del build y se cruzaron contra los unicode-range que declara el CSS EMITIDO.
+
+    94 caracteres distintos en todo el sitio
+    92 caen en el subset `latin`, y SOLO en `latin`
+     2 no caen en NINGUN subset: ← (U+2190) y → (U+2192)
+
+  Las dos flechas ya hoy las pinta la fuente de respaldo del sistema, antes y
+  despues de la dieta. Todas las tildes, la ñ, los signos ¿ ¡ y el · estan en
+  `latin`. Conclusion: cirilico, cirilico-ext, griego, vietnamita Y TAMBIEN
+  latin-ext son inertes.
+
+  VERIFICACION REDUNDANTE Y MAS FUERTE: los 15 archivos que quedan conservan
+  EXACTAMENTE EL MISMO HASH DE CONTENIDO que antes de la poda. No son
+  equivalentes: son los mismos bytes. Y de los 8 archivos del subset `latin`
+  que se fueron, los 8 son exactamente los cuatro pesos sin uso (Cormorant 700,
+  Outfit 300/600/700) en sus dos formatos.
+
+4.4 ANTES Y DESPUES
+
+                              ANTES        DESPUES     delta
+  archivos de fuente          65           15          -50   (-76,9 %)
+  KB de fuente en dist        1.005,9      303,6       -702,3 KB  (-69,8 %)
+  bloques @font-face          36           11          -25
+  bytes @font-face en el CSS  15,6 KB      5,6 KB      -10,0 KB
+  @font-face / total del CSS  29,5 %       13,0 %
+  CSS render-blocking         52,9 KB      42,9 KB     -10,0 KB  (-18,9 %)
+  peso total de dist          12 MB        11 MB
+  hashes CSP                  2            2           sin cambio
+
+4.5 LO QUE ESTA PODA **NO** HACE — dicho antes de que alguien lo asuma
+
+  Los subsets retirados NUNCA SE DESCARGABAN: unicode-range ya impedia
+  pedirlos. Los KB de fuente que baja un visitante de la home NO cambian con la
+  poda. Lo que baja de verdad es el CSS render-blocking (-10 KB) y el peso de
+  la imagen Docker (-702 KB). Quien puede mover el LCP es la PRECARGA.
+
+4.6 PRECARGA — una sola, y por que esa
+
+  Cormorant Garamond latin 600. El elemento mas grande sobre el pliegue de
+  todas las paginas es un titulo, y todo h1..h6 sale en esa familia y ese peso
+  por la regla de global.css. Outfit 400 viste el cuerpo, que es texto mas
+  chico y llega despues; JetBrains solo viste antetitulos de 12 px. Precargar
+  de mas empeora: cada preload compite por ancho de banda con el recurso que de
+  verdad pinta la pantalla.
+
+  La URL sale de un import `?url` y no escrita a mano, porque Astro le pone
+  hash de contenido al archivo. Un preload con ruta fija se rompe en el
+  proximo build en que cambie el hash, y no falla ruidosamente: descarga un
+  archivo que nadie usa y encima retrasa al bueno.
+
+  `crossorigin` no es opcional aunque el origen sea el mismo: las fuentes se
+  piden en modo CORS y un preload sin ese atributo no casa con la peticion
+  real, asi que el archivo se descargaria DOS veces.
+
+  VERIFICADO SOBRE EL BUILD, que es la parte que suele fallar:
+    - existe UNA sola copia de cormorant-garamond-latin-600-normal.woff2
+    - el href del preload es /_astro/cormorant-garamond-latin-600-normal.Co1r35X9.woff2
+    - el CSS referencia ESA MISMA URL, caracter por caracter
+    - la CSP ya declara `font-src 'self' data:`, asi que no hay que tocar nada
+
+4.7 font-display: SE QUEDA EN `swap`, y la justificacion
+
+  Es lo que emite Fontsource. Con `swap` el texto pinta de inmediato con la
+  fuente de respaldo y cambia al llegar la real, que es justo lo que conviene a
+  FCP y LCP. `optional` daria un pelo mas de estabilidad pero DESCARTA LA
+  FUENTE DE MARCA ENTERA en la primera visita lenta, y este es un sitio de
+  marca. Ademas cambiarlo obligaria a abandonar el CSS de Fontsource y escribir
+  los @font-face a mano: mas superficie fragil para ganar milisegundos que no
+  son el cuello.
+
+4.8 DEUDA QUE QUEDA (P-57)
+
+  JetBrains Mono Variable sigue emitiendo sus 5 subsets (82 KB) porque el
+  paquete variable de Fontsource NO publica CSS por subset: solo index.css y
+  wght.css. De los cinco el navegador solo baja el latin (39,5 KB); el resto es
+  peso de imagen, no de red. Podarlo exigiria escribir el @font-face a mano
+  apuntando a un archivo con hash, que es exactamente el tipo de fragilidad que
+  4.6 evita. Queda anotado, no ejecutado.
+
+
+================================================================================
+5. DOCUMENTACION — Paso 4
+================================================================================
+
+NUMERACION, leida de los archivos y no inventada:
+  PENDIENTES.md   maximo P-56 y R-21   ->  ahora P-62 y R-24
+  ERRORES.md      maximo E-28, NM-11, R-50  ->  ahora NM-15 y R-55
+  Las dos numeraciones R-XX conviven y NO se cruzan: en PENDIENTES son
+  RESUELTOS, en ERRORES son REGLAS. Queda advertido en los dos archivos.
+
+docs/PENDIENTES.md
+  CIERRA  P-04 -> R-22   correo del dominio
+          R-23           accesibilidad del footer 91-92 -> 100 (objetivo 95)
+          R-24           el deploy bajo veda se ejecuto el 17/08
+  ACTUALIZA P-54 y P-55: su deploy ocurrio
+  ABRE    P-57 medir la dieta y podar JetBrains
+          P-58 arreglo de raiz del observer
+          P-59 name: sitio-bg en el compose
+          P-60 legibilidad de la razon social a 12 px en monoespaciada
+          P-61 desarrollar RASA y LAA si vuelven al copy
+          P-62 Google Search Console
+
+docs/ERRORES-Y-APRENDIZAJES.md
+  NM-12  el <slot /> de ProductLayout envuelto en .reveal
+  NM-13  el mismo bug en BloqueFAQ, que solo falla al 150 % de texto
+  NM-14  la CSP sin media-src: los videos habrian llegado bloqueados
+  NM-15  Permissions-Policy autoplay=(): segundo asesino, independiente
+  R-51 a R-55, las cinco reglas nuevas del encargo, con la numeracion real.
+  El protocolo de veda sigue SIN numerar; le tocaria R-56.
+
+CLAUDE.md v2.5 -> v2.6
+  Estaba cuatro sesiones atrasado y afirmaba cosas falsas: «12 paginas» cuando
+  son 13, y /seguros/auto dada por RETIRADA cuando volvio en la Sesion 16 y
+  esta enlazada en el Header. Un documento de arranque que miente sobre el
+  estado es peor que no tenerlo.
+  Seccion NUEVA «Entorno de trabajo dentro del VPS», que es lo que le ahorra
+  media hora a la proxima sesion en el servidor.
+
+docs/continuidad/CONTINUIDAD_2026-08-17.md — snapshot nuevo.
+
+
+================================================================================
+6. QA FINAL
+================================================================================
+
+  build limpio desde dist vacio                         13/13 paginas
+  hashes CSP, cruce bidireccional                       2 <-> 2, MISMOS hashes
+      sha256-aOPTArMuUPr5ybUMJpH+mtSGicP8zlnwwFwZYYhokv4=   (toggle menu movil)
+      sha256-Qra3eTJV60gng4dzuHtxcR7XY8lE1nLbTAAJ5T7jyto=   (scroll-reveal)
+      los dos en las 13 paginas, cero huerfanos, identicos a infra/nginx.conf
+  SE DECLARA EXPLICITAMENTE: no se toco una sola linea de JavaScript.
+      atributos on*                                     0
+      <script src> nuevos                               0
+      <script> inline nuevos                            0
+      26 bloques inline en 13 paginas = los 2 de siempre
+  ripgrep [PENDIENTE en dist                            0
+  ripgrep [PENDIENTE en web/src                         2, y las dos son la
+      DEFINICION dentro de components/Pendiente.astro, que ninguna pagina
+      importa. MATIZ QUE CONVIENE TENER ESCRITO: cinco paginas de producto SI
+      contienen <Pendiente>...</Pendiente>, pero DENTRO de comentarios {/* */}
+      de Astro, que no llegan al build. Quien haga `rg '<Pendiente'` se asusta
+      sin motivo.
+  ripgrep del Gmail en web/src y en dist                0 y 0
+  marcadores: los 8 de pagina, uno por pagina, sin repetirse entre paginas
+      BG-HOME/index · BG-SOBRE-MI/sobre-mi · BG-AUTO/seguros/auto ·
+      BG-VIDA-TERMINO · BG-VIDA-INDEXADA · BG-SALUD-NACIONAL ·
+      BG-SALUD-INTERNACIONAL · BG-INVERSION/inversion
+  los 5 BG-CTA-* aparecen SOLO en index y contacto (el selector)
+  enlaces wa.me con exactamente 1 marcador               67
+  enlaces wa.me con 2 o mas                              0
+  enlaces wa.me sin marcador                             21 (contacto, 404 y
+      legales, que por diseño no tienen marcador propio; es lo que ya hacia
+      el sitio antes de esta sesion)
+  cifras monetarias o porcentuales nuevas en el copy      0
+      (el unico ruido del filtro son los datos del path SVG de WhatsApp y dos
+      lineas de un comentario mio que cita las metricas de la propia dieta)
+  ALTURA — verificacion ESTRUCTURAL, no medida:
+      alturas fijas en SelectorContacto.astro            0 (ni min-h, ni h-[,
+                                                         ni height)
+      alturas fijas en el CSS de la barra                0
+      el compensado sale de las mismas custom properties en rem que el alto
+      LIMITACION DECLARADA: las tres condiciones de la regla 9 (360x640 al
+      100 %, 150 % de texto, 320x256 al 400 % de zoom) NO SE PUDIERON MEDIR.
+      No hay navegador en el VPS. Lo que se verifico es la propiedad
+      estructural que hace que el bloque CREZCA en vez de desbordar. La
+      medicion queda para Francisco, con el guion de la seccion 8.
+  accesibilidad del markup nuevo:
+      sr-only «— abrir WhatsApp»                         10 (5 por pagina x 2)
+      aria-label de la barra fija                        13 de 13 paginas
+      <a> del selector con utilidad text-* directa       0  (R-43)
+      la barra va DESPUES de </footer>                   verificado
+      contrastes calculados: tx-muted/bg-elev-1 = 7,78:1 · dorado/bg-elev-1 =
+      8,36:1 · #08080d sobre dorado (barra) = 8,75:1. AA pide 4,50:1.
+  ningun .reveal nuevo sobre contenedor que pueda crecer (R-51)
+  infra/nginx.conf, Dockerfile, docker-compose.yml, sitemap.xml, robots.txt,
+      package.json y package-lock.json: SIN CAMBIOS (verificado con git diff)
+
+RE-QA TRAS LOS ARREGLOS DE LA AUDITORIA (commit 72a4333)
+  build limpio desde dist vacio                          13/13 paginas
+  hashes CSP                                             LOS MISMOS 2
+      Es el dato que mas importa del re-QA: se tocaron accesibilidad, CSS y
+      copy, y no se movio una linea de JavaScript.
+  «Aurora, un asistente automatizado» presente en        home Y /contacto
+  role="list"                                            4 (2 listas x 2 pag.)
+  clase sc-tarjeta                                       5 por pagina
+  border-gd/60 emitido en el bundle                      si
+  hyphens:auto · overflow-wrap:break-word ·
+      scroll-padding-bottom en el CSS emitido            los tres presentes
+  comentarios HTML servidos en home + /contacto          de 39 (5.068 B) a
+                                                         30 (3.438 B)
+
+
+================================================================================
+7. AUDITORIA ADVERSARIAL — 5 LENTES, JOURNAL COMPLETO
+================================================================================
+
+MONTAJE
+  5 lentes independientes, cada una con el encargo explicito de REFUTAR que el
+  trabajo esta bien hecho, y con la instruccion de devolver lista vacia antes
+  que inventar un hallazgo. Cada hallazgo que salio de una lente paso despues
+  por un REFUTADOR ESCEPTICO separado, con instruccion de default `refutado =
+  true`: el hallazgo solo sobrevive si el refutador puede reproducir el defecto
+  por su cuenta, rehaciendo todo calculo desde cero en vez de aceptar el numero
+  del primer auditor.
+
+  24 agentes · 464 llamadas a herramientas · 1.762.822 tokens · 60 minutos.
+  19 hallazgos crudos -> 10 CONFIRMADOS, 9 REFUTADOS.
+
+  Reparto por lente:  a11y 6 · movil 2 · cascada 4 · fuentes 3 · compliance 4.
+
+--------------------------------------------------------------------------
+7.1 LOS 10 CONFIRMADOS
+--------------------------------------------------------------------------
+
+>>> [ALTA] El home nombraba a Aurora sin decir que es una maquina  (ARREGLADO)
+    lente: compliance · SelectorContacto.astro:94
+    El paso 01 decia «Aurora te responde al instante y toma tu caso», al lado
+    de «Francisco lo revisa y te escribe personalmente». Dos nombres propios,
+    dos verbos en tercera persona, y Francisco es una persona real.
+    En /contacto no se materializaba porque la pagina trae su disclaimer
+    debajo. En el HOME —la pagina de mas trafico, donde el mismo componente se
+    monta— NO habia ninguno. Y el docstring del componente afirmaba estar
+    cumpliendo esa transparencia.
+    Contradecia el compromiso escrito del propio sitio: privacidad.astro:142
+    dice que Aurora «se identifica como tal»; terminos.astro:157 lo repite.
+    El refutador verifico las tres piezas y las tres reprodujeron.
+    ARREGLO: «Aurora, un asistente automatizado, te responde al instante».
+    Y el paso 02 recupera «en horario laboral», la unica acotacion de plazo del
+    bloque que el selector reemplazo en el home.
+    ESTE ES EL HALLAZGO QUE JUSTIFICA LA AUDITORIA ENTERA. Yo escribi el
+    docstring que decia que cumplia. La auditoria leyo el render, no el
+    comentario.
+
+>>> [media] Borde de las tarjetas: 1,42:1 contra el 3:1 de WCAG 1.4.11  (ARREGLADO)
+    lente: a11y · SelectorContacto.astro:138
+    Las tarjetas son <a>, o sea COMPONENTES DE INTERFAZ. Su unico limite visual
+    era `border-gd-muted` = rgba(201,168,76,0.2): 1,42:1 contra el interior de
+    la tarjeta y 1,48:1 contra la pagina. El relleno tampoco distinguia
+    (#0f0f15 sobre #08080d = 1,05:1) y el texto es blanco, no dorado, asi que
+    no quedaba ninguna otra senal de que fueran clickeables. El hover si
+    cumplia (8,36:1), pero 1.4.11 se evalua EN REPOSO y en tactil no hay hover.
+    El matiz que lo vuelve nuestro: el mismo tratamiento ya existia en el home
+    sobre <article>, que NO es componente de interfaz y esta fuera del alcance
+    del criterio. Esta sesion movio el patron a un <a> y lo metio dentro.
+    El refutador rehizo los seis contrastes con su propia implementacion de la
+    formula WCAG y saco los mismos numeros.
+    ARREGLO: `border-gd/60` = 3,68:1.
+
+>>> [media] La barra fija ocultaba el elemento enfocado — WCAG 2.2 SC 2.4.11  (ARREGLADO)
+    lente: a11y · global.css:929
+    El padding del body resolvia el final del documento, pero no el caso de
+    media pagina: al tabular, el navegador deja el elemento enfocado pegado al
+    borde inferior del viewport —justo la franja de la barra— y como la barra
+    es `fixed` no la considera. Todo control mas bajo que la barra quedaba
+    ENTERAMENTE oculto mientras tenia el foco.
+    El refutador confirmo que no habia UNA sola declaracion `scroll-padding` en
+    todo el build.
+    Se reproduce sin telefono: angostar la ventana a menos de 768 px y usar Tab.
+    ARREGLO: `scroll-padding-bottom` en `html`, con la misma cuenta.
+
+>>> [baja] El anillo de foco de la barra se perdia fuera de la pantalla  (ARREGLADO)
+    lente: a11y · Footer.astro:233
+    La regla general dibuja `outline: 2px solid var(--gd)` con offset positivo.
+    Sobre esta barra falla por GEOMETRIA, no por color: es `fixed` con
+    left/right/bottom en 0, asi que tres de los cuatro lados caen fuera del
+    viewport y no se pintan (un outline es ink overflow: no genera scroll).
+    Sobrevivia el segmento superior, flotando sobre el contenido desplazado
+    detras de la barra —que puede ser una superficie dorada del sitio, donde el
+    ratio cae a 1,00:1—.
+    NOTA HONESTA: mi hipotesis de partida («dorado sobre dorado») era ERRONEA,
+    y las dos lentes que la miraron me corrigieron: el `outline-offset` es
+    POSITIVO, asi que el anillo nunca toca el fondo de la barra. El defecto
+    real era otro y peor.
+    ARREGLO: anillo propio hacia ADENTRO en #08080d. Se dibuja entero, siempre
+    cae sobre el dorado de la barra (8,75:1) y no depende de lo que haya detras.
+
+>>> [baja] El compensado contaba UNA linea y la etiqueta puede ser de dos  (ARREGLADO)
+    lente: movil · global.css:916
+    `--barra-wa-alto` sumaba `--barra-wa-linea` una sola vez. El <span> es un
+    item flex con min-width automatico: se encoge hasta su min-content y el
+    texto pasa a dos lineas. El auditor PARSEO EL WOFF que el sitio sirve
+    (Outfit 500, tabla hmtx) y midio que la etiqueta pide 10,156 em: envuelve
+    por debajo de ~291 px al 150 % de texto y de ~382 px al 200 %.
+    Ahi la barra crece 1,25rem mas de lo que el body reserva, y como es `fixed`
+    ese sobrante tapa el final del footer SIN forma de recuperarlo con scroll.
+    Hoy no se pierde contenido porque el `py-6` del ultimo bloque del footer lo
+    absorbe: el defecto era LATENTE. Y mi comentario aseguraba que no podia
+    pasar — la cuenta en `rem` resuelve el ESCALADO del texto, no el
+    ENVOLVIMIENTO, que es el caso que de verdad rompia.
+    ARREGLO: la cuenta reserva DOS lineas.
+
+>>> [baja] `<ul>` y `<ol>` sin role="list"  (ARREGLADO)
+    lente: a11y · SelectorContacto.astro:131
+    El preflight de Tailwind v4 emite `ol,ul,menu{list-style:none}` para TODO
+    el sitio, y WebKit retira el rol `list` del arbol de accesibilidad de una
+    lista sin marcador. VoiceOver no anunciaba «lista, 4 elementos».
+    ARREGLO: `role="list"` en las dos. Dos atributos.
+
+>>> [baja] El comentario de la dieta citaba el signo ¡, que no existe en el sitio  (ARREGLADO)
+    lente: fuentes · global.css:19
+    El rastro de auditoria que dejo `bae5af6` enumeraba ¡ (U+00A1) entre los 92
+    caracteres presentes. No aparece en ninguna de las 13 paginas, ni como byte
+    ni como entidad. La conclusion de la poda NO se cae —¡ tambien vive en
+    U+0000-00FF, o sea en `latin`— pero una verificacion escrita tiene que
+    poder repetirse tal cual, y ese comentario es lo que va a leer quien toque
+    los @import dentro de seis meses.
+    ARREGLO: comentario corregido, con la precision anotada.
+
+>>> [baja] 12 enlaces del footer salen DORADOS: `text-tx-muted` es inerte  (NO SE TOCA)
+    lente: cascada · Footer.astro:64
+    Los 7 enlaces de Navegacion y Legal mas los 5 iconos de redes llevan
+    `text-tx-muted hover:text-gd`, y las dos utilidades estan MUERTAS: se
+    pintan dorado #c9a84c en vez del gris #a8a59f de intencion, y en hover van
+    a `--gd-light` en lugar de a `--gd`. El refutador lo confirmo parseando el
+    bundle por offsets de byte, no leyendo el fuente.
+    PREEXISTENTE — esas lineas no se editaron en esta sesion. Contraste sobra
+    (~8,4:1), asi que el daño es de JERARQUIA VISUAL: el pie queda con doce
+    elementos dorados compitiendo con el unico que si deberia serlo.
+    POR QUE NO SE ARREGLA: lleva meses en produccion, o sea que HOY ES el
+    aspecto aprobado del sitio. Cambiarlo de a uno seria la regresion. Va a
+    P-47, con el fix de raiz de las capas.
+
+>>> [baja] 3 `<h3 class="font-mono">` del footer salen en Cormorant  (NO SE TOCA)
+    lente: fuentes · Footer.astro:59
+    «Navegacion», «Legal» y «Contacto» declaran `font-mono` y salen en
+    Cormorant Garamond 600, porque `h1..h6 { font-family: var(--font-display) }`
+    es unlayered y le gana a `.font-mono`. En el MISMO footer, el
+    `<p class="font-mono">` hermano si sale en JetBrains: dos antetitulos con
+    la misma intencion de diseno y dos familias distintas.
+    PREEXISTENTE. Mismo criterio que el anterior: va a P-47.
+
+>>> [baja] `md:text-7xl` inerte en el h1 de /contacto  (NO SE TOCA)
+    lente: cascada · contacto.astro:64
+    Reportado por completitud. Ver 7.2: su hermano sobre `<h2>` fue REFUTADO
+    como defecto de esta sesion, y por el mismo motivo este tampoco se arregla
+    de forma aislada. Los dos van a P-47.
+
+--------------------------------------------------------------------------
+7.2 LOS 9 REFUTADOS — y lo que ensena cada refutacion
+--------------------------------------------------------------------------
+
+  R1  «md:text-5xl es inerte en el h2 nuevo» -> REFUTADO COMO REGRESION.
+      El mecanismo es CIERTO y lo reproduje yo mismo antes de la auditoria. Lo
+      que el refutador demostro es que NO es defecto de esta sesion: el h2 que
+      el selector reemplazo en el home traia la cadena de clases IDENTICA. Y
+      darle una clase propia solo a mi h2 lo habria vuelto el unico titulo
+      grande de la pagina. La decision de no arreglarlo queda validada.
+
+  R2  «El compensado del body / envolvimiento» (version de la lente a11y)
+      -> REFUTADO EN SU CONSECUENCIA. El mecanismo es cierto pero la falla WCAG
+      que le atribuia no se materializa hoy. La MISMA cosa la levanto la lente
+      movil como defecto LATENTE, y esa version SI sobrevivio. Dos lentes
+      independientes encontraron el mismo mecanismo y solo la que lo describio
+      con precision quedo en pie. Arreglado igual.
+
+  R3  «Aviso de que el enlace abre ventana nueva» -> REFUTADO POR VARA.
+      Es criterio AAA (3.2.5 Change on Request) y el proyecto declara AA en
+      docs/IDENTIDAD-MARCA.md:765. Ademas es la convencion de todo el sitio:
+      los enlaces de redes del footer y los CTA del header tampoco lo anuncian.
+      Arreglar solo los mios habria roto la consistencia. NO se toco.
+
+  R4  «Desbordamiento de "patrimonio" e "internacional"» -> REFUTADO EN SU
+      CUANTIFICACION. El refutador parseo los .woff (hmtx/cmap) y confirmo que
+      al 100 % y a 320 px NO desborda nada: «Mi patrimonio» entra por 0,2 px.
+      El mecanismo sigue existiendo en los anchos escalados.
+      DECISION: se aplico la guarda igual (`hyphens: auto` + `overflow-wrap:
+      break-word`). Es gratis, cierra la clase entera por construccion en vez
+      de por calculo, y con `html { overflow-x: hidden }` lo que se sale del
+      viewport se PIERDE. Queda dicho que el hallazgo quedo refutado.
+
+  R5  «El anillo de foco es dorado sobre dorado» -> REFUTADO EN SU PREMISA.
+      El `outline-offset` positivo dibuja el anillo FUERA de la caja, asi que
+      nunca toca el fondo de la barra. La refutacion es correcta y el defecto
+      real —geometrico— quedo confirmado por la otra lente.
+
+  R6  «El inventario de subsets nombra griego» -> REFUTADO A MEDIAS.
+      El refutador tiene razon: el griego SI esta en el bundle, via JetBrains.
+      Mi comentario era ambiguo, no falso. Se reescribio igual para que se
+      entienda que la poda no retira ningun griego.
+
+  R7  «md:text-7xl inerte en el h1» -> REFUTADO como defecto de esta sesion:
+      las clases venian de antes y solo se movieron de sitio.
+
+  R8  «El home vende vehicular sin mencionarlo» -> REFUTADO POR EL BUILD.
+      El refutador encontro que el home SI menciona el ramo vehicular. El
+      hallazgo se apoyaba en un `rg` sobre el fuente que no vio el render.
+
+  R9  «/contacto promete dos tiempos de respuesta distintos» -> REFUTADO.
+      El refutador encontro TRES frases en la propia pagina que distinguen
+      quien cumple cada plazo. El hallazgo afirmaba que no existia ninguna.
+
+--------------------------------------------------------------------------
+7.3 LO QUE APRENDI DE ESTA AUDITORIA
+--------------------------------------------------------------------------
+
+  1. EL COMENTARIO NO ES LA EVIDENCIA. El hallazgo ALTO existio porque yo
+     escribi un docstring afirmando que el componente cumplia la transparencia
+     del asistente, y despues verifique el docstring en vez del render. La
+     auditoria leyo lo que sale por pantalla. Es la misma familia de error que
+     el proyecto ya tiene documentada: una verificacion que se mira a si misma
+     no verifica.
+
+  2. UNA GUARDA GRATIS VALE MAS QUE GANAR LA DISCUSION. El hallazgo del
+     desbordamiento quedo refutado en sus numeros. La guarda cuesta dos
+     declaraciones CSS y elimina la clase entera. No hay premio por tener razon.
+
+  3. LA REFUTACION TAMBIEN SE VERIFICA. Nueve hallazgos cayeron, y dos de ellos
+     cayeron porque el auditor original no habia mirado el build. Pero el
+     mecanismo del compensado sobrevivio por la version que estaba mejor
+     descrita, no por la que primero lo encontro. Un refutador que trabaja bien
+     mejora el hallazgo, no solo lo mata.
+
+  4. MI PROPIA HIPOTESIS ERA ERRONEA en el anillo de foco, y el defecto real
+     resulto peor que el que yo sospechaba.
+
+
+================================================================================
+8. GUION DE VERIFICACION PARA FRANCISCO
+================================================================================
+
+--------------------------------------------------------------------------
+A. MEDICION DE RENDIMIENTO — en tu laptop, NO en el VPS
+--------------------------------------------------------------------------
+El VPS no tiene Chrome ni Lighthouse. Windows, pwsh 7, sobre tu clon local,
+DESPUES de traer los commits.
+
+  cd C:\Users\panch\projects\sitio-bg-infra\web
+  npm ci
+  npm run build
+  npx serve dist -l 4173
+
+En OTRA terminal, y por 127.0.0.1 — NUNCA por localhost (R-53):
+
+  npx lighthouse http://127.0.0.1:4173/ --preset=desktop --output=html --output-path=./lh-home-desktop.html --chrome-flags="--headless=new"
+  npx lighthouse http://127.0.0.1:4173/ --output=html --output-path=./lh-home-movil.html --chrome-flags="--headless=new"
+  npx lighthouse http://127.0.0.1:4173/contacto --output=html --output-path=./lh-contacto-movil.html --chrome-flags="--headless=new"
+
+Que mirar, en este orden:
+  1. LCP de la home en movil. Referencia de la Sesion 18: 1,81-2,11 s.
+     Objetivo: 1,80 s.
+  2. En el informe, seccion «Largest Contentful Paint element»: QUE elemento
+     es. Toda la dieta de fuentes asume que es un titulo en Cormorant 600. Si
+     el informe dice que el LCP es el poster del video del hero, la siguiente
+     palanca NO son las fuentes y P-57 cambia de rumbo. Este es el dato mas
+     valioso del informe, mas que el numero.
+  3. «Eliminate render-blocking resources»: el CSS bajo de 52,9 a 42,9 KB.
+  4. Accesibilidad de / y de /contacto: tiene que seguir en 100.
+  5. Si sugiere mas «Preload key requests» de fuentes, IGNORARLO: precargar de
+     mas empeora, y eso esta razonado en el commit bae5af6.
+
+--------------------------------------------------------------------------
+B. VERIFICACION VISUAL — ESCRITORIO
+--------------------------------------------------------------------------
+  1. Home, bajar hasta el final. El bloque de cierre ahora es el selector:
+     antetitulo CONTACTO, «¿Por donde / empezamos?» con la segunda linea en
+     dorado, cuatro tarjetas en fila y la tarjeta ancha punteada debajo.
+  2. Pasar el mouse por cada tarjeta: el borde se pone dorado pleno y la
+     tarjeta sube 4 px. El TEXTO NO debe cambiar a dorado. Si lo hace, R-43 se
+     colo y hay que reportarlo.
+  3. Click en «Mi carro»: abre WhatsApp con «Hola, quiero cotizar el seguro de
+     mi vehiculo. [BG-CTA-AUTO]». Comprobar el marcador entre corchetes.
+     Repetir con las cinco; los cinco marcadores tienen que ser distintos.
+  4. Tabular con el teclado por las cinco tarjetas: cada una recibe un recuadro
+     dorado de foco visible.
+  5. /contacto: la foto aparece a la izquierda del titulo «Hablemos.». El boton
+     generico de WhatsApp ya NO esta.
+  6. Footer de cualquier pagina: el correo dice contacto@barreraglobal.com.
+     En /cookies seccion 9 dice privacidad@barreraglobal.com.
+  7. La barra fija NO debe verse en escritorio.
+  8. Leer el bloque «QUE PASA DESPUES» del HOME: el paso 01 tiene que decir
+     «Aurora, un asistente automatizado». Ese es el arreglo del hallazgo ALTO.
+
+--------------------------------------------------------------------------
+C. VERIFICACION VISUAL — TELEFONO REAL (lo que mas importa)
+--------------------------------------------------------------------------
+  1. La barra dorada de WhatsApp aparece abajo, fija, y no se mueve al scrollear.
+  2. >>> LO CRITICO: bajar hasta el FINAL del footer. El ultimo renglon
+     («© 2026 Barrera Global · Todos los derechos reservados») tiene que quedar
+     COMPLETAMENTE visible por encima de la barra. Si queda tapado, el
+     compensado esta corto y hay que reportarlo.
+  3. En iPhone: la barra respeta la franja de gestos de abajo.
+  4. Subir el tamano de texto del sistema al 150 % (Android: Ajustes > Pantalla
+     > Tamano de fuente; iOS: Ajustes > Pantalla y brillo > Tamano del texto) y
+     REPETIR el punto 2. Las tarjetas deben CRECER, no cortarse, y ninguna
+     palabra debe salirse del borde dorado.
+  5. Girar el telefono a horizontal y volver a mirar el footer.
+  6. Selector a 360 px: dos columnas, sin barra de scroll horizontal, y
+     «Nacional o internacional» partido en dos lineas pero completo.
+  7. Tocar una tarjeta con el pulgar: el area tactil tiene que ser comoda
+     (medida: 152 px de alto, contra los 44 px que pide el criterio).
+
+--------------------------------------------------------------------------
+D. LA PRUEBA QUE VALE POR DIEZ, DESPUES DEL DEPLOY
+--------------------------------------------------------------------------
+  Pedir una URL inventada: https://barreraglobal.com/no-existe
+  Tiene que devolver la 404 de marca CON status 404.
+  Si devuelve 200, no estas mirando el sitio real.
+
+  Y la consola del navegador, en la home y en /contacto: CERO errores de
+  Content-Security-Policy. Si aparece uno que menciona `script-src`, el hash no
+  cuadro y el menu movil y las animaciones estan muertas en silencio.
+
+
+================================================================================
+9. ARCHIVOS
+================================================================================
+
+  NUEVOS       web/src/components/SelectorContacto.astro
+               docs/continuidad/CONTINUIDAD_2026-08-17.md
+               REPORTE-SESION-19.txt
+
+  MODIFICADOS  web/src/components/SelectorContacto.astro (creado y luego
+                 corregido por la auditoria)
+               web/src/lib/whatsapp.ts
+               web/src/layouts/Layout.astro
+               web/src/components/Footer.astro
+               web/src/pages/index.astro · contacto.astro · terminos.astro
+               web/src/pages/cookies.astro
+               web/src/styles/global.css
+               CLAUDE.md
+               docs/PENDIENTES.md · docs/ERRORES-Y-APRENDIZAJES.md
+
+  NO SE TOCO   infra/ COMPLETO (nginx.conf, Dockerfile, docker-compose.yml)
+               web/public/ (sitemap.xml, robots.txt, imagenes)
+               web/package.json y package-lock.json
+               las 6 paginas de producto
+               los assets
+               NADA de infraestructura compartida: ni Docker, ni Caddy, ni red,
+               ni /opt. Aurora intacta.
